@@ -1,0 +1,6 @@
+{
+  "name": "Nexus IPTV Pro",
+  "description": "Aplicación IPTV profesional para Android TV, TV Box y dispositivos móviles con soporte Xtream Codes, control remoto y gestión centralizada.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

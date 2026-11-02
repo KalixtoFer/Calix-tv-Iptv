@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Nexus IPTV Pro</string>
+    <string name="title_activity_main">Nexus IPTV Pro</string>
+    <string name="package_name">com.nexus.iptv.pro</string>
+    <string name="custom_url_scheme">com.nexus.iptv.pro</string>
+</resources>

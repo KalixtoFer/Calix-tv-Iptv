@@ -1,0 +1,533 @@
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import Hls from 'hls.js';
+import {
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
+  Maximize,
+  Minimize,
+  RotateCcw,
+  SkipForward,
+  SkipBack,
+  Tv,
+  ChevronLeft,
+  ChevronRight,
+  Info,
+  Layers,
+  AlertCircle,
+  Loader2,
+} from 'lucide-react';
+
+export interface VideoPlayerProps {
+  url: string;
+  title: string;
+  subtitle?: string;
+  type?: 'live' | 'movie' | 'episode';
+  poster?: string;
+  autoPlay?: boolean;
+  onClose?: () => void;
+  onNextChannel?: () => void;
+  onPrevChannel?: () => void;
+  onTimeUpdate?: (currentTime: number, duration: number) => void;
+  initialTime?: number;
+  className?: string;
+  isMiniPlayer?: boolean;
+  onExpand?: () => void;
+}
+
+type AspectRatioMode = 'cover' | 'contain' | 'fill' | 'scale-down';
+
+export const VideoPlayer: React.FC<VideoPlayerProps> = ({
+  url,
+  title,
+  subtitle,
+  type = 'live',
+  poster,
+  autoPlay = true,
+  onClose,
+  onNextChannel,
+  onPrevChannel,
+  onTimeUpdate,
+  initialTime = 0,
+  className = '',
+  isMiniPlayer = false,
+  onExpand,
+}) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const hlsRef = useRef<Hls | null>(null);
+
+  const [isPlaying, setIsPlaying] = useState<boolean>(autoPlay);
+  const [isMuted, setIsMuted] = useState<boolean>(false);
+  const [volume, setVolume] = useState<number>(1);
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [hasError, setHasError] = useState<string | null>(null);
+  const [currentTime, setCurrentTime] = useState<number>(0);
+  const [duration, setDuration] = useState<number>(0);
+  const [showControls, setShowControls] = useState<boolean>(true);
+  const [aspectRatio, setAspectRatio] = useState<AspectRatioMode>('contain');
+  const [qualityText, setQualityText] = useState<string>('FHD 1080p');
+
+  const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Auto-hide controls
+  const bumpControls = useCallback(() => {
+    setShowControls(true);
+    if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+    if (!isMiniPlayer) {
+      controlsTimeoutRef.current = setTimeout(() => {
+        setShowControls(false);
+      }, 4000);
+    }
+  }, [isMiniPlayer]);
+
+  useEffect(() => {
+    bumpControls();
+    return () => {
+      if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+    };
+  }, [bumpControls]);
+
+  // Video source loading via HLS.js or Native
+  const loadStream = useCallback(() => {
+    const video = videoRef.current;
+    if (!video || !url) return;
+
+    setIsLoading(true);
+    setHasError(null);
+
+    // Clean up previous HLS instance
+    if (hlsRef.current) {
+      hlsRef.current.destroy();
+      hlsRef.current = null;
+    }
+
+    const isHlsStream = url.includes('.m3u8') || url.includes('/live/');
+
+    if (isHlsStream && Hls.isSupported()) {
+      const hls = new Hls({
+        enableWorker: true,
+        lowLatencyMode: true,
+        backBufferLength: 60,
+      });
+      hlsRef.current = hls;
+
+      hls.loadSource(url);
+      hls.attachMedia(video);
+
+      hls.on(Hls.Events.MANIFEST_PARSED, (_event, data) => {
+        setIsLoading(false);
+        if (data.levels && data.levels.length > 0) {
+          const maxLevel = data.levels[data.levels.length - 1];
+          if (maxLevel.height) {
+            setQualityText(maxLevel.height >= 1080 ? 'FHD 1080p' : `${maxLevel.height}p`);
+          }
+        }
+        if (autoPlay) {
+          video.play().catch(() => {
+            // Browser autoplay restrictions may require mute
+            video.muted = true;
+            setIsMuted(true);
+            video.play().catch(console.error);
+          });
+        }
+      });
+
+      hls.on(Hls.Events.ERROR, (_event, data) => {
+        if (data.fatal) {
+          switch (data.type) {
+            case Hls.ErrorTypes.NETWORK_ERROR:
+              console.warn('HLS Network Error, attempting recovery...');
+              hls.startLoad();
+              break;
+            case Hls.ErrorTypes.MEDIA_ERROR:
+              console.warn('HLS Media Error, recovering media...');
+              hls.recoverMediaError();
+              break;
+            default:
+              hls.destroy();
+              setHasError('No se pudo reproducir la transmisión. Verifique su conexión al servidor IPTV.');
+              setIsLoading(false);
+              break;
+          }
+        }
+      });
+    } else {
+      // Native MP4 / WebM / Safari HLS
+      video.src = url;
+      video.load();
+      if (autoPlay) {
+        video.play().catch(() => {
+          video.muted = true;
+          setIsMuted(true);
+          video.play().catch(console.error);
+        });
+      }
+    }
+
+    if (initialTime > 0) {
+      video.currentTime = initialTime;
+    }
+  }, [url, autoPlay, initialTime]);
+
+  useEffect(() => {
+    loadStream();
+    return () => {
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+    };
+  }, [loadStream]);
+
+  // Video listeners
+  const handleTimeUpdate = () => {
+    if (!videoRef.current) return;
+    const cur = videoRef.current.currentTime;
+    const dur = videoRef.current.duration || 0;
+    setCurrentTime(cur);
+    setDuration(dur);
+    if (onTimeUpdate) onTimeUpdate(cur, dur);
+  };
+
+  const handlePlayPause = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) {
+      video.play().then(() => setIsPlaying(true)).catch(console.error);
+    } else {
+      video.pause();
+      setIsPlaying(false);
+    }
+    bumpControls();
+  };
+
+  const handleToggleMute = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = !video.muted;
+    setIsMuted(video.muted);
+    bumpControls();
+  };
+
+  const handleVolumeChange = (newVol: number) => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.volume = newVol;
+    setVolume(newVol);
+    if (newVol === 0) {
+      video.muted = true;
+      setIsMuted(true);
+    } else if (isMuted) {
+      video.muted = false;
+      setIsMuted(false);
+    }
+  };
+
+  const handleSeek = (seconds: number) => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.currentTime = Math.max(0, Math.min(video.duration || 0, video.currentTime + seconds));
+    bumpControls();
+  };
+
+  const handleSliderSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const video = videoRef.current;
+    if (!video) return;
+    const target = parseFloat(e.target.value);
+    video.currentTime = target;
+    setCurrentTime(target);
+    bumpControls();
+  };
+
+  const toggleFullscreen = () => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    if (!document.fullscreenElement) {
+      container.requestFullscreen?.().then(() => setIsFullscreen(true)).catch(console.error);
+    } else {
+      document.exitFullscreen?.().then(() => setIsFullscreen(false)).catch(console.error);
+    }
+    bumpControls();
+  };
+
+  const cycleAspectRatio = () => {
+    const modes: AspectRatioMode[] = ['contain', 'cover', 'fill'];
+    const next = modes[(modes.indexOf(aspectRatio) + 1) % modes.length];
+    setAspectRatio(next);
+    bumpControls();
+  };
+
+  const formatTime = (secs: number) => {
+    if (isNaN(secs)) return '00:00';
+    const h = Math.floor(secs / 3600);
+    const m = Math.floor((secs % 3600) / 60);
+    const s = Math.floor(secs % 60);
+    if (h > 0) {
+      return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      onMouseMove={bumpControls}
+      onClick={isMiniPlayer && onExpand ? onExpand : bumpControls}
+      className={`relative group bg-black overflow-hidden flex items-center justify-center select-none ${className} ${
+        isFullscreen ? 'fixed inset-0 z-50 w-screen h-screen' : ''
+      }`}
+    >
+      {/* Video Element */}
+      <video
+        ref={videoRef}
+        poster={poster}
+        playsInline
+        onTimeUpdate={handleTimeUpdate}
+        onWaiting={() => setIsLoading(true)}
+        onPlaying={() => {
+          setIsLoading(false);
+          setIsPlaying(true);
+        }}
+        onEnded={() => setIsPlaying(false)}
+        onError={() => {
+          setIsLoading(false);
+          setHasError('Error de formato de transmisión o señal fuera de línea');
+        }}
+        className={`w-full h-full transition-all duration-200 ${
+          aspectRatio === 'contain'
+            ? 'object-contain'
+            : aspectRatio === 'cover'
+            ? 'object-cover'
+            : 'object-fill'
+        }`}
+      />
+
+      {/* Loading Spinner */}
+      {isLoading && !hasError && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 pointer-events-none z-20">
+          <Loader2 className="w-12 h-12 text-cyan-400 animate-spin mb-3 drop-shadow-[0_0_12px_rgba(6,182,212,0.8)]" />
+          <span className="text-sm font-semibold tracking-wide text-zinc-300">Conectando señal...</span>
+        </div>
+      )}
+
+      {/* Error state */}
+      {hasError && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950/90 text-center p-6 z-20">
+          <AlertCircle className="w-12 h-12 text-rose-500 mb-3" />
+          <h4 className="text-base font-bold text-white mb-1">Señal no disponible temporalmente</h4>
+          <p className="text-xs text-zinc-400 max-w-md mb-4">{hasError}</p>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              loadStream();
+            }}
+            className="tv-focusable px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-sm font-semibold flex items-center gap-2 shadow-lg cursor-pointer"
+          >
+            <RotateCcw className="w-4 h-4" /> Reintentar Señal
+          </button>
+        </div>
+      )}
+
+      {/* Mini Player Overlay Header */}
+      {isMiniPlayer && (
+        <div className="absolute top-2 left-2 right-2 flex items-center justify-between z-10 pointer-events-none">
+          <div className="flex items-center gap-2 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/10">
+            <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+            <span className="text-xs font-bold text-white truncate max-w-[140px]">{title}</span>
+          </div>
+          {onExpand && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onExpand();
+              }}
+              className="pointer-events-auto p-1.5 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-md shadow-md text-xs flex items-center gap-1 cursor-pointer"
+              title="Expandir a pantalla completa"
+            >
+              <Maximize className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Full Player Controls Overlay */}
+      {!isMiniPlayer && (
+        <div
+          className={`absolute inset-0 flex flex-col justify-between p-4 sm:p-6 bg-gradient-to-t from-black/90 via-black/30 to-black/80 transition-opacity duration-300 z-30 ${
+            showControls ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+          }`}
+        >
+          {/* Top Bar: Title & Channel Info */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {onClose && (
+                <button
+                  onClick={onClose}
+                  className="tv-focusable p-2.5 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700/60 rounded-xl text-zinc-300 hover:text-white transition cursor-pointer"
+                  title="Cerrar / Volver"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+              )}
+              <div>
+                <div className="flex items-center gap-2">
+                  {type === 'live' && (
+                    <span className="px-2 py-0.5 bg-rose-600 text-white text-[11px] font-extrabold rounded-md flex items-center gap-1 uppercase tracking-wider animate-pulse">
+                      <span className="w-1.5 h-1.5 rounded-full bg-white" /> EN VIVO
+                    </span>
+                  )}
+                  <h3 className="text-base sm:text-lg font-bold text-white tracking-wide truncate max-w-sm sm:max-w-md">
+                    {title}
+                  </h3>
+                </div>
+                {subtitle && <p className="text-xs text-zinc-400 truncate max-w-md mt-0.5">{subtitle}</p>}
+              </div>
+            </div>
+
+            {/* Badges */}
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-1 bg-zinc-900/90 border border-zinc-700 text-cyan-400 text-xs font-mono font-bold rounded-lg shadow-inner">
+                {qualityText}
+              </span>
+              <span className="hidden sm:inline-block px-2.5 py-1 bg-zinc-900/90 border border-zinc-700 text-zinc-300 text-xs font-mono rounded-lg">
+                60 FPS
+              </span>
+              <button
+                onClick={cycleAspectRatio}
+                className="tv-focusable px-2.5 py-1 bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700 text-xs text-zinc-300 rounded-lg flex items-center gap-1 cursor-pointer"
+                title="Cambiar relación de aspecto"
+              >
+                <Layers className="w-3.5 h-3.5 text-zinc-400" />
+                <span className="capitalize text-[11px] font-medium">{aspectRatio}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Center Play Indicator for Click */}
+          <div className="flex items-center justify-center gap-6">
+            {type === 'live' && onPrevChannel && (
+              <button
+                onClick={onPrevChannel}
+                className="tv-focusable p-3 bg-zinc-900/80 hover:bg-cyan-500 hover:text-black text-white rounded-full transition transform active:scale-95 cursor-pointer shadow-lg"
+                title="Canal Anterior (CH-)"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+            )}
+
+            <button
+              onClick={handlePlayPause}
+              className="tv-focusable p-4 sm:p-5 bg-cyan-500 hover:bg-cyan-400 text-black rounded-full transition transform active:scale-95 shadow-[0_0_30px_rgba(6,182,212,0.6)] cursor-pointer"
+              title={isPlaying ? 'Pausar' : 'Reproducir'}
+            >
+              {isPlaying ? <Pause className="w-8 h-8 fill-current" /> : <Play className="w-8 h-8 fill-current ml-0.5" />}
+            </button>
+
+            {type === 'live' && onNextChannel && (
+              <button
+                onClick={onNextChannel}
+                className="tv-focusable p-3 bg-zinc-900/80 hover:bg-cyan-500 hover:text-black text-white rounded-full transition transform active:scale-95 cursor-pointer shadow-lg"
+                title="Canal Siguiente (CH+)"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+            )}
+          </div>
+
+          {/* Bottom Bar: Timeline (if VOD) + Controls */}
+          <div className="space-y-3">
+            {/* Scrubber slider for Movies / Series episodes */}
+            {type !== 'live' && duration > 0 && (
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-xs font-mono text-zinc-400 px-1">
+                  <span>{formatTime(currentTime)}</span>
+                  <span>{formatTime(duration)}</span>
+                </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={duration || 100}
+                  step={1}
+                  value={currentTime}
+                  onChange={handleSliderSeek}
+                  className="w-full h-1.5 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+                />
+              </div>
+            )}
+
+            {/* Bottom Controls Row */}
+            <div className="flex items-center justify-between pt-1">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handlePlayPause}
+                  className="tv-focusable text-zinc-300 hover:text-cyan-400 transition cursor-pointer"
+                >
+                  {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+                </button>
+
+                {type !== 'live' && (
+                  <>
+                    <button
+                      onClick={() => handleSeek(-10)}
+                      className="tv-focusable text-zinc-400 hover:text-white transition text-xs flex items-center gap-1 cursor-pointer"
+                      title="-10 segundos"
+                    >
+                      <SkipBack className="w-4 h-4" /> 10s
+                    </button>
+                    <button
+                      onClick={() => handleSeek(10)}
+                      className="tv-focusable text-zinc-400 hover:text-white transition text-xs flex items-center gap-1 cursor-pointer"
+                      title="+10 segundos"
+                    >
+                      <SkipForward className="w-4 h-4" /> 10s
+                    </button>
+                  </>
+                )}
+
+                {/* Volume slider */}
+                <div className="flex items-center gap-2 group/vol ml-2">
+                  <button
+                    onClick={handleToggleMute}
+                    className="tv-focusable text-zinc-300 hover:text-white transition cursor-pointer"
+                  >
+                    {isMuted || volume === 0 ? <VolumeX className="w-5 h-5 text-rose-400" /> : <Volume2 className="w-5 h-5" />}
+                  </button>
+                  <input
+                    type="range"
+                    min={0}
+                    max={1}
+                    step={0.05}
+                    value={isMuted ? 0 : volume}
+                    onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
+                    className="w-16 sm:w-20 h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+                  />
+                </div>
+              </div>
+
+              {/* Right action buttons */}
+              <div className="flex items-center gap-3">
+                {type === 'live' && (
+                  <div className="hidden sm:flex items-center gap-1 text-[11px] text-zinc-400 font-mono">
+                    <Tv className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>ZAPPING: CH+ / CH-</span>
+                  </div>
+                )}
+                <button
+                  onClick={toggleFullscreen}
+                  className="tv-focusable p-1.5 text-zinc-300 hover:text-cyan-400 transition cursor-pointer"
+                  title="Pantalla Completa (F)"
+                >
+                  {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
