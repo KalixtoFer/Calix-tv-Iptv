@@ -2,7 +2,7 @@ name: Compilar APK Android TV & Móvil
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ "**" ]
   workflow_dispatch:
 
 jobs:
@@ -14,38 +14,48 @@ jobs:
       - name: 1. Descargar código del repositorio
         uses: actions/checkout@v4
 
-      - name: 2. Configurar Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-
-      - name: 3. Instalar dependencias del proyecto
-        run: npm install --legacy-peer-deps
-
-      - name: 4. Compilar interfaz web para producción
-        run: npm run build
-
-      - name: 5. Sincronizar archivos con el proyecto Android
-        run: npx cap sync android
-
-      - name: 6. Configurar Java 17 (JDK)
+      - name: 2. Configurar Java 21 (JDK)
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '17'
+          java-version: '21'
 
-      - name: 7. Asignar permisos de ejecución al compilador Gradle
-        run: chmod +x android/gradlew
+      - name: 3. Configurar Android SDK
+        uses: android-actions/setup-android@v3
 
-      - name: 8. Compilar APK Nativo con Gradle
+      - name: 4. Aceptar licencias del SDK de Android
+        run: |
+          yes | sdkmanager --licenses || true
+
+      - name: 5. Configurar Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 6. Instalar dependencias del proyecto
+        run: |
+          npm install --legacy-peer-deps --no-audit
+
+      - name: 7. Compilar interfaz web para producción
+        run: |
+          npm run build
+
+      - name: 8. Sincronizar archivos con el proyecto Android
+        run: |
+          npx cap sync android
+
+      - name: 9. Asignar permisos al compilador Gradle
+        run: |
+          chmod +x android/gradlew
+
+      - name: 10. Compilar APK con Gradle
         run: |
           cd android
-          ./gradlew assembleDebug --stacktrace
+          ./gradlew assembleDebug --no-daemon --stacktrace
           cd ..
           cp android/app/build/outputs/apk/debug/app-debug.apk NexusIPTVPro-v2.5.4.apk
 
-      - name: 9. Generar enlace de descarga del APK listo
+      - name: 11. Subir APK como enlace de descarga directa
         uses: actions/upload-artifact@v4
         with:
           name: NexusIPTVPro-v2.5.4-APK
