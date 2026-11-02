@@ -23,7 +23,7 @@ jobs:
       - name: 3. Configurar Node.js 20
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: 4. Instalar dependencias web
         run: |
