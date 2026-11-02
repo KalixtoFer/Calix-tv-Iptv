@@ -81,15 +81,19 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
       <div className="w-full max-w-md bg-zinc-950/85 backdrop-blur-2xl border border-zinc-800/90 rounded-3xl p-6 sm:p-8 shadow-2xl relative z-10 space-y-6">
         {/* Logo & Branding */}
         <div className="text-center space-y-2">
-          <div className="inline-flex p-3.5 rounded-2xl bg-gradient-to-tr from-cyan-600 to-blue-600 shadow-[0_0_25px_rgba(6,182,212,0.5)] mb-1">
-            <Tv className="w-8 h-8 text-white" />
+          <div className="flex justify-center mb-1">
+            <img
+              src="/logo.png"
+              alt="Calix TV"
+              className="h-20 sm:h-24 w-auto object-contain drop-shadow-[0_0_25px_rgba(6,182,212,0.6)]"
+            />
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            NEXUS IPTV PRO
+            CALIX TV
           </h1>
-          <p className="text-xs text-zinc-400">
-            {config.serviceName || 'Sistema Centralizado Xtream Codes'}
+          <p className="text-xs text-cyan-400 font-semibold tracking-wide">
+            Tu Servicio Digital • Versión 1.0
           </p>
 
           {/* Centralized Server Pill (Customer DOES NOT type the server) */}

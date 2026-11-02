@@ -235,21 +235,23 @@ export default function App() {
         viewMode === 'tv' ? 'tv-overscan text-base' : 'text-sm'
       }`}
     >
-      {/* Top Application Bar */}
-      <Header
-        appName={config.serviceName || 'NEXUS IPTV PRO'}
-        version="v2.5.4"
-        userInfo={session.authResponse.user_info}
-        serverUrl={config.serverUrl}
-        isOnline={true}
-        viewMode={viewMode}
-        onToggleViewMode={toggleViewMode}
-        onOpenSettings={() => setIsAdminOpen(true)}
-        onOpenRemote={() => setIsRemoteOpen((prev) => !prev)}
-        onOpenApkGuide={() => setIsApkGuideOpen(true)}
-        onLogout={handleLogout}
-        onHomeClick={() => setActiveSection('home')}
-      />
+      {/* Top Application Bar - Only shown in sub-sections, Home has its own integrated TV bar matching the screenshot */}
+      {activeSection !== 'home' && (
+        <Header
+          appName={config.serviceName || 'NEXUS IPTV PRO'}
+          version="v2.5.4"
+          userInfo={session.authResponse.user_info}
+          serverUrl={config.serverUrl}
+          isOnline={true}
+          viewMode={viewMode}
+          onToggleViewMode={toggleViewMode}
+          onOpenSettings={() => setIsAdminOpen(true)}
+          onOpenRemote={() => setIsRemoteOpen((prev) => !prev)}
+          onOpenApkGuide={() => setIsApkGuideOpen(true)}
+          onLogout={handleLogout}
+          onHomeClick={() => setActiveSection('home')}
+        />
+      )}
 
       {/* Main View Router */}
       <main className="flex-1 flex flex-col overflow-hidden">
@@ -258,6 +260,9 @@ export default function App() {
             config={config}
             onNavigate={(sec) => setActiveSection(sec)}
             onPlayStream={handlePlayStream}
+            onOpenSettings={() => setIsAdminOpen(true)}
+            onOpenSpeedTest={() => setIsAdminOpen(true)}
+            onOpenFavorites={() => setActiveSection('live')}
           />
         )}
 

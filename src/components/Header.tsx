@@ -89,21 +89,22 @@ export const Header: React.FC<HeaderProps> = ({
           className="tv-focusable flex items-center gap-2.5 text-left group cursor-pointer"
           title="Ir a Inicio"
         >
-          {/* Logo Icon / Custom Slot */}
-          <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-tr from-cyan-600 via-blue-600 to-indigo-600 p-[1.5px] shadow-[0_0_18px_rgba(6,182,212,0.4)] group-hover:shadow-[0_0_24px_rgba(6,182,212,0.6)] transition-all">
-            <div className="w-full h-full bg-[#08090e] rounded-[10px] flex items-center justify-center overflow-hidden">
-              <Tv className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400 fill-cyan-400/20 group-hover:scale-110 transition-transform" />
-            </div>
-            <span className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 border-2 border-[#0a0d14] rounded-full shadow-sm" />
+          {/* Official Calix TV Logo Image */}
+          <div className="relative group-hover:scale-105 transition-transform">
+            <img
+              src="/logo.png"
+              alt="Calix TV"
+              className="h-10 sm:h-11 w-auto object-contain drop-shadow-[0_0_12px_rgba(6,182,212,0.5)]"
+            />
           </div>
 
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-extrabold tracking-wider text-base sm:text-lg text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-100 to-cyan-300">
-                {appName}
+              <span className="font-extrabold tracking-wider text-base sm:text-lg text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-100 to-cyan-400">
+                CALIX TV
               </span>
               <span className="px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-cyan-950/80 text-cyan-400 border border-cyan-800/60 rounded">
-                {version}
+                1.0
               </span>
             </div>
             <div className="flex items-center gap-1.5 text-[11px] text-zinc-400">

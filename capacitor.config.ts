@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.nexus.iptv.pro',
-  appName: 'Nexus IPTV Pro',
+  appId: 'com.calixtv.app',
+  appName: 'Calix TV',
   webDir: 'dist',
   server: {
     androidScheme: 'https',
