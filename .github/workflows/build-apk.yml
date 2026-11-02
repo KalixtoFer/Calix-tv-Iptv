@@ -33,24 +33,33 @@ jobs:
         run: |
           npm run build
 
-      - name: 6. Sincronizar con el proyecto Android
+      - name: 6. Sincronizar o crear proyecto Android
         run: |
-          npx cap sync android
+          if [ ! -d "android" ]; then
+            echo "Creando proyecto nativo Android..."
+            npx cap add android
+          else
+            echo "Sincronizando proyecto Android..."
+            npx cap sync android
+          fi
 
-      - name: 7. Permisos de ejecución a Gradle
+      - name: 7. Configurar Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: 8. Permisos de ejecución a Gradle
         run: |
           chmod +x android/gradlew
 
-      - name: 8. Compilar APK con Gradle
+      - name: 9. Compilar APK con Gradle
         run: |
           cd android
           ./gradlew assembleDebug --no-daemon --stacktrace
           cd ..
-          cp android/app/build/outputs/apk/debug/app-debug.apk NexusIPTVPro-v2.5.4.apk
+          cp android/app/build/outputs/apk/debug/app-debug.apk CalixTV-v1.0.apk
 
-      - name: 9. Generar enlace de descarga directa del APK
+      - name: 10. Subir APK listo para descargar
         uses: actions/upload-artifact@v4
         with:
-          name: NexusIPTVPro-v2.5.4-APK
-          path: NexusIPTVPro-v2.5.4.apk
+          name: CalixTV-v1.0-APK
+          path: CalixTV-v1.0.apk
           if-no-files-found: error
