@@ -43,19 +43,19 @@ jobs:
             npx cap sync android
           fi
 
-      - name: 6.5. Forzar compileSdk y targetSdk 36
+      - name: 6.5. Forzar compileSdk y targetSdk 35
         run: |
-          sed -i 's/compileSdkVersion = [0-9]*/compileSdkVersion = 36/' android/variables.gradle
-          sed -i 's/targetSdkVersion = [0-9]*/targetSdkVersion = 36/' android/variables.gradle
+          sed -i 's/compileSdkVersion = [0-9]*/compileSdkVersion = 35/' android/variables.gradle
+          sed -i 's/targetSdkVersion = [0-9]*/targetSdkVersion = 35/' android/variables.gradle
           echo "--- variables.gradle ---"
           cat android/variables.gradle
 
-      - name: 7. Configurar Android SDK API 36 y Licencias
+      - name: 7. Configurar Android SDK API 35 y Licencias
         run: |
           mkdir -p android
           echo "sdk.dir=$ANDROID_HOME" > android/local.properties
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null || true
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-36" "build-tools;36.0.0" || true
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-35" "build-tools;35.0.0" || true
           echo "--- Plataformas instaladas ---"
           ls $ANDROID_HOME/platforms
           echo "--- Build-tools instalados ---"

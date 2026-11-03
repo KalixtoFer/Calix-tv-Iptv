@@ -38,11 +38,9 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
   onClose,
   onConfigSaved,
 }) => {
-  // Login form state
-  const [loginMode, setLoginMode] = useState<'pin' | 'credentials'>('credentials');
+  // Login form state (Strict username + password authentication)
   const [username, setUsername] = useState<string>('admin');
   const [password, setPassword] = useState<string>('');
-  const [pin, setPin] = useState<string>('');
   const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
@@ -80,18 +78,16 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
   const [newUsername, setNewUsername] = useState<string>('');
   const [newPassword, setNewPassword] = useState<string>('');
   const [newEmail, setNewEmail] = useState<string>('');
-  const [newPin, setNewPin] = useState<string>('');
   const [credMessage, setCredMessage] = useState<string | null>(null);
   const [isUpdatingCreds, setIsUpdatingCreds] = useState<boolean>(false);
 
-  // Handle Admin Login (User/Password or PIN)
+  // Handle Admin Login (Strict User & Password)
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsVerifying(true);
     setAuthError(null);
 
-    const payload = loginMode === 'pin' ? { pin } : { username, password };
-    const res = await iptvApi.verifyAdmin(payload);
+    const res = await iptvApi.verifyAdmin({ username, password });
     setIsVerifying(false);
 
     if (res.success && res.authorized) {
@@ -116,7 +112,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
       // Run security audit automatically on login
       runAudit();
     } else {
-      setAuthError(res.message || 'Credenciales incorrectas.');
+      setAuthError(res.message || 'Usuario o contraseña de administrador incorrectos.');
     }
   };
 
@@ -150,7 +146,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
     setIsSaving(true);
     setSaveSuccess(null);
 
-    const res = await iptvApi.saveAdminConfig(pin || '8888', config);
+    const res = await iptvApi.saveAdminConfig(config);
     setIsSaving(false);
 
     if (res.success) {
@@ -171,21 +167,18 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
     setCredMessage(null);
 
     const res = await iptvApi.updateAdminCredentials({
-      currentPin: pin,
       newUsername: newUsername || undefined,
       newPassword: newPassword || undefined,
       newEmail: newEmail || undefined,
-      newPin: newPin || undefined,
     });
     setIsUpdatingCreds(false);
 
     if (res.success) {
-      setCredMessage('¡Credenciales actualizadas correctamente!');
+      setCredMessage('¡Credenciales de administrador actualizadas correctamente!');
       if (res.adminUser) {
         setAdminUser(res.adminUser);
       }
       setNewPassword('');
-      setNewPin('');
       runAudit();
       setTimeout(() => setCredMessage(null), 4000);
     } else {
@@ -280,83 +273,34 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
             <div className="text-center space-y-1 max-w-md">
               <h4 className="text-lg font-bold text-white">Acceso de Administrador</h4>
               <p className="text-xs text-zinc-400">
-                Inicia sesión con tu cuenta de administrador o tu PIN maestro para actualizar la aplicación y gestionar tus clientes desde cualquier dispositivo.
+                Inicia sesión con tu cuenta de usuario y contraseña de administrador para gestionar tu servicio IPTV.
               </p>
-            </div>
-
-            {/* Selector de Método de Acceso */}
-            <div className="flex p-1 bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-sm">
-              <button
-                type="button"
-                onClick={() => setLoginMode('credentials')}
-                className={`flex-1 py-2 text-xs font-bold rounded-xl transition ${
-                  loginMode === 'credentials'
-                    ? 'bg-cyan-500 text-black shadow-md'
-                    : 'text-zinc-400 hover:text-white'
-                }`}
-              >
-                Usuario y Contraseña
-              </button>
-              <button
-                type="button"
-                onClick={() => setLoginMode('pin')}
-                className={`flex-1 py-2 text-xs font-bold rounded-xl transition ${
-                  loginMode === 'pin'
-                    ? 'bg-cyan-500 text-black shadow-md'
-                    : 'text-zinc-400 hover:text-white'
-                }`}
-              >
-                PIN Maestro (8888)
-              </button>
             </div>
 
             {/* Formulario */}
             <form onSubmit={handleLogin} className="w-full max-w-sm space-y-4">
-              {loginMode === 'credentials' ? (
-                <>
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-zinc-300">Usuario o Email</label>
-                    <input
-                      type="text"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      placeholder="admin o tu@email.com"
-                      required
-                      className="w-full px-4 py-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm focus:outline-none focus:border-cyan-500"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-zinc-300">Contraseña de Administrador</label>
-                    <input
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Ingresa tu contraseña"
-                      required
-                      className="w-full px-4 py-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm focus:outline-none focus:border-cyan-500"
-                    />
-                    <p className="text-[10px] text-zinc-500">
-                      Contraseña inicial configurada: <code className="text-cyan-400">CalixTvAdmin2026!</code>
-                    </p>
-                  </div>
-                </>
-              ) : (
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-zinc-300">PIN Maestro de 4 Dígitos</label>
-                  <input
-                    type="password"
-                    maxLength={8}
-                    value={pin}
-                    onChange={(e) => setPin(e.target.value)}
-                    placeholder="8888"
-                    required
-                    className="w-full px-4 py-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-white text-center text-lg tracking-widest font-mono focus:outline-none focus:border-cyan-500"
-                  />
-                  <p className="text-[10px] text-zinc-500 text-center">
-                    PIN maestro inicial: <code className="text-cyan-400">8888</code>
-                  </p>
-                </div>
-              )}
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-zinc-300">Usuario Administrador</label>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="admin"
+                  required
+                  className="w-full px-4 py-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm focus:outline-none focus:border-cyan-500"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-zinc-300">Contraseña</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  className="w-full px-4 py-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm focus:outline-none focus:border-cyan-500"
+                />
+              </div>
 
               {authError && (
                 <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-400 text-xs flex items-center gap-2">
@@ -373,7 +317,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                 {isVerifying ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Verificando seguridad...</span>
+                    <span>Verificando credenciales...</span>
                   </>
                 ) : (
                   <>
@@ -749,7 +693,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       <span>Cambiar Credenciales de Administrador</span>
                     </h4>
                     <p className="text-xs text-zinc-400">
-                      Modifica tu usuario, contraseña o PIN maestro para acceder desde cualquier navegador o tu celular.
+                      Modifica tu usuario, email o contraseña para acceder de forma segura desde cualquier navegador o tu celular.
                     </p>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
@@ -775,7 +719,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                         />
                       </div>
 
-                      <div className="space-y-1">
+                      <div className="sm:col-span-2 space-y-1">
                         <label className="text-xs text-zinc-300 font-semibold">Nueva Contraseña (Dejar vacío para no cambiar)</label>
                         <input
                           type="password"
@@ -783,18 +727,6 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           onChange={(e) => setNewPassword(e.target.value)}
                           placeholder="••••••••"
                           className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white text-xs focus:border-cyan-500 focus:outline-none"
-                        />
-                      </div>
-
-                      <div className="space-y-1">
-                        <label className="text-xs text-zinc-300 font-semibold">Nuevo PIN Maestro (4-8 dígitos)</label>
-                        <input
-                          type="password"
-                          maxLength={8}
-                          value={newPin}
-                          onChange={(e) => setNewPin(e.target.value)}
-                          placeholder="8888"
-                          className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white text-xs font-mono focus:border-cyan-500 focus:outline-none"
                         />
                       </div>
                     </div>

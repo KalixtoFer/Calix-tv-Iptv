@@ -62,7 +62,6 @@ class IptvApiService {
       serverPort: '8080',
       serverProtocol: 'http',
       serviceName: 'NEXUS IPTV ULTRA HD',
-      adminPin: '8888',
       announcement: '¡Bienvenidos a Nexus IPTV Pro! Servidores 4K optimizados con baja latencia.',
       showAnnouncement: true,
       banners: [],
@@ -254,7 +253,7 @@ class IptvApiService {
   // 9. Admin Configuration & Security Methods
   private adminToken: string | null = null;
 
-  async verifyAdmin(params: { pin?: string; username?: string; password?: string }): Promise<{
+  async verifyAdmin(params: { username?: string; password?: string }): Promise<{
     success: boolean;
     authorized?: boolean;
     token?: string;
@@ -274,18 +273,14 @@ class IptvApiService {
     return data;
   }
 
-  async verifyAdminPin(pin: string) {
-    return this.verifyAdmin({ pin });
-  }
-
-  async saveAdminConfig(pin: string, config: Partial<CentralizedConfig>): Promise<{ success: boolean; message: string; config?: CentralizedConfig }> {
+  async saveAdminConfig(config: Partial<CentralizedConfig>): Promise<{ success: boolean; message: string; config?: CentralizedConfig }> {
     const res = await fetch('/api/iptv/admin/save', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         ...(this.adminToken ? { 'x-admin-token': this.adminToken } : {}),
       },
-      body: JSON.stringify({ pin, token: this.adminToken, config }),
+      body: JSON.stringify({ token: this.adminToken, config }),
     });
     const data = await res.json();
     if (data.success && data.config) {
@@ -295,11 +290,9 @@ class IptvApiService {
   }
 
   async updateAdminCredentials(params: {
-    currentPin?: string;
     newUsername?: string;
     newPassword?: string;
     newEmail?: string;
-    newPin?: string;
     newName?: string;
   }): Promise<{ success: boolean; message: string; adminUser?: any }> {
     const res = await fetch('/api/iptv/admin/update-credentials', {

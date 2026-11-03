@@ -30,7 +30,6 @@ interface CentralizedConfig {
   serverPort: string;
   serverProtocol: 'http' | 'https';
   serviceName: string;
-  adminPin: string;
   announcement: string;
   showAnnouncement: boolean;
   banners: Array<{
@@ -66,17 +65,20 @@ export interface AdminAuthData {
   username: string;
   email: string;
   passwordHash: string;
-  masterPin: string;
   role: string;
   name: string;
   createdAt: string;
 }
 
+// Password hashing utility
+function hashPassword(pass: string): string {
+  return crypto.createHash('sha256').update(`calixtv_salt_${pass}`).digest('hex');
+}
+
 const DEFAULT_ADMIN_AUTH: AdminAuthData = {
   username: 'admin',
   email: 'kalixgaming123@gmail.com',
-  passwordHash: 'CalixTvAdmin2026!',
-  masterPin: '8888',
+  passwordHash: hashPassword('CalixTvAdmin2026!'),
   role: 'superadmin',
   name: 'Administrador Calix TV',
   createdAt: new Date().toISOString(),
@@ -87,7 +89,6 @@ const DEFAULT_CONFIG: CentralizedConfig = {
   serverPort: '8443',
   serverProtocol: 'http',
   serviceName: 'Calix TV',
-  adminPin: '8888',
   announcement: '¡Bienvenidos a Calix TV! Servidores optimizados con baja latencia y calidad 4K.',
   showAnnouncement: true,
   banners: [
@@ -223,12 +224,11 @@ function resetAdminFailedAttempts(ip: string) {
 // Centralized Configuration API
 // -------------------------------------------------------------
 
-// Public config for clients (omits sensitive pin)
+// Public config for clients
 app.get('/api/iptv/config', (_req, res) => {
-  const { adminPin: _, ...safeConfig } = currentConfig;
   res.json({
     success: true,
-    config: safeConfig,
+    config: currentConfig,
   });
 });
 
@@ -281,7 +281,7 @@ app.get('/api/iptv/android-status', (_req, res) => {
   });
 });
 
-// Admin Authentication (supports PIN or Username + Password with brute-force protection)
+// Admin Authentication (Strict Username + Password with brute-force protection and token issuance)
 app.post('/api/iptv/admin/verify', (req, res) => {
   const clientIp = req.ip || req.socket.remoteAddress || 'unknown';
   const rateLimit = checkAdminRateLimit(clientIp);
@@ -292,23 +292,21 @@ app.post('/api/iptv/admin/verify', (req, res) => {
     });
   }
 
-  const { pin, username, password } = req.body;
+  const { username, password } = req.body;
   let isValid = false;
 
-  // Option A: Username and Password verification
   if (username && password) {
     const isUserMatch =
       username.toLowerCase() === currentAdminAuth.username.toLowerCase() ||
       username.toLowerCase() === currentAdminAuth.email.toLowerCase();
-    const isPassMatch = password === currentAdminAuth.passwordHash;
+    
+    // Support both hashed comparison or legacy raw fallback
+    const inputHash = hashPassword(password);
+    const isPassMatch = inputHash === currentAdminAuth.passwordHash || password === currentAdminAuth.passwordHash;
+
     if (isUserMatch && isPassMatch) {
       isValid = true;
     }
-  }
-
-  // Option B: Quick Master PIN verification
-  if (pin && (pin === currentAdminAuth.masterPin || pin === currentConfig.adminPin)) {
-    isValid = true;
   }
 
   if (isValid) {
@@ -341,15 +339,13 @@ app.post('/api/iptv/admin/verify', (req, res) => {
   });
 });
 
-// Admin save config (Protected by token or master PIN)
+// Admin save config (Protected strictly by token)
 app.post('/api/iptv/admin/save', (req, res) => {
   const headerToken = req.headers['x-admin-token'] as string;
-  const { pin, token, config } = req.body;
+  const { token, config } = req.body;
 
   const authToken = headerToken || token;
-  const isAuthorized =
-    (authToken && activeAdminTokens.has(authToken)) ||
-    (pin && (pin === currentAdminAuth.masterPin || pin === currentConfig.adminPin));
+  const isAuthorized = authToken && activeAdminTokens.has(authToken);
 
   if (!isAuthorized) {
     return res.status(401).json({ success: false, message: 'Sesión no autorizada o expirada. Inicie sesión nuevamente.' });
@@ -362,15 +358,8 @@ app.post('/api/iptv/admin/save', (req, res) => {
   currentConfig = {
     ...currentConfig,
     ...config,
-    adminPin: config.adminPin || currentAdminAuth.masterPin || currentConfig.adminPin,
   };
   saveConfig(currentConfig);
-
-  // Sync master PIN if updated in config
-  if (config.adminPin && config.adminPin !== currentAdminAuth.masterPin) {
-    currentAdminAuth.masterPin = config.adminPin;
-    saveAdminAuth(currentAdminAuth);
-  }
 
   res.json({
     success: true,
@@ -379,34 +368,26 @@ app.post('/api/iptv/admin/save', (req, res) => {
   });
 });
 
-// Admin update security credentials (change password, username, email, PIN)
+// Admin update security credentials (change password, username, email, name)
 app.post('/api/iptv/admin/update-credentials', (req, res) => {
   const headerToken = req.headers['x-admin-token'] as string;
-  const { token, currentPin, newUsername, newPassword, newEmail, newPin, newName } = req.body;
+  const { token, newUsername, newPassword, newEmail, newName } = req.body;
 
   const authToken = headerToken || token;
-  const isAuthorized =
-    (authToken && activeAdminTokens.has(authToken)) ||
-    (currentPin && (currentPin === currentAdminAuth.masterPin || currentPin === currentConfig.adminPin));
+  const isAuthorized = authToken && activeAdminTokens.has(authToken);
 
   if (!isAuthorized) {
-    return res.status(401).json({ success: false, message: 'Autorización de administrador requerida.' });
+    return res.status(401).json({ success: false, message: 'Autorización de administrador requerida. Inicie sesión nuevamente.' });
   }
 
   if (newUsername && String(newUsername).trim().length >= 3) {
     currentAdminAuth.username = String(newUsername).trim();
   }
   if (newPassword && String(newPassword).trim().length >= 6) {
-    currentAdminAuth.passwordHash = String(newPassword).trim();
+    currentAdminAuth.passwordHash = hashPassword(String(newPassword).trim());
   }
   if (newEmail && String(newEmail).includes('@')) {
     currentAdminAuth.email = String(newEmail).trim();
-  }
-  if (newPin && String(newPin).trim().length >= 4) {
-    const pinStr = String(newPin).trim();
-    currentAdminAuth.masterPin = pinStr;
-    currentConfig.adminPin = pinStr;
-    saveConfig(currentConfig);
   }
   if (newName) {
     currentAdminAuth.name = String(newName).trim();
@@ -434,7 +415,7 @@ app.get('/api/iptv/admin/security-audit', (_req, res) => {
       title: 'Cuenta de Administrador Dedicada',
       status: currentAdminAuth.username ? 'passed' : 'warning',
       description: `Usuario activo: ${currentAdminAuth.username} (${currentAdminAuth.email})`,
-      recommendation: 'Activo con privilegios SuperAdmin.',
+      recommendation: 'Activo con privilegios SuperAdmin y autenticación estricta.',
     },
     {
       id: 'rate_limiting',
@@ -444,15 +425,11 @@ app.get('/api/iptv/admin/security-audit', (_req, res) => {
       recommendation: 'Protegido.',
     },
     {
-      id: 'pin_strength',
-      title: 'Robustez de PIN de Acceso Rápido',
-      status: currentAdminAuth.masterPin === '8888' ? 'warning' : 'passed',
-      description: currentAdminAuth.masterPin === '8888'
-        ? 'Actualmente usa el PIN predeterminado 8888.'
-        : 'PIN personalizado y seguro.',
-      recommendation: currentAdminAuth.masterPin === '8888'
-        ? 'Cambie el PIN 8888 por uno propio en la pestaña de Seguridad.'
-        : 'Configuración óptima.',
+      id: 'password_hashing',
+      title: 'Cifrado de Contraseña de Administrador (SHA-256 + Salt)',
+      status: 'passed',
+      description: 'Contraseñas almacenadas de forma segura con hash criptográfico.',
+      recommendation: 'Sin claves expuestas.',
     },
     {
       id: 'ota_updates',

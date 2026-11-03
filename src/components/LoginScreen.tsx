@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  Tv,
   Lock,
   User,
   Eye,
@@ -9,10 +8,6 @@ import {
   ShieldCheck,
   AlertCircle,
   Loader2,
-  Settings,
-  Sparkles,
-  Wifi,
-  CheckCircle2,
 } from 'lucide-react';
 import { CentralizedConfig, XtreamAuthResponse } from '../types/iptv';
 import { iptvApi } from '../services/iptvApi';
@@ -65,11 +60,6 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
     }
   };
 
-  const handleUseDemo = () => {
-    setUsername('demo');
-    setPassword('demo');
-    setErrorMessage(null);
-  };
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-4 bg-[#06070a] relative overflow-hidden select-none">
@@ -95,45 +85,6 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
           <p className="text-xs text-cyan-400 font-semibold tracking-wide">
             Tu Servicio Digital • Versión 1.0
           </p>
-
-          {/* Centralized Server Pill (Customer DOES NOT type the server) */}
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-zinc-900/90 border border-zinc-800 rounded-full text-[11px] text-zinc-300">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-zinc-400">Servidor configurado:</span>
-            <span className="font-mono text-cyan-400 font-semibold truncate max-w-[170px]">
-              {config.serverUrl.replace(/^https?:\/\//, '')}
-            </span>
-          </div>
-        </div>
-
-        {/* Botón de Acceso Directo Sin Cuenta */}
-        <div className="p-3.5 bg-gradient-to-r from-cyan-950/70 via-blue-950/50 to-indigo-950/70 border-2 border-cyan-500/50 hover:border-cyan-400 rounded-2xl shadow-[0_0_25px_rgba(6,182,212,0.25)] transition space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="px-2 py-0.5 bg-cyan-500 text-black text-[10px] font-extrabold uppercase tracking-wider rounded">
-              ACCESO INSTANTÁNEO
-            </span>
-            <span className="text-[11px] text-cyan-300 font-medium">Sin registro previo</span>
-          </div>
-          <button
-            type="button"
-            onClick={onEnterGuest}
-            className="tv-focusable w-full py-3 bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 hover:from-cyan-300 hover:to-emerald-300 text-black font-extrabold text-sm rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.5)] flex items-center justify-center gap-2 cursor-pointer transition transform active:scale-95"
-          >
-            <Sparkles className="w-4 h-4 fill-current" />
-            <span>VER APLICACIÓN SIN CUENTA [ENTRAR]</span>
-          </button>
-          <p className="text-[11px] text-center text-zinc-400">
-            Explora canales en directo, películas, series y el reproductor de inmediato
-          </p>
-        </div>
-
-        {/* Separador */}
-        <div className="relative flex py-1 items-center">
-          <div className="flex-grow border-t border-zinc-800"></div>
-          <span className="flex-shrink mx-3 text-[11px] font-bold text-zinc-500 uppercase tracking-wider">
-            O inicia con tu cuenta IPTV
-          </span>
-          <div className="flex-grow border-t border-zinc-800"></div>
         </div>
 
         {/* Error Feedback */}
@@ -200,14 +151,6 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
               />
               <span>Recordar sesión</span>
             </label>
-
-            <button
-              type="button"
-              onClick={handleUseDemo}
-              className="text-cyan-400 hover:text-cyan-300 font-semibold flex items-center gap-1 cursor-pointer"
-            >
-              <Sparkles className="w-3 h-3" /> Usar Cuenta Demo
-            </button>
           </div>
 
           {/* Submit Button */}
@@ -230,20 +173,12 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
           </button>
         </form>
 
-        {/* Security & Admin Configuration Note */}
-        <div className="pt-4 border-t border-zinc-800/80 flex items-center justify-between text-xs text-zinc-400">
-          <div className="flex items-center gap-1 text-[11px]">
+        {/* Security Note */}
+        <div className="pt-4 border-t border-zinc-800/80 flex items-center justify-center text-xs text-zinc-400">
+          <div className="flex items-center gap-1.5 text-[11px] text-zinc-400">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Conexión Encriptada</span>
+            <span>Conexión Encriptada SSL</span>
           </div>
-
-          <button
-            onClick={onOpenAdmin}
-            className="tv-focusable text-zinc-400 hover:text-cyan-400 flex items-center gap-1 text-[11px] font-semibold cursor-pointer"
-          >
-            <Settings className="w-3.5 h-3.5" />
-            <span>Configurar Servidor (Admin)</span>
-          </button>
         </div>
       </div>
     </div>

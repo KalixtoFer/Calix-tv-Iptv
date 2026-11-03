@@ -50,7 +50,7 @@ export default function App() {
   // Active Fullscreen Video Playback
   const [activePlayback, setActivePlayback] = useState<PlaybackState | null>(null);
 
-  // 1. Initial Load: Fetch Config, Check Updates & Restore Session
+  // 1. Initial Load: Fetch Config, Check Updates & Restore Session + Check Admin Route (#calixtv or /calixtv)
   useEffect(() => {
     async function init() {
       try {
@@ -67,6 +67,32 @@ export default function App() {
         if (savedSession) {
           setSession(savedSession);
         }
+
+        // Check URL route for calixtv admin access
+        const checkCalixtvRoute = () => {
+          const currentUrl = window.location.href.toLowerCase();
+          const path = window.location.pathname.toLowerCase();
+          const hash = window.location.hash.toLowerCase();
+          const search = window.location.search.toLowerCase();
+
+          if (
+            hash.includes('calixtv') ||
+            path.includes('calixtv') ||
+            search.includes('calixtv') ||
+            currentUrl.includes('calixtv')
+          ) {
+            setIsAdminOpen(true);
+          }
+        };
+
+        checkCalixtvRoute();
+        window.addEventListener('hashchange', checkCalixtvRoute);
+        window.addEventListener('popstate', checkCalixtvRoute);
+
+        return () => {
+          window.removeEventListener('hashchange', checkCalixtvRoute);
+          window.removeEventListener('popstate', checkCalixtvRoute);
+        };
       } catch (err) {
         console.error('Initialization error:', err);
       } finally {

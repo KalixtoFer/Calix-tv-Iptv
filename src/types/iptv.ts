@@ -150,7 +150,7 @@ export interface CentralizedConfig {
   serverPort: string;
   serverProtocol: 'http' | 'https';
   serviceName: string;
-  adminPin: string;
+  adminPin?: string;
   announcement: string;
   showAnnouncement: boolean;
   banners: BannerItem[];
