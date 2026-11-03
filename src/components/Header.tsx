@@ -30,7 +30,7 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  appName = 'NEXUS IPTV PRO',
+  appName = 'Calix Tv iptv Pro',
   version = 'v2.5.4',
   userInfo,
   serverUrl = '',

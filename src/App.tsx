@@ -242,7 +242,7 @@ export default function App() {
     return (
       <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[#07080c] text-white">
         <Loader2 className="w-12 h-12 text-cyan-400 animate-spin mb-4" />
-        <h2 className="text-lg font-bold tracking-wide">Iniciando Nexus IPTV Pro...</h2>
+        <h2 className="text-lg font-bold tracking-wide">Iniciando Calix Tv iptv Pro...</h2>
         <p className="text-xs text-zinc-500 mt-1">Conectando con la configuración centralizada</p>
       </div>
     );
@@ -278,7 +278,7 @@ export default function App() {
       {/* Top Application Bar - Only shown in sub-sections, Home has its own integrated TV bar matching the screenshot */}
       {activeSection !== 'home' && (
         <Header
-          appName={config.serviceName || 'NEXUS IPTV PRO'}
+          appName={config.serviceName || 'Calix Tv iptv Pro'}
           version="v2.5.4"
           userInfo={session.authResponse.user_info}
           serverUrl={config.serverUrl}

@@ -1,4 +1,4 @@
-# Nexus IPTV Pro - Aplicación IPTV Profesional para Android TV & Móvil
+# Calix Tv iptv Pro - Aplicación IPTV Profesional para Android TV & Móvil
 
 Aplicación IPTV profesional con identidad visual propia, compatible con **Android TV, TV Box, Fire TV Stick, Google TV, celulares y tablets Android**.
 
@@ -19,13 +19,13 @@ Este repositorio ya contiene el flujo de trabajo automatizado en `.github/workfl
 5. Espera aproximadamente **2 minutos** mientras GitHub compila el proyecto con Java 17 y Gradle.
 6. Al finalizar con un check verde ✅, haz clic sobre la ejecución completada.
 7. Al final de la página, en la sección **Artifacts**, encontrarás el enlace para descargar:
-   - **`NexusIPTVPro-v2.5.4-APK`** (El archivo `.apk` instalable listo para tu televisor o celular).
+   - **`CalixTV-v1.0-APK`** (El archivo `.apk` instalable listo para tu televisor o celular).
 
 ---
 
 ## 📺 Instalación en Android TV y TV Box
 
-1. Descarga el archivo `NexusIPTVPro-v2.5.4.apk`.
+1. Descarga el archivo `CalixTV-v1.0.apk`.
 2. Puedes pasarlo a tu televisor de tres formas:
    - **Memoria USB:** Cópialo a un pendrive USB y ábrelo en tu TV Box con cualquier explorador de archivos.
    - **App "Send files to TV":** Instala esa app en tu celular y en tu TV para transferir el APK por WiFi.
@@ -40,4 +40,4 @@ Este repositorio ya contiene el flujo de trabajo automatizado en `.github/workfl
 - **Soporte TV Box:** Navegación por flechas (D-Pad) y botón OK.
 - **5 Secciones:** VIVO, SERIES, PELÍCULAS, ANIME, ESPECIAL.
 - **Reproductor HLS Integrado:** Zapping, pantalla completa y guía EPG en directo.
-- **Panel de Administración:** Protegido con PIN maestro `8888` para cambiar servidores y banners.
+- **Panel de Administración:** Protegido con autenticación de administrador para cambiar servidores y banners.

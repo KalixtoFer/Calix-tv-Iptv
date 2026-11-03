@@ -277,7 +277,7 @@ app.get('/api/iptv/android-status', (_req, res) => {
     zipAvailable: zipExists,
     zipSizeMb,
     packageId: 'com.nexus.iptv.pro',
-    appName: 'Nexus IPTV Pro',
+    appName: 'Calix Tv iptv Pro',
   });
 });
 
@@ -606,7 +606,7 @@ app.post('/api/iptv/login', async (req, res) => {
     const apiRes = await fetch(url, {
       signal: controller.signal,
       headers: {
-        'User-Agent': 'NexusIPTVPro/2.5.4 (Android TV; Linux)',
+        'User-Agent': 'CalixTvIptvPro/1.0 (Android TV; Linux)',
         Accept: 'application/json, text/plain, */*',
       },
     });
@@ -676,7 +676,7 @@ app.get('/api/iptv/proxy', async (req, res) => {
     const apiRes = await fetch(url, {
       signal: controller.signal,
       headers: {
-        'User-Agent': 'NexusIPTVPro/2.5.4 (Android TV; Linux)',
+        'User-Agent': 'CalixTvIptvPro/1.0 (Android TV; Linux)',
         Accept: 'application/json',
       },
     });
@@ -1025,7 +1025,7 @@ async function startServer() {
   }
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Nexus IPTV Pro Backend & Server listening on http://0.0.0.0:${PORT}`);
+    console.log(`🚀 Calix Tv iptv Pro Backend & Server listening on http://0.0.0.0:${PORT}`);
   });
 }
 

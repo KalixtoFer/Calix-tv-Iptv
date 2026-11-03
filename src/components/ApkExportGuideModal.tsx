@@ -46,7 +46,7 @@ export const ApkExportGuideModal: React.FC<ApkExportGuideModalProps> = ({ onClos
 
   const gitCommands = `git init
 git add .
-git commit -m "Nexus IPTV Pro Android TV APK"
+git commit -m "Calix Tv iptv Pro Android TV APK"
 git branch -M main
 git remote add origin https://github.com/TU_USUARIO/TU_REPOSITORIO.git
 git push -u origin main`;
