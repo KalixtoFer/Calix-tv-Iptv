@@ -217,20 +217,27 @@ class IptvApiService {
   buildStreamUrl(
     type: 'live' | 'movie' | 'episode',
     streamId: string | number,
-    extension = 'ts',
+    extension = '',
     username = '',
     password = ''
   ): string {
     const config = this.activeConfig;
-    const base = config?.serverUrl || 'http://xtream.demo-nexus.tv:8080';
+    const base = config?.serverUrl || 'https://sneoplus.net:8443';
     const cleanBase = base.endsWith('/') ? base.slice(0, -1) : base;
 
+    const session = this.getSavedSession();
+    const activeUser = username || session?.username || 'demo';
+    const activePass = password || session?.authResponse?.user_info?.password || 'demo';
+
     if (type === 'live') {
-      return `${cleanBase}/live/${username}/${password}/${streamId}.${extension || 'm3u8'}`;
+      const ext = extension || 'm3u8';
+      return `${cleanBase}/live/${encodeURIComponent(activeUser)}/${encodeURIComponent(activePass)}/${streamId}.${ext}`;
     } else if (type === 'movie') {
-      return `${cleanBase}/movie/${username}/${password}/${streamId}.${extension || 'mp4'}`;
+      const ext = extension || 'mp4';
+      return `${cleanBase}/movie/${encodeURIComponent(activeUser)}/${encodeURIComponent(activePass)}/${streamId}.${ext}`;
     } else {
-      return `${cleanBase}/series/${username}/${password}/${streamId}.${extension || 'mp4'}`;
+      const ext = extension || 'mp4';
+      return `${cleanBase}/series/${encodeURIComponent(activeUser)}/${encodeURIComponent(activePass)}/${streamId}.${ext}`;
     }
   }
 

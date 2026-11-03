@@ -93,24 +93,39 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   // Video source loading via HLS.js or Native
   const loadStream = useCallback(() => {
     const video = videoRef.current;
-    if (!video || !url) return;
+    if (!video || !url || url.trim() === '') {
+      setIsLoading(false);
+      return;
+    }
 
     setIsLoading(true);
     setHasError(null);
 
-    // Clean up previous HLS instance
+    // Clean up previous HLS instance safely
     if (hlsRef.current) {
       hlsRef.current.destroy();
       hlsRef.current = null;
     }
 
-    const isHlsStream = url.includes('.m3u8') || url.includes('/live/');
+    try {
+      video.pause();
+    } catch {
+      // Ignore pause error on uninitialized media
+    }
+
+    const isHlsStream =
+      url.includes('.m3u8') ||
+      url.includes('m3u8') ||
+      url.includes('/live/') ||
+      type === 'live';
 
     if (isHlsStream && Hls.isSupported()) {
       const hls = new Hls({
         enableWorker: true,
         lowLatencyMode: true,
         backBufferLength: 60,
+        maxBufferLength: 30,
+        maxMaxBufferLength: 60,
       });
       hlsRef.current = hls;
 
@@ -119,6 +134,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
       hls.on(Hls.Events.MANIFEST_PARSED, (_event, data) => {
         setIsLoading(false);
+        setHasError(null);
         if (data.levels && data.levels.length > 0) {
           const maxLevel = data.levels[data.levels.length - 1];
           if (maxLevel.height) {
@@ -127,10 +143,10 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         }
         if (autoPlay) {
           video.play().catch(() => {
-            // Browser autoplay restrictions may require mute
+            // Autoplay policies require user interaction or muted playback
             video.muted = true;
             setIsMuted(true);
-            video.play().catch(console.error);
+            video.play().catch(() => {});
           });
         }
       });
@@ -148,21 +164,30 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
               break;
             default:
               hls.destroy();
-              setHasError('No se pudo reproducir la transmisión. Verifique su conexión al servidor IPTV.');
               setIsLoading(false);
+              setHasError('Señal no disponible o canal temporalmente fuera de línea.');
               break;
           }
         }
       });
-    } else {
-      // Native MP4 / WebM / Safari HLS
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      // Safari / iOS Native HLS
       video.src = url;
-      video.load();
       if (autoPlay) {
         video.play().catch(() => {
           video.muted = true;
           setIsMuted(true);
-          video.play().catch(console.error);
+          video.play().catch(() => {});
+        });
+      }
+    } else {
+      // Native MP4 / WebM
+      video.src = url;
+      if (autoPlay) {
+        video.play().catch(() => {
+          video.muted = true;
+          setIsMuted(true);
+          video.play().catch(() => {});
         });
       }
     }
@@ -170,7 +195,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     if (initialTime > 0) {
       video.currentTime = initialTime;
     }
-  }, [url, autoPlay, initialTime]);
+  }, [url, autoPlay, initialTime, type]);
 
   useEffect(() => {
     loadStream();
@@ -288,14 +313,18 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         playsInline
         onTimeUpdate={handleTimeUpdate}
         onWaiting={() => setIsLoading(true)}
+        onCanPlay={() => setIsLoading(false)}
         onPlaying={() => {
           setIsLoading(false);
           setIsPlaying(true);
+          setHasError(null);
         }}
         onEnded={() => setIsPlaying(false)}
         onError={() => {
           setIsLoading(false);
-          setHasError('Error de formato de transmisión o señal fuera de línea');
+          if (url && url.trim() !== '') {
+            setHasError('Señal no disponible o canal temporalmente fuera de línea.');
+          }
         }}
         className={`w-full h-full transition-all duration-200 ${
           aspectRatio === 'contain'
