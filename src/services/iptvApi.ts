@@ -251,27 +251,104 @@ class IptvApiService {
     return await res.json();
   }
 
-  // 9. Admin Configuration Methods
-  async verifyAdminPin(pin: string): Promise<{ success: boolean; authorized?: boolean; fullConfig?: CentralizedConfig; message?: string }> {
+  // 9. Admin Configuration & Security Methods
+  private adminToken: string | null = null;
+
+  async verifyAdmin(params: { pin?: string; username?: string; password?: string }): Promise<{
+    success: boolean;
+    authorized?: boolean;
+    token?: string;
+    adminUser?: { username: string; email: string; name: string; role: string };
+    fullConfig?: CentralizedConfig;
+    message?: string;
+  }> {
     const res = await fetch('/api/iptv/admin/verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pin }),
+      body: JSON.stringify(params),
     });
-    return await res.json();
+    const data = await res.json();
+    if (data.success && data.token) {
+      this.adminToken = data.token;
+    }
+    return data;
+  }
+
+  async verifyAdminPin(pin: string) {
+    return this.verifyAdmin({ pin });
   }
 
   async saveAdminConfig(pin: string, config: Partial<CentralizedConfig>): Promise<{ success: boolean; message: string; config?: CentralizedConfig }> {
     const res = await fetch('/api/iptv/admin/save', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pin, config }),
+      headers: {
+        'Content-Type': 'application/json',
+        ...(this.adminToken ? { 'x-admin-token': this.adminToken } : {}),
+      },
+      body: JSON.stringify({ pin, token: this.adminToken, config }),
     });
     const data = await res.json();
     if (data.success && data.config) {
       this.activeConfig = data.config;
     }
     return data;
+  }
+
+  async updateAdminCredentials(params: {
+    currentPin?: string;
+    newUsername?: string;
+    newPassword?: string;
+    newEmail?: string;
+    newPin?: string;
+    newName?: string;
+  }): Promise<{ success: boolean; message: string; adminUser?: any }> {
+    const res = await fetch('/api/iptv/admin/update-credentials', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(this.adminToken ? { 'x-admin-token': this.adminToken } : {}),
+      },
+      body: JSON.stringify({ token: this.adminToken, ...params }),
+    });
+    return await res.json();
+  }
+
+  async getSecurityAudit(): Promise<{
+    success: boolean;
+    score: number;
+    status: string;
+    checks: Array<{ id: string; title: string; status: 'passed' | 'warning' | 'failed'; description: string; recommendation: string }>;
+    checkedAt: string;
+  }> {
+    const res = await fetch('/api/iptv/admin/security-audit');
+    return await res.json();
+  }
+
+  async checkAppUpdate(currentVersion = '1.0'): Promise<{
+    hasUpdate: boolean;
+    currentVersion: string;
+    latestVersion: string;
+    apkDownloadUrl: string;
+    releaseNotes: string;
+    forceUpdate: boolean;
+    publishedAt?: string;
+  }> {
+    try {
+      const res = await fetch(`/api/iptv/check-update?currentVersion=${encodeURIComponent(currentVersion)}`);
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {
+      console.warn('Update check error:', e);
+    }
+    return {
+      hasUpdate: false,
+      currentVersion,
+      latestVersion: currentVersion,
+      apkDownloadUrl: '',
+      releaseNotes: '',
+      forceUpdate: false,
+    };
   }
 
   // 10. Favorites Management

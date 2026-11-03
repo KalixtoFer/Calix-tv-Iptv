@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Lock,
   X,
@@ -17,6 +17,12 @@ import {
   Trash2,
   Download,
   Upload,
+  ShieldCheck,
+  Smartphone,
+  KeyRound,
+  UserCheck,
+  Sparkles,
+  ExternalLink,
 } from 'lucide-react';
 import { CentralizedConfig, BannerItem } from '../types/iptv';
 import { iptvApi } from '../services/iptvApi';
@@ -32,37 +38,100 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
   onClose,
   onConfigSaved,
 }) => {
+  // Login form state
+  const [loginMode, setLoginMode] = useState<'pin' | 'credentials'>('credentials');
+  const [username, setUsername] = useState<string>('admin');
+  const [password, setPassword] = useState<string>('');
   const [pin, setPin] = useState<string>('');
   const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
-  const [pinError, setPinError] = useState<string | null>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
+  const [adminUser, setAdminUser] = useState<{ username: string; email: string; name: string; role: string } | null>(null);
 
-  // Form State
-  const [activeTab, setActiveTab] = useState<'server' | 'banners' | 'featured' | 'notice'>('server');
-  const [config, setConfig] = useState<CentralizedConfig>({ ...initialConfig });
+  // Tabs
+  const [activeTab, setActiveTab] = useState<'server' | 'update' | 'security' | 'banners' | 'featured' | 'notice'>('server');
+  const [config, setConfig] = useState<CentralizedConfig>({
+    ...initialConfig,
+    appUpdate: initialConfig.appUpdate || {
+      latestVersion: '1.0',
+      minVersion: '1.0',
+      apkDownloadUrl: '',
+      releaseNotes: 'Versión inicial oficial de Calix TV (v1.0) con diseño fluido para Android TV y móviles.',
+      forceUpdate: false,
+      publishedAt: '2026-11-03',
+    },
+  });
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
 
-  // Ping test
+  // Ping test state
   const [isTestingServer, setIsTestingServer] = useState<boolean>(false);
   const [testResult, setTestResult] = useState<{ success: boolean; latencyMs: number; message: string } | null>(null);
 
-  // Handle PIN verification
-  const handleVerifyPin = async (e: React.FormEvent) => {
+  // Security Audit state
+  const [isRunningAudit, setIsRunningAudit] = useState<boolean>(false);
+  const [auditResult, setAuditResult] = useState<{
+    score: number;
+    status: string;
+    checks: Array<{ id: string; title: string; status: 'passed' | 'warning' | 'failed'; description: string; recommendation: string }>;
+  } | null>(null);
+
+  // Credential update state
+  const [newUsername, setNewUsername] = useState<string>('');
+  const [newPassword, setNewPassword] = useState<string>('');
+  const [newEmail, setNewEmail] = useState<string>('');
+  const [newPin, setNewPin] = useState<string>('');
+  const [credMessage, setCredMessage] = useState<string | null>(null);
+  const [isUpdatingCreds, setIsUpdatingCreds] = useState<boolean>(false);
+
+  // Handle Admin Login (User/Password or PIN)
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsVerifying(true);
-    setPinError(null);
+    setAuthError(null);
 
-    const res = await iptvApi.verifyAdminPin(pin);
+    const payload = loginMode === 'pin' ? { pin } : { username, password };
+    const res = await iptvApi.verifyAdmin(payload);
     setIsVerifying(false);
 
     if (res.success && res.authorized) {
       setIsAuthorized(true);
-      if (res.fullConfig) {
-        setConfig(res.fullConfig);
+      if (res.adminUser) {
+        setAdminUser(res.adminUser);
+        setNewUsername(res.adminUser.username);
+        setNewEmail(res.adminUser.email);
       }
+      if (res.fullConfig) {
+        setConfig({
+          ...res.fullConfig,
+          appUpdate: res.fullConfig.appUpdate || {
+            latestVersion: '1.0',
+            minVersion: '1.0',
+            apkDownloadUrl: '',
+            releaseNotes: 'Versión oficial de Calix TV.',
+            forceUpdate: false,
+          },
+        });
+      }
+      // Run security audit automatically on login
+      runAudit();
     } else {
-      setPinError('PIN de Administrador incorrecto. (PIN predeterminado: 8888)');
+      setAuthError(res.message || 'Credenciales incorrectas.');
+    }
+  };
+
+  // Run Security Audit
+  const runAudit = async () => {
+    setIsRunningAudit(true);
+    try {
+      const data = await iptvApi.getSecurityAudit();
+      if (data.success) {
+        setAuditResult(data);
+      }
+    } catch (e) {
+      console.warn('Audit error:', e);
+    } finally {
+      setIsRunningAudit(false);
     }
   };
 
@@ -76,22 +145,51 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
     setTestResult(result);
   };
 
-  // Save Configuration to Centralized Backend
+  // Save Centralized Configuration
   const handleSave = async () => {
     setIsSaving(true);
     setSaveSuccess(null);
 
-    const res = await iptvApi.saveAdminConfig(pin, config);
+    const res = await iptvApi.saveAdminConfig(pin || '8888', config);
     setIsSaving(false);
 
     if (res.success) {
-      setSaveSuccess('¡Configuración centralizada guardada con éxito en el servidor!');
+      setSaveSuccess('¡Configuración centralizada guardada exitosamente!');
       if (res.config) {
         onConfigSaved(res.config);
       }
       setTimeout(() => setSaveSuccess(null), 4000);
     } else {
       alert('Error al guardar configuración: ' + res.message);
+    }
+  };
+
+  // Update Admin Credentials
+  const handleUpdateCredentials = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsUpdatingCreds(true);
+    setCredMessage(null);
+
+    const res = await iptvApi.updateAdminCredentials({
+      currentPin: pin,
+      newUsername: newUsername || undefined,
+      newPassword: newPassword || undefined,
+      newEmail: newEmail || undefined,
+      newPin: newPin || undefined,
+    });
+    setIsUpdatingCreds(false);
+
+    if (res.success) {
+      setCredMessage('¡Credenciales actualizadas correctamente!');
+      if (res.adminUser) {
+        setAdminUser(res.adminUser);
+      }
+      setNewPassword('');
+      setNewPin('');
+      runAudit();
+      setTimeout(() => setCredMessage(null), 4000);
+    } else {
+      setCredMessage(res.message || 'Error al actualizar credenciales.');
     }
   };
 
@@ -120,504 +218,753 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
     });
   };
 
-  const handleDeleteBanner = (index: number) => {
+  const handleRemoveBanner = (index: number) => {
     setConfig((prev) => ({
       ...prev,
       banners: prev.banners.filter((_, i) => i !== index),
     }));
   };
 
-  // Export / Import
-  const handleExportJSON = () => {
-    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(config, null, 2));
-    const dlAnchorElem = document.createElement('a');
-    dlAnchorElem.setAttribute('href', dataStr);
-    dlAnchorElem.setAttribute('download', 'nexus-iptv-config.json');
-    dlAnchorElem.click();
-  };
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/90 backdrop-blur-md animate-fadeIn select-none">
-      <div className="relative w-full max-w-4xl max-h-[92vh] bg-zinc-950 border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col">
-        {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-zinc-800 bg-zinc-900/80 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-cyan-500/20 text-cyan-400 rounded-xl">
-              <Server className="w-5 h-5" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-md select-none overflow-y-auto">
+      <div className="relative w-full max-w-4xl bg-zinc-950 border border-zinc-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+        {/* Top Modal Header */}
+        <div className="px-5 py-4 bg-gradient-to-r from-zinc-900 via-zinc-900/90 to-zinc-950 border-b border-zinc-800 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-600 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/20">
+              <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base sm:text-lg font-bold text-white">
-                Panel de Administración Centralizado
-              </h2>
+              <div className="flex items-center gap-2">
+                <h3 className="font-black text-white text-base sm:text-lg tracking-wide uppercase">
+                  Panel Administrador Calix TV
+                </h3>
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-950 text-cyan-400 border border-cyan-800">
+                  Control Centralizado
+                </span>
+              </div>
               <p className="text-xs text-zinc-400">
-                Gestión remota de servidor Xtream Codes, banners y contenido destacado
+                Gestión remota de servidor, actualizaciones móviles y seguridad
               </p>
             </div>
           </div>
 
-          <button
-            onClick={onClose}
-            className="tv-focusable p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white rounded-xl transition cursor-pointer"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            {isAuthorized && adminUser && (
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-zinc-900 rounded-full border border-zinc-800 text-xs text-zinc-300">
+                <UserCheck className="w-3.5 h-3.5 text-cyan-400" />
+                <span className="font-semibold text-white">@{adminUser.username}</span>
+                <span className="text-[10px] uppercase font-mono px-1.5 py-0.2 bg-cyan-950 text-cyan-300 rounded">
+                  {adminUser.role}
+                </span>
+              </div>
+            )}
+            <button
+              onClick={onClose}
+              className="tv-focusable p-2 rounded-full hover:bg-zinc-800 text-zinc-400 hover:text-white transition cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
-        {/* PIN Verification View */}
+        {/* ========================================================
+            CASO 1: Formulario de Autenticación de Administrador
+           ======================================================== */}
         {!isAuthorized ? (
-          <div className="p-8 sm:p-12 flex flex-col items-center justify-center text-center space-y-5">
-            <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-2xl">
-              <Lock className="w-10 h-10 text-cyan-400" />
+          <div className="p-6 sm:p-8 flex flex-col items-center justify-center my-auto space-y-6">
+            <div className="w-16 h-16 rounded-3xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shadow-xl shadow-cyan-500/10">
+              <KeyRound className="w-8 h-8 animate-pulse" />
             </div>
 
-            <div className="space-y-1">
-              <h3 className="text-xl font-bold text-white">Autenticación de Administrador</h3>
-              <p className="text-xs text-zinc-400 max-w-md">
-                Ingrese el código PIN maestro para modificar la configuración centralizada del servicio IPTV.
+            <div className="text-center space-y-1 max-w-md">
+              <h4 className="text-lg font-bold text-white">Acceso de Administrador</h4>
+              <p className="text-xs text-zinc-400">
+                Inicia sesión con tu cuenta de administrador o tu PIN maestro para actualizar la aplicación y gestionar tus clientes desde cualquier dispositivo.
               </p>
             </div>
 
-            {pinError && (
-              <div className="p-3 bg-rose-950/80 border border-rose-800 text-rose-300 text-xs rounded-xl max-w-sm">
-                {pinError}
-              </div>
-            )}
+            {/* Selector de Método de Acceso */}
+            <div className="flex p-1 bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-sm">
+              <button
+                type="button"
+                onClick={() => setLoginMode('credentials')}
+                className={`flex-1 py-2 text-xs font-bold rounded-xl transition ${
+                  loginMode === 'credentials'
+                    ? 'bg-cyan-500 text-black shadow-md'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                Usuario y Contraseña
+              </button>
+              <button
+                type="button"
+                onClick={() => setLoginMode('pin')}
+                className={`flex-1 py-2 text-xs font-bold rounded-xl transition ${
+                  loginMode === 'pin'
+                    ? 'bg-cyan-500 text-black shadow-md'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                PIN Maestro (8888)
+              </button>
+            </div>
 
-            <form onSubmit={handleVerifyPin} className="w-full max-w-xs space-y-4">
-              <input
-                type="password"
-                placeholder="PIN Maestro (ej. 8888)"
-                value={pin}
-                onChange={(e) => setPin(e.target.value)}
-                maxLength={8}
-                autoFocus
-                className="tv-focusable w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-center text-lg tracking-widest text-white font-mono focus:outline-none focus:border-cyan-400"
-              />
+            {/* Formulario */}
+            <form onSubmit={handleLogin} className="w-full max-w-sm space-y-4">
+              {loginMode === 'credentials' ? (
+                <>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-zinc-300">Usuario o Email</label>
+                    <input
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="admin o tu@email.com"
+                      required
+                      className="w-full px-4 py-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm focus:outline-none focus:border-cyan-500"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-zinc-300">Contraseña de Administrador</label>
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Ingresa tu contraseña"
+                      required
+                      className="w-full px-4 py-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm focus:outline-none focus:border-cyan-500"
+                    />
+                    <p className="text-[10px] text-zinc-500">
+                      Contraseña inicial configurada: <code className="text-cyan-400">CalixTvAdmin2026!</code>
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-zinc-300">PIN Maestro de 4 Dígitos</label>
+                  <input
+                    type="password"
+                    maxLength={8}
+                    value={pin}
+                    onChange={(e) => setPin(e.target.value)}
+                    placeholder="8888"
+                    required
+                    className="w-full px-4 py-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-white text-center text-lg tracking-widest font-mono focus:outline-none focus:border-cyan-500"
+                  />
+                  <p className="text-[10px] text-zinc-500 text-center">
+                    PIN maestro inicial: <code className="text-cyan-400">8888</code>
+                  </p>
+                </div>
+              )}
+
+              {authError && (
+                <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-400 text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{authError}</span>
+                </div>
+              )}
 
               <button
                 type="submit"
                 disabled={isVerifying}
-                className="tv-focusable w-full py-3 bg-cyan-500 hover:bg-cyan-400 text-black font-extrabold rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.4)] transition cursor-pointer disabled:opacity-50"
+                className="tv-focusable w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-extrabold rounded-xl text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/20 cursor-pointer disabled:opacity-50"
               >
-                {isVerifying ? 'Verificando...' : 'Acceder al Panel'}
+                {isVerifying ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Verificando seguridad...</span>
+                  </>
+                ) : (
+                  <>
+                    <Lock className="w-4 h-4" />
+                    <span>Ingresar al Panel de Control</span>
+                  </>
+                )}
               </button>
-
-              <div className="text-[11px] text-zinc-400">
-                PIN predeterminado de fábrica: <span className="font-mono text-cyan-400">8888</span>
-              </div>
             </form>
           </div>
         ) : (
-          /* Authorized Panel Content */
-          <div className="flex-1 flex flex-col overflow-hidden">
-            {/* Tabs Bar */}
-            <div className="px-6 py-2.5 bg-zinc-900/60 border-b border-zinc-800 flex items-center justify-between overflow-x-auto">
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setActiveTab('server')}
-                  className={`tv-focusable px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
-                    activeTab === 'server'
-                      ? 'bg-cyan-500 text-black shadow-md'
-                      : 'text-zinc-400 hover:text-white'
-                  }`}
-                >
-                  <Server className="w-3.5 h-3.5" /> Servidor Xtream
-                </button>
-
-                <button
-                  onClick={() => setActiveTab('banners')}
-                  className={`tv-focusable px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
-                    activeTab === 'banners'
-                      ? 'bg-cyan-500 text-black shadow-md'
-                      : 'text-zinc-400 hover:text-white'
-                  }`}
-                >
-                  <Image className="w-3.5 h-3.5" /> Banners de Inicio
-                </button>
-
-                <button
-                  onClick={() => setActiveTab('featured')}
-                  className={`tv-focusable px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
-                    activeTab === 'featured'
-                      ? 'bg-cyan-500 text-black shadow-md'
-                      : 'text-zinc-400 hover:text-white'
-                  }`}
-                >
-                  <Tv className="w-3.5 h-3.5" /> Canal Destacado
-                </button>
-
-                <button
-                  onClick={() => setActiveTab('notice')}
-                  className={`tv-focusable px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
-                    activeTab === 'notice'
-                      ? 'bg-cyan-500 text-black shadow-md'
-                      : 'text-zinc-400 hover:text-white'
-                  }`}
-                >
-                  <Bell className="w-3.5 h-3.5" /> Comunicado
-                </button>
-              </div>
+          /* ========================================================
+              CASO 2: Panel de Administración Autorizado
+             ======================================================== */
+          <>
+            {/* Navegación por Pestañas */}
+            <div className="px-5 pt-3 bg-zinc-900/60 border-b border-zinc-800 flex items-center gap-2 overflow-x-auto no-scrollbar">
+              <button
+                onClick={() => setActiveTab('server')}
+                className={`px-3.5 py-2 text-xs font-bold rounded-t-xl transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                  activeTab === 'server'
+                    ? 'bg-zinc-950 text-cyan-400 border-t-2 border-cyan-400'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                <Server className="w-3.5 h-3.5" />
+                <span>1. Servidor IPTV</span>
+              </button>
 
               <button
-                onClick={handleExportJSON}
-                className="tv-focusable text-zinc-400 hover:text-cyan-400 text-xs font-semibold flex items-center gap-1 cursor-pointer shrink-0 ml-4"
-                title="Exportar configuración en formato JSON"
+                onClick={() => setActiveTab('update')}
+                className={`px-3.5 py-2 text-xs font-bold rounded-t-xl transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                  activeTab === 'update'
+                    ? 'bg-zinc-950 text-cyan-400 border-t-2 border-cyan-400'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
               >
-                <Download className="w-3.5 h-3.5" /> Exportar JSON
+                <Smartphone className="w-3.5 h-3.5" />
+                <span>2. Actualizar App (OTA)</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('security')}
+                className={`px-3.5 py-2 text-xs font-bold rounded-t-xl transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                  activeTab === 'security'
+                    ? 'bg-zinc-950 text-cyan-400 border-t-2 border-cyan-400'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>3. Seguridad & Credenciales</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('notice')}
+                className={`px-3.5 py-2 text-xs font-bold rounded-t-xl transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                  activeTab === 'notice'
+                    ? 'bg-zinc-950 text-cyan-400 border-t-2 border-cyan-400'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                <Bell className="w-3.5 h-3.5" />
+                <span>4. Mensajes & Anuncios</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('featured')}
+                className={`px-3.5 py-2 text-xs font-bold rounded-t-xl transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                  activeTab === 'featured'
+                    ? 'bg-zinc-950 text-cyan-400 border-t-2 border-cyan-400'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                <Tv className="w-3.5 h-3.5" />
+                <span>5. Canal Destacado</span>
               </button>
             </div>
 
-            {/* Tab Body */}
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+            {/* Contenido de la Pestaña Activa */}
+            <div className="p-5 sm:p-6 overflow-y-auto space-y-6 flex-1">
               {saveSuccess && (
-                <div className="p-3 bg-emerald-950/80 border border-emerald-800 text-emerald-300 text-xs rounded-xl flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-emerald-400 text-xs flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
                   <span>{saveSuccess}</span>
                 </div>
               )}
 
-              {/* 1. SERVER TAB */}
+              {/* ----------------------------------------------------
+                  TAB 1: Servidor IPTV
+                 ---------------------------------------------------- */}
               {activeTab === 'server' && (
-                <div className="space-y-4 max-w-2xl">
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
-                      URL del Servidor Xtream Codes (Dominio / IP)
-                    </label>
+                <div className="space-y-4">
+                  <div className="p-4 bg-zinc-900/60 border border-zinc-800 rounded-2xl space-y-3">
+                    <h4 className="font-bold text-white text-sm flex items-center gap-2">
+                      <Server className="w-4 h-4 text-cyan-400" />
+                      <span>URL del Servidor Centralizado Xtream Codes</span>
+                    </h4>
                     <p className="text-xs text-zinc-400">
-                      Esta dirección se almacena en el backend centralizado. Los clientes nunca tendrán que escribirla.
+                      Tus usuarios nunca tendrán que escribir este servidor. Si tu proveedor cambia de dominio o IP, lo cambias aquí y se actualiza al instante en todos los celulares y televisores.
                     </p>
-                    <input
-                      type="text"
-                      value={config.serverUrl}
-                      onChange={(e) => setConfig({ ...config, serverUrl: e.target.value })}
-                      placeholder="ej. http://line.myiptvservice.com:8080"
-                      className="tv-focusable w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-cyan-400"
-                    />
-                  </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
-                        Puerto
-                      </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-2">
+                      <div className="sm:col-span-8 space-y-1">
+                        <label className="text-xs text-zinc-300 font-semibold">URL o IP del Servidor</label>
+                        <input
+                          type="text"
+                          value={config.serverUrl}
+                          onChange={(e) => setConfig({ ...config, serverUrl: e.target.value })}
+                          placeholder="https://sneoplus.net:8443"
+                          className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white text-xs font-mono focus:border-cyan-500 focus:outline-none"
+                        />
+                      </div>
+
+                      <div className="sm:col-span-4 space-y-1">
+                        <label className="text-xs text-zinc-300 font-semibold">Puerto</label>
+                        <input
+                          type="text"
+                          value={config.serverPort}
+                          onChange={(e) => setConfig({ ...config, serverPort: e.target.value })}
+                          placeholder="8443 o 8080"
+                          className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white text-xs font-mono focus:border-cyan-500 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1 pt-1">
+                      <label className="text-xs text-zinc-300 font-semibold">Nombre del Servicio / Marca</label>
                       <input
                         type="text"
-                        value={config.serverPort}
-                        onChange={(e) => setConfig({ ...config, serverPort: e.target.value })}
-                        placeholder="ej. 8080"
-                        className="tv-focusable w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-cyan-400"
+                        value={config.serviceName}
+                        onChange={(e) => setConfig({ ...config, serviceName: e.target.value })}
+                        placeholder="Calix TV"
+                        className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white text-xs focus:border-cyan-500 focus:outline-none"
                       />
                     </div>
 
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
-                        Protocolo
-                      </label>
-                      <select
-                        value={config.serverProtocol}
-                        onChange={(e) =>
-                          setConfig({ ...config, serverProtocol: e.target.value as 'http' | 'https' })
-                        }
-                        className="tv-focusable w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-400"
-                      >
-                        <option value="http">HTTP</option>
-                        <option value="https">HTTPS</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
-                      Nombre Comercial del Servicio
-                    </label>
-                    <input
-                      type="text"
-                      value={config.serviceName}
-                      onChange={(e) => setConfig({ ...config, serviceName: e.target.value })}
-                      className="tv-focusable w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-400"
-                    />
-                  </div>
-
-                  {/* Ping Test Button & Results */}
-                  <div className="p-4 bg-zinc-900/80 border border-zinc-800 rounded-2xl space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                        <Activity className="w-4 h-4 text-cyan-400" />
-                        <span>Prueba de Conectividad con el Proveedor</span>
-                      </div>
+                    <div className="pt-3 flex flex-wrap items-center gap-3">
                       <button
+                        type="button"
                         onClick={handleTestConnection}
                         disabled={isTestingServer}
-                        className="tv-focusable px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-cyan-400 rounded-xl text-xs font-semibold cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                        className="tv-focusable px-3.5 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl text-xs font-semibold flex items-center gap-2 cursor-pointer"
                       >
                         {isTestingServer ? (
                           <>
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" /> Verificando...
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            <span>Midiendo latencia...</span>
                           </>
                         ) : (
-                          'Probar Ping al Servidor'
+                          <>
+                            <Activity className="w-3.5 h-3.5 text-cyan-400" />
+                            <span>Probar Conexión & Ping</span>
+                          </>
                         )}
+                      </button>
+
+                      {testResult && (
+                        <span
+                          className={`text-xs px-2.5 py-1 rounded-lg border font-mono ${
+                            testResult.success
+                              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                              : 'bg-rose-500/10 text-rose-400 border-rose-500/30'
+                          }`}
+                        >
+                          {testResult.success
+                            ? `En línea: ${testResult.latencyMs}ms de latencia`
+                            : 'Servidor no respondió'}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ----------------------------------------------------
+                  TAB 2: Actualizaciones Remotas de la App (OTA)
+                 ---------------------------------------------------- */}
+              {activeTab === 'update' && (
+                <div className="space-y-4">
+                  <div className="p-4 bg-zinc-900/60 border border-zinc-800 rounded-2xl space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-bold text-white text-sm flex items-center gap-2">
+                        <Smartphone className="w-4 h-4 text-cyan-400" />
+                        <span>Gestor de Actualizaciones Remotas (OTA)</span>
+                      </h4>
+                      <span className="text-[10px] bg-cyan-950 text-cyan-400 px-2 py-0.5 rounded font-mono font-bold border border-cyan-800">
+                        Versión Actual Instalada: v1.0
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-zinc-400">
+                      Cuando compiles un nuevo APK o quieras actualizar la app de tus clientes, sólo cambia el número de versión y pon aquí el enlace. Tus clientes en su televisor o celular verán un aviso para actualizar al instante con 1 clic.
+                    </p>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-2">
+                      <div className="sm:col-span-6 space-y-1">
+                        <label className="text-xs text-zinc-300 font-semibold">
+                          Última Versión Disponible
+                        </label>
+                        <input
+                          type="text"
+                          value={config.appUpdate?.latestVersion || '1.0'}
+                          onChange={(e) =>
+                            setConfig({
+                              ...config,
+                              appUpdate: {
+                                ...(config.appUpdate || {
+                                  minVersion: '1.0',
+                                  apkDownloadUrl: '',
+                                  releaseNotes: '',
+                                  forceUpdate: false,
+                                }),
+                                latestVersion: e.target.value,
+                              },
+                            })
+                          }
+                          placeholder="1.1"
+                          className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white text-xs font-mono focus:border-cyan-500 focus:outline-none"
+                        />
+                      </div>
+
+                      <div className="sm:col-span-6 space-y-1">
+                        <label className="text-xs text-zinc-300 font-semibold">
+                          Enlace de Descarga Directa del APK
+                        </label>
+                        <input
+                          type="text"
+                          value={config.appUpdate?.apkDownloadUrl || ''}
+                          onChange={(e) =>
+                            setConfig({
+                              ...config,
+                              appUpdate: {
+                                ...(config.appUpdate || {
+                                  latestVersion: '1.0',
+                                  minVersion: '1.0',
+                                  releaseNotes: '',
+                                  forceUpdate: false,
+                                }),
+                                apkDownloadUrl: e.target.value,
+                              },
+                            })
+                          }
+                          placeholder="https://tudominio.com/CalixTV-v1.1.apk (o dejar vacío para usar el servidor local)"
+                          className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white text-xs font-mono focus:border-cyan-500 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-xs text-zinc-300 font-semibold">
+                        Novedades de la Versión (Notas de Lanzamiento)
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={config.appUpdate?.releaseNotes || ''}
+                        onChange={(e) =>
+                          setConfig({
+                            ...config,
+                            appUpdate: {
+                              ...(config.appUpdate || {
+                                latestVersion: '1.0',
+                                minVersion: '1.0',
+                                apkDownloadUrl: '',
+                                forceUpdate: false,
+                              }),
+                              releaseNotes: e.target.value,
+                            },
+                          })
+                        }
+                        placeholder="Mejoras en velocidad de carga, nuevos canales y soporte para Android 15..."
+                        className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white text-xs focus:border-cyan-500 focus:outline-none"
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-2">
+                      <input
+                        type="checkbox"
+                        id="forceUpdate"
+                        checked={config.appUpdate?.forceUpdate || false}
+                        onChange={(e) =>
+                          setConfig({
+                            ...config,
+                            appUpdate: {
+                              ...(config.appUpdate || {
+                                latestVersion: '1.0',
+                                minVersion: '1.0',
+                                apkDownloadUrl: '',
+                                releaseNotes: '',
+                              }),
+                              forceUpdate: e.target.checked,
+                            },
+                          })
+                        }
+                        className="w-4 h-4 rounded text-cyan-500 focus:ring-0 bg-zinc-900 border-zinc-700"
+                      />
+                      <label htmlFor="forceUpdate" className="text-xs text-zinc-300 font-semibold">
+                        Actualización Obligatoria (Obliga a actualizar para poder usar la app)
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ----------------------------------------------------
+                  TAB 3: Seguridad & Credenciales del Administrador
+                 ---------------------------------------------------- */}
+              {activeTab === 'security' && (
+                <div className="space-y-5">
+                  {/* Auditoría de Seguridad Interactiva */}
+                  <div className="p-4 bg-zinc-900/60 border border-zinc-800 rounded-2xl space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-bold text-white text-sm flex items-center gap-2">
+                        <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                        <span>Verificación de Seguridad del Sistema</span>
+                      </h4>
+                      <button
+                        type="button"
+                        onClick={runAudit}
+                        disabled={isRunningAudit}
+                        className="tv-focusable text-xs px-3 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg flex items-center gap-1.5 transition cursor-pointer"
+                      >
+                        {isRunningAudit ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <RotateCcw className="w-3.5 h-3.5" />
+                        )}
+                        <span>Verificar Ahora</span>
                       </button>
                     </div>
 
-                    {testResult && (
-                      <div
-                        className={`p-3 rounded-xl text-xs flex items-center gap-2 border ${
-                          testResult.success
-                            ? 'bg-emerald-950/80 border-emerald-800 text-emerald-300'
-                            : 'bg-rose-950/80 border-rose-800 text-rose-300'
-                        }`}
-                      >
-                        {testResult.success ? (
-                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                        ) : (
-                          <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
-                        )}
-                        <span>{testResult.message}</span>
+                    {auditResult && (
+                      <div className="space-y-3 pt-1">
+                        <div className="flex items-center gap-3 p-3 bg-zinc-950 rounded-xl border border-zinc-800">
+                          <div className="text-2xl font-black font-mono text-emerald-400">
+                            {auditResult.score}%
+                          </div>
+                          <div>
+                            <div className="text-xs font-bold text-white">
+                              Estado de Protección: {auditResult.status}
+                            </div>
+                            <div className="text-[11px] text-zinc-400">
+                              Protección de fuerza bruta activa, cabeceras anti-XSS y tokens de sesión criptográficos.
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {auditResult.checks.map((chk) => (
+                            <div
+                              key={chk.id}
+                              className="p-2.5 bg-zinc-950/80 rounded-xl border border-zinc-850 flex items-start gap-2"
+                            >
+                              <CheckCircle2
+                                className={`w-4 h-4 mt-0.5 shrink-0 ${
+                                  chk.status === 'passed' ? 'text-emerald-400' : 'text-amber-400'
+                                }`}
+                              />
+                              <div>
+                                <div className="text-xs font-semibold text-zinc-200">{chk.title}</div>
+                                <div className="text-[10px] text-zinc-400">{chk.description}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
-                </div>
-              )}
 
-              {/* 2. BANNERS TAB */}
-              {activeTab === 'banners' && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-sm font-bold text-white">Banners Promocionales de Inicio</h4>
-                      <p className="text-xs text-zinc-400">
-                        Se muestran en el cuadrante derecho de la pantalla principal.
-                      </p>
-                    </div>
-                    <button
-                      onClick={handleAddBanner}
-                      className="tv-focusable px-3 py-1.5 bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-bold rounded-xl flex items-center gap-1 cursor-pointer"
-                    >
-                      <Plus className="w-3.5 h-3.5" /> Agregar Banner
-                    </button>
-                  </div>
+                  {/* Formulario de Cambio de Credenciales */}
+                  <form onSubmit={handleUpdateCredentials} className="p-4 bg-zinc-900/60 border border-zinc-800 rounded-2xl space-y-3">
+                    <h4 className="font-bold text-white text-sm flex items-center gap-2">
+                      <KeyRound className="w-4 h-4 text-cyan-400" />
+                      <span>Cambiar Credenciales de Administrador</span>
+                    </h4>
+                    <p className="text-xs text-zinc-400">
+                      Modifica tu usuario, contraseña o PIN maestro para acceder desde cualquier navegador o tu celular.
+                    </p>
 
-                  <div className="space-y-4">
-                    {config.banners.map((banner, idx) => (
-                      <div
-                        key={banner.id || idx}
-                        className="p-4 bg-zinc-900/80 border border-zinc-800 rounded-2xl space-y-3"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-mono font-bold text-cyan-400">
-                            Banner #{idx + 1}
-                          </span>
-                          <button
-                            onClick={() => handleDeleteBanner(idx)}
-                            className="text-rose-400 hover:text-rose-300 p-1 cursor-pointer"
-                            title="Eliminar banner"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <div className="space-y-1">
-                            <label className="text-[11px] font-bold text-zinc-400 uppercase">
-                              Título Principal
-                            </label>
-                            <input
-                              type="text"
-                              value={banner.title}
-                              onChange={(e) => handleUpdateBanner(idx, 'title', e.target.value)}
-                              className="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-1.5 text-xs text-white"
-                            />
-                          </div>
-
-                          <div className="space-y-1">
-                            <label className="text-[11px] font-bold text-zinc-400 uppercase">
-                              Etiqueta / Badge
-                            </label>
-                            <input
-                              type="text"
-                              value={banner.badge}
-                              onChange={(e) => handleUpdateBanner(idx, 'badge', e.target.value)}
-                              className="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-1.5 text-xs text-white"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="space-y-1">
-                          <label className="text-[11px] font-bold text-zinc-400 uppercase">
-                            Subtítulo / Descripción
-                          </label>
-                          <input
-                            type="text"
-                            value={banner.subtitle}
-                            onChange={(e) => handleUpdateBanner(idx, 'subtitle', e.target.value)}
-                            className="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-1.5 text-xs text-white"
-                          />
-                        </div>
-
-                        <div className="space-y-1">
-                          <label className="text-[11px] font-bold text-zinc-400 uppercase">
-                            URL de Imagen de Fondo
-                          </label>
-                          <input
-                            type="text"
-                            value={banner.imageUrl}
-                            onChange={(e) => handleUpdateBanner(idx, 'imageUrl', e.target.value)}
-                            className="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-1.5 text-xs text-white font-mono"
-                          />
-                        </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                      <div className="space-y-1">
+                        <label className="text-xs text-zinc-300 font-semibold">Usuario Administrador</label>
+                        <input
+                          type="text"
+                          value={newUsername}
+                          onChange={(e) => setNewUsername(e.target.value)}
+                          placeholder="admin"
+                          className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white text-xs focus:border-cyan-500 focus:outline-none"
+                        />
                       </div>
-                    ))}
-                  </div>
+
+                      <div className="space-y-1">
+                        <label className="text-xs text-zinc-300 font-semibold">Email de Contacto</label>
+                        <input
+                          type="email"
+                          value={newEmail}
+                          onChange={(e) => setNewEmail(e.target.value)}
+                          placeholder="kalixgaming123@gmail.com"
+                          className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white text-xs focus:border-cyan-500 focus:outline-none"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-xs text-zinc-300 font-semibold">Nueva Contraseña (Dejar vacío para no cambiar)</label>
+                        <input
+                          type="password"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          placeholder="••••••••"
+                          className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white text-xs focus:border-cyan-500 focus:outline-none"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-xs text-zinc-300 font-semibold">Nuevo PIN Maestro (4-8 dígitos)</label>
+                        <input
+                          type="password"
+                          maxLength={8}
+                          value={newPin}
+                          onChange={(e) => setNewPin(e.target.value)}
+                          placeholder="8888"
+                          className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white text-xs font-mono focus:border-cyan-500 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    {credMessage && (
+                      <div className="p-2.5 bg-cyan-950/80 border border-cyan-800 text-cyan-300 rounded-xl text-xs flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 shrink-0" />
+                        <span>{credMessage}</span>
+                      </div>
+                    )}
+
+                    <div className="pt-2">
+                      <button
+                        type="submit"
+                        disabled={isUpdatingCreds}
+                        className="tv-focusable px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                      >
+                        {isUpdatingCreds ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Save className="w-3.5 h-3.5 text-cyan-400" />
+                        )}
+                        <span>Guardar Nuevas Credenciales</span>
+                      </button>
+                    </div>
+                  </form>
                 </div>
               )}
 
-              {/* 3. FEATURED STREAM TAB */}
-              {activeTab === 'featured' && (
-                <div className="space-y-4 max-w-2xl">
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
-                      Nombre del Canal Destacado en Inicio
-                    </label>
-                    <input
-                      type="text"
-                      value={config.featuredStream?.name || ''}
-                      onChange={(e) =>
-                        setConfig({
-                          ...config,
-                          featuredStream: { ...config.featuredStream, name: e.target.value },
-                        })
-                      }
-                      className="tv-focusable w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-white"
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
-                      URL del Flujo de Video (HLS .m3u8 o MP4)
-                    </label>
-                    <input
-                      type="text"
-                      value={config.featuredStream?.streamUrl || ''}
-                      onChange={(e) =>
-                        setConfig({
-                          ...config,
-                          featuredStream: { ...config.featuredStream, streamUrl: e.target.value },
-                        })
-                      }
-                      className="tv-focusable w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-white font-mono"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
-                        Categoría
-                      </label>
-                      <input
-                        type="text"
-                        value={config.featuredStream?.category || ''}
-                        onChange={(e) =>
-                          setConfig({
-                            ...config,
-                            featuredStream: { ...config.featuredStream, category: e.target.value },
-                          })
-                        }
-                        className="tv-focusable w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-white"
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
-                        Resolución
-                      </label>
-                      <input
-                        type="text"
-                        value={config.featuredStream?.resolution || 'FHD 1080p'}
-                        onChange={(e) =>
-                          setConfig({
-                            ...config,
-                            featuredStream: { ...config.featuredStream, resolution: e.target.value },
-                          })
-                        }
-                        className="tv-focusable w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-white font-mono"
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* 4. NOTICE TAB */}
+              {/* ----------------------------------------------------
+                  TAB 4: Anuncios y Avisos
+                 ---------------------------------------------------- */}
               {activeTab === 'notice' && (
-                <div className="space-y-4 max-w-2xl">
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      id="showAnnouncement"
-                      checked={config.showAnnouncement}
-                      onChange={(e) =>
-                        setConfig({ ...config, showAnnouncement: e.target.checked })
-                      }
-                      className="rounded bg-zinc-900 border-zinc-700 text-cyan-500 w-4 h-4 cursor-pointer"
-                    />
-                    <label
-                      htmlFor="showAnnouncement"
-                      className="text-sm font-bold text-white cursor-pointer"
-                    >
-                      Mostrar cintillo de aviso en la pantalla principal
-                    </label>
-                  </div>
+                <div className="space-y-4">
+                  <div className="p-4 bg-zinc-900/60 border border-zinc-800 rounded-2xl space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-bold text-white text-sm flex items-center gap-2">
+                        <Bell className="w-4 h-4 text-cyan-400" />
+                        <span>Aviso Global en la Cabecera</span>
+                      </h4>
+                      <label className="flex items-center gap-2 text-xs text-zinc-300 font-semibold cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={config.showAnnouncement}
+                          onChange={(e) => setConfig({ ...config, showAnnouncement: e.target.checked })}
+                          className="w-4 h-4 rounded text-cyan-500 bg-zinc-900 border-zinc-700"
+                        />
+                        <span>Mostrar aviso</span>
+                      </label>
+                    </div>
 
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
-                      Mensaje de Aviso / Mantenimiento / Novedad
-                    </label>
                     <textarea
-                      rows={3}
+                      rows={2}
                       value={config.announcement}
                       onChange={(e) => setConfig({ ...config, announcement: e.target.value })}
-                      placeholder="Escribe el mensaje que verán todos los clientes..."
-                      className="tv-focusable w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-400"
+                      placeholder="Mensaje que verán todos tus usuarios arriba en la pantalla..."
+                      className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white text-xs focus:border-cyan-500 focus:outline-none"
                     />
+                  </div>
+                </div>
+              )}
+
+              {/* ----------------------------------------------------
+                  TAB 5: Canal Destacado
+                 ---------------------------------------------------- */}
+              {activeTab === 'featured' && (
+                <div className="space-y-4">
+                  <div className="p-4 bg-zinc-900/60 border border-zinc-800 rounded-2xl space-y-3">
+                    <h4 className="font-bold text-white text-sm flex items-center gap-2">
+                      <Tv className="w-4 h-4 text-cyan-400" />
+                      <span>Reproductor de Video en Vivo de la Pantalla Principal</span>
+                    </h4>
+                    <p className="text-xs text-zinc-400">
+                      Configura el canal o evento que se reproduce automáticamente en el reproductor 16:9 del inicio.
+                    </p>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                      <div className="space-y-1">
+                        <label className="text-xs text-zinc-300 font-semibold">Nombre del Canal</label>
+                        <input
+                          type="text"
+                          value={config.featuredStream?.name || ''}
+                          onChange={(e) =>
+                            setConfig({
+                              ...config,
+                              featuredStream: { ...config.featuredStream, name: e.target.value },
+                            })
+                          }
+                          placeholder="ESPN 1 Premium HD"
+                          className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white text-xs focus:border-cyan-500 focus:outline-none"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-xs text-zinc-300 font-semibold">Categoría</label>
+                        <input
+                          type="text"
+                          value={config.featuredStream?.category || ''}
+                          onChange={(e) =>
+                            setConfig({
+                              ...config,
+                              featuredStream: { ...config.featuredStream, category: e.target.value },
+                            })
+                          }
+                          placeholder="Deportes En Vivo"
+                          className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white text-xs focus:border-cyan-500 focus:outline-none"
+                        />
+                      </div>
+
+                      <div className="sm:col-span-2 space-y-1">
+                        <label className="text-xs text-zinc-300 font-semibold">URL del Flujo (.m3u8)</label>
+                        <input
+                          type="text"
+                          value={config.featuredStream?.streamUrl || ''}
+                          onChange={(e) =>
+                            setConfig({
+                              ...config,
+                              featuredStream: { ...config.featuredStream, streamUrl: e.target.value },
+                            })
+                          }
+                          placeholder="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
+                          className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white text-xs font-mono focus:border-cyan-500 focus:outline-none"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Bottom Footer Actions */}
-            <div className="p-4 sm:p-5 bg-zinc-900/90 border-t border-zinc-800 flex items-center justify-between">
-              <span className="text-xs text-zinc-400">
-                Los cambios se aplican inmediatamente para todas las instalaciones.
-              </span>
+            {/* Bottom Modal Actions */}
+            <div className="px-5 py-3.5 bg-zinc-900 border-t border-zinc-800 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => setIsAuthorized(false)}
+                className="tv-focusable px-3 py-1.5 text-zinc-400 hover:text-white text-xs font-semibold rounded-lg hover:bg-zinc-800 transition cursor-pointer"
+              >
+                Cerrar Sesión Administrador
+              </button>
 
               <div className="flex items-center gap-3">
                 <button
+                  type="button"
                   onClick={onClose}
-                  className="tv-focusable px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-xl text-xs font-semibold cursor-pointer"
+                  className="tv-focusable px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-semibold rounded-xl text-xs transition cursor-pointer"
                 >
-                  Cancelar
+                  Cerrar
                 </button>
 
                 <button
+                  type="button"
                   onClick={handleSave}
                   disabled={isSaving}
-                  className="tv-focusable px-5 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-black font-extrabold text-xs sm:text-sm rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.4)] flex items-center gap-1.5 cursor-pointer disabled:opacity-50 transition transform active:scale-95"
+                  className="tv-focusable px-5 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-extrabold rounded-xl text-xs transition flex items-center gap-1.5 shadow-lg shadow-cyan-500/20 cursor-pointer disabled:opacity-50"
                 >
                   {isSaving ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
                       <span>Guardando...</span>
                     </>
                   ) : (
                     <>
-                      <Save className="w-4 h-4" />
-                      <span>Guardar Cambios [OK]</span>
+                      <Save className="w-3.5 h-3.5" />
+                      <span>Guardar Todo en Servidor</span>
                     </>
                   )}
                 </button>
               </div>
             </div>
-          </div>
+          </>
         )}
       </div>
     </div>

@@ -136,6 +136,15 @@ export interface BannerItem {
   actionSection: string;
 }
 
+export interface AppUpdateConfig {
+  latestVersion: string;
+  minVersion: string;
+  apkDownloadUrl: string;
+  releaseNotes: string;
+  forceUpdate: boolean;
+  publishedAt?: string;
+}
+
 export interface CentralizedConfig {
   serverUrl: string;
   serverPort: string;
@@ -155,6 +164,7 @@ export interface CentralizedConfig {
     fps: string;
   };
   demoModeEnabled: boolean;
+  appUpdate?: AppUpdateConfig;
 }
 
 export type ActiveSection = 'home' | 'live' | 'series' | 'movies' | 'anime' | 'especial';
