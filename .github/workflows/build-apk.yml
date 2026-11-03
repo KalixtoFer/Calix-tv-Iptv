@@ -14,13 +14,13 @@ jobs:
       - name: 1. Descargar código del repositorio
         uses: actions/checkout@v4
 
-      - name: 2. Configurar Java 21 (JDK)
+      - name: 2. Configurar Java 17 (JDK)
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '21'
+          java-version: '17'
 
-      - name: 3. Configurar Node.js 22 (LTS requerido por Capacitor 8)
+      - name: 3. Configurar Node.js 22 (LTS)
         uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -43,21 +43,28 @@ jobs:
             npx cap sync android
           fi
 
-      - name: 7. Configurar Gradle
+      - name: 7. Configurar Android SDK y Licencias
+        run: |
+          mkdir -p android
+          echo "sdk.dir=$ANDROID_HOME" > android/local.properties
+          echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-35" "build-tools;35.0.0" || true
+
+      - name: 8. Configurar Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: 8. Permisos de ejecución a Gradle
+      - name: 9. Permisos de ejecución a Gradle
         run: |
           chmod +x android/gradlew
 
-      - name: 9. Compilar APK con Gradle
+      - name: 10. Compilar APK con Gradle
         run: |
           cd android
           ./gradlew assembleDebug --no-daemon --stacktrace
           cd ..
           cp android/app/build/outputs/apk/debug/app-debug.apk CalixTV-v1.0.apk
 
-      - name: 10. Subir APK listo para descargar
+      - name: 11. Subir APK listo para descargar
         uses: actions/upload-artifact@v4
         with:
           name: CalixTV-v1.0-APK
