@@ -2,16 +2,17 @@ import React, { useState, useEffect } from 'react';
 import {
   Settings,
   Wifi,
-  Gauge,
+  Calendar,
+  Clock,
+  Tv,
+  Clapperboard,
+  Monitor,
   Star,
-  Maximize2,
   ChevronRight,
-  ChevronLeft,
-  Volume2,
-  VolumeX,
+  Play,
+  Flame,
 } from 'lucide-react';
 import { ActiveSection, CentralizedConfig } from '../types/iptv';
-import { VideoPlayer } from './VideoPlayer';
 
 interface HomeScreenProps {
   config: CentralizedConfig;
@@ -37,10 +38,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onOpenSpeedTest,
   onOpenFavorites,
 }) => {
-  const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(0);
-  const [timeStr, setTimeStr] = useState<string>('03:16');
-  const [dayStr, setDayStr] = useState<string>('Jue.');
-  const [dateStr, setDateStr] = useState<string>('17/10/2024');
+  const [timeStr, setTimeStr] = useState<string>('13:45');
+  const [dateStr, setDateStr] = useState<string>('Mié, 03 Nov. 2026');
 
   // Live time ticker
   useEffect(() => {
@@ -54,384 +53,270 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         })
       );
       const days = ['Dom.', 'Lun.', 'Mar.', 'Mié.', 'Jue.', 'Vie.', 'Sáb.'];
-      setDayStr(days[now.getDay()]);
-      setDateStr(
-        now.toLocaleDateString('es-ES', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-        })
-      );
+      const months = [
+        'Ene.', 'Feb.', 'Mar.', 'Abr.', 'May.', 'Jun.',
+        'Jul.', 'Ago.', 'Sep.', 'Oct.', 'Nov.', 'Dic.'
+      ];
+      const dayName = days[now.getDay()];
+      const dayNum = String(now.getDate()).padStart(2, '0');
+      const monthName = months[now.getMonth()];
+      const year = now.getFullYear();
+      setDateStr(`${dayName}, ${dayNum} ${monthName} ${year}`);
     };
     updateClock();
     const interval = setInterval(updateClock, 1000);
     return () => clearInterval(interval);
   }, []);
 
-  // Featured posters for right vertical slider (Teacup and movies)
-  const featuredPosters = [
+  const featuredMovies = [
     {
-      id: 'p1',
-      title: 'TEACUP',
-      subtitle: 'Serie Exclusiva 2026',
-      badge: 'TOP 1',
-      imageUrl: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=800&q=80',
-      actionSection: 'series',
+      id: 'm1',
+      title: 'AVENGERS ENDGAME',
+      imageUrl: 'https://images.unsplash.com/photo-1635805737707-575885ab0820?auto=format&fit=crop&w=600&q=80',
     },
     {
-      id: 'p2',
-      title: 'DUNE: PARTE DOS',
-      subtitle: 'Estreno 4K UHD',
-      badge: 'ESTRENO',
-      imageUrl: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80',
-      actionSection: 'movies',
+      id: 'm2',
+      title: 'DEADPOOL & WOLVERINE',
+      imageUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80',
     },
     {
-      id: 'p3',
-      title: 'SHINOBI DRAGON',
-      subtitle: 'Anime 24/7 Dual',
-      badge: 'ANIME',
-      imageUrl: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=800&q=80',
-      actionSection: 'anime',
+      id: 'm3',
+      title: 'TOP GUN MAVERICK',
+      imageUrl: 'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=600&q=80',
     },
     {
-      id: 'p4',
-      title: 'UFC FIGHT PASS',
-      subtitle: 'Evento Mundial PPV',
-      badge: 'PPV VIVO',
-      imageUrl: 'https://images.unsplash.com/photo-1517438476312-10d79c077509?auto=format&fit=crop&w=800&q=80',
-      actionSection: 'especial',
-    },
-    {
-      id: 'p5',
-      title: 'FÚTBOL DE CAMPEONES',
-      subtitle: 'Transmisión 60 FPS',
-      badge: 'DEPORTES',
-      imageUrl: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=800&q=80',
-      actionSection: 'live',
+      id: 'm4',
+      title: 'JURASSIC WORLD EL RENACER',
+      imageUrl: 'https://images.unsplash.com/photo-1534567153574-2b12153a87f0?auto=format&fit=crop&w=600&q=80',
     },
   ];
 
-  // Auto-slide vertical poster every 6 seconds
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlideIndex((prev) => (prev + 1) % featuredPosters.length);
-    }, 6000);
-    return () => clearInterval(timer);
-  }, [featuredPosters.length]);
-
-  const activePoster = featuredPosters[currentSlideIndex];
-  const featured = config.featuredStream;
-
-  const handleOpenPlayerFullscreen = () => {
-    if (featured) {
-      onPlayStream({
-        streamId: featured.streamId,
-        title: featured.name,
-        url: featured.streamUrl,
-        type: 'live',
-        poster: featured.poster,
-        category: featured.category,
-      });
-    }
+  const handleOpenLiveStream = () => {
+    const featured = config.featuredStream;
+    onPlayStream({
+      streamId: featured?.streamId || 'demo-live-1',
+      title: featured?.name || 'Fútbol En Vivo HD',
+      url: featured?.streamUrl || 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+      type: 'live',
+      poster: featured?.poster,
+      category: 'Deportes En Vivo',
+    });
   };
 
   return (
-    <div className="flex-1 flex flex-col justify-between w-full h-screen max-h-screen bg-[#07080a] text-zinc-100 p-4 sm:p-6 lg:p-7 select-none overflow-hidden">
+    <div className="flex-1 flex flex-col justify-between w-full h-screen max-h-screen bg-[#02050e] text-white p-3 sm:p-5 select-none overflow-hidden relative">
+      {/* Background ambient lighting */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-96 bg-cyan-600/10 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-blue-600/15 rounded-full blur-[140px] pointer-events-none" />
+
       {/* ========================================================
-          1. TOP BAR: Versión 1.0 a la izquierda | Logo Calix TV + Wifi + Hora + Fecha + Ajustes a la derecha
+          1. TOP BAR: Logo CALIX TV (Izq) | Fecha + Hora + Ajustes + Wifi (Der)
          ======================================================== */}
-      <div className="flex items-center justify-between w-full pt-1 pb-3 px-1">
-        {/* Top Left: Versión 1.0 (sin la palabra FLUJO) */}
-        <div className="flex items-center gap-2">
-          <div className="px-3 py-1 bg-zinc-900/90 border border-zinc-700/80 rounded-xl text-zinc-300 font-mono text-xs sm:text-sm font-bold tracking-wider shadow-inner flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-            <span>Versión 1.0</span>
+      <div className="flex items-center justify-between w-full z-20 pb-1">
+        {/* Top Left: CALIX TV Branding */}
+        <div className="flex items-center gap-3">
+          <img
+            src="/logo.png"
+            alt="CALIX TV"
+            className="h-12 sm:h-14 md:h-16 w-auto object-contain drop-shadow-[0_0_20px_rgba(6,182,212,0.6)]"
+          />
+          <div className="hidden sm:flex flex-col leading-tight">
+            <span className="font-black text-2xl sm:text-3xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 via-white to-blue-400 drop-shadow">
+              CALIXTV
+            </span>
+            <span className="text-xs font-bold text-cyan-400 tracking-wider">
+              Tu Servicio Digital
+            </span>
           </div>
         </div>
 
-        {/* Top Right: Wifi + Hora + Fecha + Ajustes + Logo Calix TV en la esquina */}
+        {/* Top Right: Date Pill | Clock | Settings Gear | Wifi Signal */}
         <div className="flex items-center gap-3 sm:gap-4">
-          {/* Wifi Icon */}
-          <Wifi className="w-5 h-5 text-white shrink-0" />
-
-          {/* Clock: Large time + stacked Day/Date */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-xl sm:text-2xl font-bold tracking-tight text-white font-mono">
-              {timeStr}
-            </span>
-            <div className="flex flex-col text-[10px] text-zinc-300 font-semibold leading-tight text-left">
-              <span>{dayStr}</span>
-              <span>{dateStr}</span>
-            </div>
+          {/* Date Badge */}
+          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-cyan-950/80 border border-cyan-800/80 rounded-xl text-xs font-semibold text-cyan-200 shadow-md">
+            <Calendar className="w-4 h-4 text-cyan-400" />
+            <span>{dateStr}</span>
           </div>
 
-          {/* Settings circular button */}
+          <div className="h-6 w-[1px] bg-cyan-900/60 hidden md:block" />
+
+          {/* Clock */}
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-900/90 border border-zinc-800 rounded-xl">
+            <Clock className="w-4 h-4 text-cyan-400" />
+            <span className="text-lg sm:text-xl font-black font-mono tracking-wider text-white">
+              {timeStr}
+            </span>
+          </div>
+
+          <div className="h-6 w-[1px] bg-zinc-800" />
+
+          {/* Admin Settings Gear Button (⚙️) */}
           <button
             onClick={onOpenSettings}
-            className="tv-focusable w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-zinc-800/90 hover:bg-zinc-700 border border-zinc-700 flex items-center justify-center text-zinc-200 hover:text-white transition cursor-pointer shadow-md"
-            title="Ajustes / Panel de Administración"
+            aria-label="Configuración y Administración"
+            className="tv-focusable w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/80 flex items-center justify-center text-zinc-200 hover:text-cyan-400 transition cursor-pointer shadow-lg active:scale-95"
+            title="Panel de Administración"
           >
-            <Settings className="w-4 h-4" />
+            <Settings className="w-5 h-5" />
           </button>
 
-          <div className="h-7 w-[1px] bg-zinc-800 hidden sm:block" />
-
-          {/* Logo Oficial Calix TV en la misma esquina superior derecha */}
-          <div className="flex items-center pl-0.5">
-            <img
-              src="/logo.png"
-              alt="Calix TV - Tu Servicio Digital"
-              className="h-12 sm:h-14 md:h-16 w-auto object-contain drop-shadow-[0_0_18px_rgba(6,182,212,0.45)] transition-transform hover:scale-105 cursor-pointer"
-            />
+          {/* Wifi Signal Indicator */}
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-emerald-400">
+            <Wifi className="w-5 h-5" />
           </div>
         </div>
       </div>
 
       {/* ========================================================
-          2. ÁREA CENTRAL: Reproductor en Vivo (Izq) + Poster Vertical (Der)
+          2. MIDDLE SECTION: EN VIVO Banner (Left) + PELÍCULAS DESTACADAS Grid (Right)
          ======================================================== */}
-      <div className="grid grid-cols-12 gap-4 lg:gap-5 flex-1 my-2 min-h-0">
-        {/* Left: 16:9 Live Video Player (approx 8.5 cols) */}
-        <div className="col-span-12 lg:col-span-9 flex flex-col bg-black rounded-2xl overflow-hidden border border-zinc-800/70 shadow-2xl relative group">
-          {/* Active Live Video Stream */}
-          <div className="relative w-full h-full flex items-center justify-center bg-black">
-            <VideoPlayer
-              url={featured?.streamUrl || 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8'}
-              title={featured?.name || 'D GAMES 2 HD'}
-              subtitle={featured?.category || 'Deportes En Vivo'}
-              poster={featured?.poster}
-              autoPlay={true}
-              type="live"
-              className="w-full h-full"
-              isMiniPlayer={true}
-              onExpand={handleOpenPlayerFullscreen}
-            />
+      <div className="grid grid-cols-12 gap-3 sm:gap-4 flex-1 my-2 z-10 min-h-0">
+        {/* Left Card: EN VIVO - FÚTBOL SIN CORTES (approx 7 cols) */}
+        <div
+          onClick={handleOpenLiveStream}
+          className="tv-focusable col-span-12 lg:col-span-7 bg-gradient-to-br from-blue-950/80 via-zinc-950 to-black rounded-3xl border-2 border-cyan-500/80 shadow-[0_0_35px_rgba(6,182,212,0.25)] relative overflow-hidden flex flex-col justify-between p-5 sm:p-7 group cursor-pointer"
+        >
+          {/* Background Stadium & Trophy Image */}
+          <div
+            className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105 opacity-80"
+            style={{
+              backgroundImage: `url('https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1200&q=80')`,
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-950/90 via-black/70 to-transparent" />
 
-            {/* Top Right Channel Watermark (like "D SPORTS") */}
-            <div className="absolute top-3.5 right-4 pointer-events-none z-20 flex items-center gap-1.5 bg-black/40 backdrop-blur-sm px-2.5 py-1 rounded-lg border border-white/10">
-              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-              <span className="text-white font-black text-xs tracking-wider uppercase drop-shadow">
-                D SPORTS
-              </span>
+          {/* Top Tag: ● EN VIVO */}
+          <div className="relative z-10 flex items-center justify-start">
+            <div className="px-3.5 py-1 bg-rose-600 text-white rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-lg shadow-rose-600/40">
+              <span className="w-2.5 h-2.5 rounded-full bg-white animate-ping" />
+              <span>● EN VIVO</span>
             </div>
+          </div>
 
-            {/* Bottom Overlay Bar matching the exact reference */}
-            <div
-              onClick={handleOpenPlayerFullscreen}
-              className="tv-focusable absolute bottom-2.5 left-3 right-3 bg-black/85 backdrop-blur-md rounded-xl p-2 sm:p-2.5 border border-white/10 flex items-center justify-between text-xs cursor-pointer z-20 shadow-lg"
-            >
-              <div className="flex items-center gap-2.5 overflow-hidden flex-1">
-                {/* Live Green Dot + Channel Name */}
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-                  <span className="font-extrabold text-white text-xs sm:text-sm tracking-wide">
-                    {featured?.name || 'D GAMES 2 HD'}
-                  </span>
-                </div>
+          {/* Main Hero Text */}
+          <div className="relative z-10 space-y-2 max-w-xl my-auto">
+            <h1 className="text-3xl sm:text-5xl md:text-6xl font-black italic tracking-tight text-white leading-none drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">
+              FÚTBOL <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-cyan-100 to-blue-400">
+                SIN CORTES
+              </span>
+            </h1>
+            <p className="text-xs sm:text-sm font-extrabold text-cyan-200 tracking-wide uppercase drop-shadow">
+              DISFRUTÁ TODOS LOS PARTIDOS EN LA MEJOR CALIDAD 4K
+            </p>
+          </div>
 
-                {/* Scoreboard / Current Program info */}
-                <div className="hidden sm:flex items-center gap-2 px-2.5 py-0.5 bg-zinc-900/90 rounded border border-zinc-700/60 text-zinc-300 font-mono text-[11px] truncate">
-                  <span>CD OSORNO</span>
-                  <span className="font-bold text-cyan-400">3 | 4</span>
-                  <span>SANTA MARIA</span>
-                  <span className="text-zinc-500">• 1st 7:58</span>
-                </div>
-              </div>
-
-              {/* Bitrate / Stream Speed (1Mb/s) */}
-              <div className="flex items-center gap-2 shrink-0">
-                <div className="flex items-center gap-1 px-2 py-0.5 bg-zinc-900/80 rounded border border-zinc-700 text-zinc-300 font-mono text-[11px]">
-                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-                  <span>1Mb/s</span>
-                </div>
-
-                <div className="p-1 bg-cyan-500 text-black rounded font-bold text-[10px] hidden sm:flex items-center gap-1">
-                  <Maximize2 className="w-3 h-3" />
-                  <span>OK</span>
-                </div>
-              </div>
+          {/* Bottom Action Prompt */}
+          <div className="relative z-10 flex items-center gap-2 text-xs font-extrabold text-cyan-300">
+            <div className="px-3 py-1.5 bg-cyan-950/90 border border-cyan-500/80 rounded-xl flex items-center gap-2 shadow-md">
+              <Play className="w-3.5 h-3.5 fill-cyan-400 text-cyan-400" />
+              <span>REPRODUCIR CANAL EN VIVO</span>
             </div>
           </div>
         </div>
 
-        {/* Right: Vertical Poster Slider (Teacup etc.) (approx 3.5 cols) */}
-        <div
-          onClick={() => onNavigate(activePoster.actionSection as ActiveSection)}
-          className="tv-focusable col-span-12 lg:col-span-3 rounded-2xl overflow-hidden border border-zinc-800/80 shadow-2xl relative flex flex-col justify-end p-4 bg-zinc-950 group cursor-pointer"
-        >
-          {/* Backdrop Image */}
-          <div
-            className="absolute inset-0 bg-cover bg-center transition-all duration-700 scale-100 group-hover:scale-105"
-            style={{ backgroundImage: `url(${activePoster.imageUrl})` }}
-          />
-          {/* Subtle dark gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-
-          {/* Poster Content */}
-          <div className="relative z-10 text-center space-y-1 mb-2">
-            <h3 className="text-xl sm:text-2xl font-black text-cyan-300 tracking-wider uppercase drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
-              {activePoster.title}
-            </h3>
-            <p className="text-[11px] text-zinc-300 drop-shadow">
-              {activePoster.subtitle}
-            </p>
+        {/* Right Section: PELÍCULAS DESTACADAS (approx 5 cols) */}
+        <div className="col-span-12 lg:col-span-5 flex flex-col justify-between bg-zinc-950/80 border border-cyan-900/50 rounded-3xl p-3.5 sm:p-4 shadow-xl relative">
+          {/* Section Header */}
+          <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
+            <div className="flex items-center gap-2 text-amber-400 font-extrabold text-sm sm:text-base tracking-wide uppercase">
+              <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+              <span className="text-white">PELÍCULAS DESTACADAS</span>
+            </div>
+            <ChevronRight className="w-5 h-5 text-cyan-400" />
           </div>
 
-          {/* Slider Pagination Dots (exact match: 5 dots, active one in orange) */}
-          <div className="relative z-10 flex items-center justify-center gap-1.5 pt-1">
-            {featuredPosters.map((_, idx) => (
-              <span
-                key={idx}
-                className={`transition-all rounded-full ${
-                  idx === currentSlideIndex
-                    ? 'w-4 h-1.5 bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.8)]'
-                    : 'w-1.5 h-1.5 bg-white/40'
-                }`}
-              />
+          {/* 2x2 Movie Grid */}
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-3 flex-1 mt-2.5">
+            {featuredMovies.map((movie) => (
+              <div
+                key={movie.id}
+                onClick={() => onNavigate('movies')}
+                className="tv-focusable relative rounded-2xl overflow-hidden border border-zinc-800 hover:border-cyan-400 transition-all duration-300 group cursor-pointer bg-zinc-900 shadow-md min-h-[100px] flex items-end p-2.5"
+              >
+                <div
+                  className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                  style={{ backgroundImage: `url(${movie.imageUrl})` }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+
+                <span className="relative z-10 text-[11px] font-black text-white tracking-tight uppercase leading-tight drop-shadow">
+                  {movie.title}
+                </span>
+              </div>
             ))}
           </div>
         </div>
       </div>
 
       {/* ========================================================
-          3. MENÚ INFERIOR: Los 5 Botones de Colores + 2 Botones de Utilidad
+          3. BOTTOM NAVIGATION BAR (5 Glowing Glass Buttons)
          ======================================================== */}
-      <div className="flex items-center gap-3 w-full pt-1 pb-1">
-        {/* Container for the 5 Main Buttons */}
-        <div className="grid grid-cols-5 gap-2.5 sm:gap-3 flex-1">
-          {/* 1. VIVO (Coral Red #ff5252) */}
-          <button
-            onClick={() => onNavigate('live')}
-            className="tv-focusable group flex flex-col items-center justify-center py-3.5 sm:py-4 px-2 rounded-2xl bg-gradient-to-b from-[#ff5b5b] to-[#e63946] text-white shadow-[0_4px_20px_rgba(230,57,70,0.35)] hover:shadow-[0_0_25px_rgba(255,91,91,0.6)] cursor-pointer transition transform active:scale-95"
-          >
-            {/* Custom Video Projector Icon */}
-            <div className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
-              <svg viewBox="0 0 48 48" className="w-full h-full fill-white drop-shadow">
-                <rect x="6" y="10" width="26" height="28" rx="6" />
-                <polygon points="34,18 42,12 42,36 34,30" />
-                <polygon points="17,19 25,24 17,29" fill="#e63946" />
-              </svg>
-            </div>
-            <span className="font-extrabold text-xs sm:text-sm tracking-wider uppercase text-white drop-shadow-sm">
-              VIVO
-            </span>
-          </button>
+      <div className="grid grid-cols-5 gap-2.5 sm:gap-3.5 w-full z-20 pt-1">
+        {/* 1. TV EN VIVO */}
+        <button
+          onClick={() => onNavigate('live')}
+          className="tv-focusable group py-3 sm:py-4 px-2 rounded-2xl bg-gradient-to-b from-cyan-950 via-zinc-900 to-black border-2 border-cyan-400/90 shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.6)] text-white flex flex-col items-center justify-center cursor-pointer transition transform active:scale-95"
+        >
+          <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-cyan-500/20 border border-cyan-400 flex items-center justify-center mb-1 text-cyan-300 group-hover:scale-110 transition-transform">
+            <Tv className="w-5 h-5 sm:w-6 sm:h-6" />
+          </div>
+          <span className="font-black text-xs sm:text-sm tracking-wider uppercase text-white drop-shadow">
+            TV EN VIVO
+          </span>
+        </button>
 
-          {/* 2. SERIE (Sky Blue #29b6f6) */}
-          <button
-            onClick={() => onNavigate('series')}
-            className="tv-focusable group flex flex-col items-center justify-center py-3.5 sm:py-4 px-2 rounded-2xl bg-gradient-to-b from-[#29b6f6] to-[#0288d1] text-white shadow-[0_4px_20px_rgba(2,136,209,0.35)] hover:shadow-[0_0_25px_rgba(41,182,246,0.6)] cursor-pointer transition transform active:scale-95"
-          >
-            {/* TV with "TV" text inside */}
-            <div className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
-              <svg viewBox="0 0 48 48" className="w-full h-full fill-white drop-shadow">
-                <rect x="6" y="10" width="36" height="26" rx="5" />
-                <rect x="18" y="38" width="12" height="4" rx="2" />
-                <text
-                  x="24"
-                  y="28"
-                  textAnchor="middle"
-                  fill="#0288d1"
-                  fontSize="13"
-                  fontWeight="900"
-                  fontFamily="system-ui, sans-serif"
-                >
-                  TV
-                </text>
-              </svg>
-            </div>
-            <span className="font-extrabold text-xs sm:text-sm tracking-wider uppercase text-white drop-shadow-sm">
-              SERIE
-            </span>
-          </button>
+        {/* 2. PELÍCULAS */}
+        <button
+          onClick={() => onNavigate('movies')}
+          className="tv-focusable group py-3 sm:py-4 px-2 rounded-2xl bg-gradient-to-b from-blue-950 via-zinc-900 to-black border border-blue-600/70 hover:border-blue-400 shadow-lg text-white flex flex-col items-center justify-center cursor-pointer transition transform active:scale-95"
+        >
+          <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-blue-500/20 border border-blue-400 flex items-center justify-center mb-1 text-blue-300 group-hover:scale-110 transition-transform">
+            <Clapperboard className="w-5 h-5 sm:w-6 sm:h-6" />
+          </div>
+          <span className="font-black text-xs sm:text-sm tracking-wider uppercase text-white drop-shadow">
+            PELÍCULAS
+          </span>
+        </button>
 
-          {/* 3. PELÍCULA (Turquoise Emerald #00c988) */}
-          <button
-            onClick={() => onNavigate('movies')}
-            className="tv-focusable group flex flex-col items-center justify-center py-3.5 sm:py-4 px-2 rounded-2xl bg-gradient-to-b from-[#10b981] to-[#059669] text-white shadow-[0_4px_20px_rgba(5,150,105,0.35)] hover:shadow-[0_0_25px_rgba(16,185,129,0.6)] cursor-pointer transition transform active:scale-95"
-          >
-            {/* Film Reel Icon */}
-            <div className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
-              <svg viewBox="0 0 48 48" className="w-full h-full fill-white drop-shadow">
-                <circle cx="24" cy="24" r="18" />
-                <circle cx="24" cy="24" r="5" fill="#059669" />
-                <circle cx="16" cy="18" r="3" fill="#059669" />
-                <circle cx="32" cy="18" r="3" fill="#059669" />
-                <circle cx="16" cy="30" r="3" fill="#059669" />
-                <circle cx="32" cy="30" r="3" fill="#059669" />
-              </svg>
-            </div>
-            <span className="font-extrabold text-xs sm:text-sm tracking-wider uppercase text-white drop-shadow-sm">
-              PELÍCULA
-            </span>
-          </button>
+        {/* 3. SERIES */}
+        <button
+          onClick={() => onNavigate('series')}
+          className="tv-focusable group py-3 sm:py-4 px-2 rounded-2xl bg-gradient-to-b from-indigo-950 via-zinc-900 to-black border border-indigo-600/70 hover:border-indigo-400 shadow-lg text-white flex flex-col items-center justify-center cursor-pointer transition transform active:scale-95"
+        >
+          <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-indigo-500/20 border border-indigo-400 flex items-center justify-center mb-1 text-indigo-300 group-hover:scale-110 transition-transform">
+            <Monitor className="w-5 h-5 sm:w-6 sm:h-6" />
+          </div>
+          <span className="font-black text-xs sm:text-sm tracking-wider uppercase text-white drop-shadow">
+            SERIES
+          </span>
+        </button>
 
-          {/* 4. ANIME (Lavender Purple #8b5cf6) */}
-          <button
-            onClick={() => onNavigate('anime')}
-            className="tv-focusable group flex flex-col items-center justify-center py-3.5 sm:py-4 px-2 rounded-2xl bg-gradient-to-b from-[#8b5cf6] to-[#6d28d9] text-white shadow-[0_4px_20px_rgba(109,40,217,0.35)] hover:shadow-[0_0_25px_rgba(139,92,246,0.6)] cursor-pointer transition transform active:scale-95"
-          >
-            {/* Cute Bear/Mascot Head Icon */}
-            <div className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
-              <svg viewBox="0 0 48 48" className="w-full h-full fill-white drop-shadow">
-                {/* Ears */}
-                <circle cx="13" cy="16" r="6" />
-                <circle cx="35" cy="16" r="6" />
-                {/* Head */}
-                <ellipse cx="24" cy="26" rx="16" ry="14" />
-                {/* Eyes & Muzzle */}
-                <circle cx="19" cy="24" r="2" fill="#6d28d9" />
-                <circle cx="29" cy="24" r="2" fill="#6d28d9" />
-                <ellipse cx="24" cy="30" rx="4" ry="2.5" fill="#6d28d9" />
-              </svg>
-            </div>
-            <span className="font-extrabold text-xs sm:text-sm tracking-wider uppercase text-white drop-shadow-sm">
-              ANIME
-            </span>
-          </button>
+        {/* 4. ANIME */}
+        <button
+          onClick={() => onNavigate('anime')}
+          className="tv-focusable group py-3 sm:py-4 px-2 rounded-2xl bg-gradient-to-b from-purple-950 via-zinc-900 to-black border border-purple-600/70 hover:border-purple-400 shadow-lg text-white flex flex-col items-center justify-center cursor-pointer transition transform active:scale-95"
+        >
+          <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-purple-500/20 border border-purple-400 flex items-center justify-center mb-1 text-purple-300 group-hover:scale-110 transition-transform overflow-hidden">
+            <Flame className="w-5 h-5 sm:w-6 sm:h-6 text-purple-300" />
+          </div>
+          <span className="font-black text-xs sm:text-sm tracking-wider uppercase text-white drop-shadow">
+            ANIME
+          </span>
+        </button>
 
-          {/* 5. ESPECIAL (Vibrant Orange #f97316) */}
-          <button
-            onClick={() => onNavigate('especial')}
-            className="tv-focusable group flex flex-col items-center justify-center py-3.5 sm:py-4 px-2 rounded-2xl bg-gradient-to-b from-[#f97316] to-[#ea580c] text-white shadow-[0_4px_20px_rgba(234,88,12,0.35)] hover:shadow-[0_0_25px_rgba(249,115,22,0.6)] cursor-pointer transition transform active:scale-95"
-          >
-            {/* Castle / Ribbon Badge with Star */}
-            <div className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
-              <svg viewBox="0 0 48 48" className="w-full h-full fill-white drop-shadow">
-                <path d="M14,10 L34,10 C36.2,10 38,11.8 38,14 L38,38 L24,31 L10,38 L10,14 C10,11.8 11.8,10 14,10 Z" />
-                <polygon
-                  points="24,18 26,22 30,22 27,25 28,29 24,26.5 20,29 21,25 18,22 22,22"
-                  fill="#ea580c"
-                />
-              </svg>
-            </div>
-            <span className="font-extrabold text-xs sm:text-sm tracking-wider uppercase text-white drop-shadow-sm">
-              ESPECIAL
-            </span>
-          </button>
-        </div>
-
-        {/* Far Right: Stack of 2 Utility Buttons (Rocket/Speed & Favorites Star) */}
-        <div className="flex flex-col gap-2 shrink-0">
-          {/* Top: Speed / Optimization */}
-          <button
-            onClick={onOpenSpeedTest}
-            className="tv-focusable w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-zinc-800/90 hover:bg-zinc-700 border border-zinc-700/80 flex items-center justify-center text-zinc-300 hover:text-cyan-400 transition cursor-pointer shadow-md"
-            title="Prueba de Velocidad / Latencia del Servidor"
-          >
-            <Gauge className="w-4 h-4 sm:w-5 sm:h-5" />
-          </button>
-
-          {/* Bottom: Favorites Star */}
-          <button
-            onClick={onOpenFavorites}
-            className="tv-focusable w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-zinc-800/90 hover:bg-zinc-700 border border-zinc-700/80 flex items-center justify-center text-zinc-300 hover:text-amber-400 transition cursor-pointer shadow-md"
-            title="Mis Favoritos"
-          >
-            <Star className="w-4 h-4 sm:w-5 sm:h-5 fill-amber-400/20" />
-          </button>
-        </div>
+        {/* 5. ESPECIALES */}
+        <button
+          onClick={() => onNavigate('especial')}
+          className="tv-focusable group py-3 sm:py-4 px-2 rounded-2xl bg-gradient-to-b from-amber-950 via-zinc-900 to-black border border-amber-600/70 hover:border-amber-400 shadow-lg text-white flex flex-col items-center justify-center cursor-pointer transition transform active:scale-95"
+        >
+          <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-amber-500/20 border border-amber-400 flex items-center justify-center mb-1 text-amber-300 group-hover:scale-110 transition-transform">
+            <Star className="w-5 h-5 sm:w-6 sm:h-6 fill-amber-400 text-amber-400" />
+          </div>
+          <span className="font-black text-xs sm:text-sm tracking-wider uppercase text-white drop-shadow">
+            ESPECIALES
+          </span>
+        </button>
       </div>
     </div>
   );
