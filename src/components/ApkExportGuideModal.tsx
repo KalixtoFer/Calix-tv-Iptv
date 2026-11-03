@@ -168,7 +168,7 @@ git push -u origin main`;
                 </div>
                 <h4 className="font-bold text-white text-xs sm:text-sm">Descargar el APK Listo</h4>
                 <p className="text-[11px] text-zinc-400 leading-relaxed">
-                  En 2 minutos terminará con un check verde ✅. Entra y en la sección <strong className="text-emerald-300">Artifacts</strong> descarga el archivo <strong className="text-white">NexusIPTVPro-v2.5.4-APK</strong>.
+                  En 2 minutos terminará con un check verde ✅. Entra y en la sección <strong className="text-emerald-300">Artifacts</strong> descarga el archivo <strong className="text-white">CalixTV-v1.0-APK</strong>.
                 </p>
               </div>
             </div>

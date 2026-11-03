@@ -1,6 +1,8 @@
 {
-  "name": "Nexus IPTV Pro",
+  "name": "Calix Tv IPTV Pro",
   "description": "Aplicación IPTV profesional para Android TV, TV Box y dispositivos móviles con soporte Xtream Codes, control remoto y gestión centralizada.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }
