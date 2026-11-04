@@ -89,15 +89,11 @@ export default function App() {
         }
 
         const savedSession = iptvApi.getSavedSession();
-        const isCalixtvRoute =
-          window.location.hash.toLowerCase().includes('calixtv') ||
-          window.location.pathname.toLowerCase().includes('calixtv') ||
-          window.location.search.toLowerCase().includes('calixtv') ||
-          window.location.href.toLowerCase().includes('calixtv');
+        const isAdminRoute = window.location.search.includes('admin=true');
 
         if (savedSession) {
           setSession(savedSession);
-        } else if (isCalixtvRoute) {
+        } else if (isAdminRoute) {
           // If accessing via admin route #calixtv, show full app behind admin modal
           const defaultGuestSession: StoredSession = {
             username: 'Invitado',
@@ -123,19 +119,10 @@ export default function App() {
           setSession(defaultGuestSession);
         }
 
-        // Check URL route for calixtv admin access
-        const checkCalixtvRoute = () => {
-          const currentUrl = window.location.href.toLowerCase();
-          const path = window.location.pathname.toLowerCase();
-          const hash = window.location.hash.toLowerCase();
+        const checkAdminRoute = () => {
           const search = window.location.search.toLowerCase();
 
-          if (
-            hash.includes('calixtv') ||
-            path.includes('calixtv') ||
-            search.includes('calixtv') ||
-            currentUrl.includes('calixtv')
-          ) {
+          if (search.includes('admin=true')) {
             setIsAdminOpen(true);
             setSession((prev) => {
               if (prev) return prev;
@@ -164,13 +151,12 @@ export default function App() {
           }
         };
 
-        checkCalixtvRoute();
-        window.addEventListener('hashchange', checkCalixtvRoute);
-        window.addEventListener('popstate', checkCalixtvRoute);
+        window.addEventListener('hashchange', checkAdminRoute);
+        window.addEventListener('popstate', checkAdminRoute);
 
         return () => {
-          window.removeEventListener('hashchange', checkCalixtvRoute);
-          window.removeEventListener('popstate', checkCalixtvRoute);
+          window.removeEventListener('hashchange', checkAdminRoute);
+          window.removeEventListener('popstate', checkAdminRoute);
         };
       } catch (err) {
         console.error('Initialization error:', err);
