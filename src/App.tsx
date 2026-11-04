@@ -25,6 +25,7 @@ import { VirtualRemote } from './components/VirtualRemote';
 import { ApkExportGuideModal } from './components/ApkExportGuideModal';
 import { AppUpdateModal } from './components/AppUpdateModal';
 import { Loader2 } from 'lucide-react';
+import { ScreenOrientation } from '@capacitor/screen-orientation';
 
 export default function App() {
   const [config, setConfig] = useState<CentralizedConfig | null>(null);
@@ -197,7 +198,20 @@ export default function App() {
     });
   }, []);
 
-  // 3. Remote Control Key Listener (TV Remote D-Pad & shortcuts)
+  // 3. Screen Orientation Management (Auto-rotate to landscape on mobile during playback)
+  useEffect(() => {
+    if (activePlayback && viewMode === 'mobile') {
+      try {
+        ScreenOrientation.lock({ orientation: 'landscape' }).catch(() => {});
+      } catch (e) {}
+    } else if (!activePlayback && viewMode === 'mobile') {
+      try {
+        ScreenOrientation.unlock().catch(() => {});
+      } catch (e) {}
+    }
+  }, [activePlayback, viewMode]);
+
+  // 4. Remote Control Key Listener (TV Remote D-Pad & shortcuts)
   const handleRemoteKey = useCallback(
     (key: RemoteKey) => {
       // If full player is active, Back closes it
@@ -390,7 +404,9 @@ export default function App() {
         {activeSection === 'live' && (
           <LiveTVScreen
             username={session.username}
+            viewMode={viewMode}
             onBack={() => setActiveSection('home')}
+            onNavigate={(sec) => setActiveSection(sec)}
             onPlayStream={handlePlayStream}
           />
         )}

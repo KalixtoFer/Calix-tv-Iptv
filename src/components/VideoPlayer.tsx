@@ -18,6 +18,7 @@ import {
   AlertCircle,
   Loader2,
 } from 'lucide-react';
+import { ScreenOrientation } from '@capacitor/screen-orientation';
 
 export interface VideoPlayerProps {
   url: string;
@@ -267,14 +268,33 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     bumpControls();
   };
 
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isCurrentlyFull = !!document.fullscreenElement;
+      setIsFullscreen(isCurrentlyFull);
+      if (isCurrentlyFull) {
+        ScreenOrientation.lock({ orientation: 'landscape' }).catch(() => {});
+      } else {
+        ScreenOrientation.unlock().catch(() => {});
+      }
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      // Ensure we unlock when component unmounts
+      ScreenOrientation.unlock().catch(() => {});
+    };
+  }, []);
+
   const toggleFullscreen = () => {
     const container = containerRef.current;
     if (!container) return;
 
     if (!document.fullscreenElement) {
-      container.requestFullscreen?.().then(() => setIsFullscreen(true)).catch(console.error);
+      container.requestFullscreen?.().catch(console.error);
     } else {
-      document.exitFullscreen?.().then(() => setIsFullscreen(false)).catch(console.error);
+      document.exitFullscreen?.().catch(console.error);
     }
     bumpControls();
   };
