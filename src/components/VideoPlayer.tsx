@@ -70,7 +70,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const [showControls, setShowControls] = useState<boolean>(true);
   const [aspectRatio, setAspectRatio] = useState<AspectRatioMode>('contain');
   const [qualityText, setQualityText] = useState<string>('FHD 1080p');
+  const [zapFeedback, setZapFeedback] = useState<'next' | 'prev' | null>(null);
 
+  const touchStartY = useRef<number>(0);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Auto-hide controls
@@ -127,6 +129,10 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         backBufferLength: 60,
         maxBufferLength: 30,
         maxMaxBufferLength: 60,
+        capLevelToPlayerSize: true,
+        initialLiveManifestSize: 1,
+        manifestLoadingMaxRetry: 3,
+        levelLoadingMaxRetry: 3,
       });
       hlsRef.current = hls;
 
@@ -137,6 +143,10 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         setIsLoading(false);
         setHasError(null);
         if (data.levels && data.levels.length > 0) {
+          // Default to a medium level for faster initial buffer if available
+          const startLevel = Math.floor(data.levels.length / 2);
+          hls.startLevel = startLevel;
+          
           const maxLevel = data.levels[data.levels.length - 1];
           if (maxLevel.height) {
             setQualityText(maxLevel.height >= 1080 ? 'FHD 1080p' : `${maxLevel.height}p`);
@@ -317,11 +327,38 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const touchEndY = e.changedTouches[0].clientY;
+    const diff = touchStartY.current - touchEndY;
+    const threshold = 50;
+
+    if (Math.abs(diff) > threshold) {
+      if (diff > 0) {
+        // Swiped up -> Next
+        setZapFeedback('next');
+        if (onNextChannel) onNextChannel();
+      } else {
+        // Swiped down -> Prev
+        setZapFeedback('prev');
+        if (onPrevChannel) onPrevChannel();
+      }
+      setTimeout(() => setZapFeedback(null), 800);
+    } else {
+      bumpControls();
+    }
+  };
+
   return (
     <div
       ref={containerRef}
       onMouseMove={bumpControls}
       onClick={isMiniPlayer && onExpand ? onExpand : bumpControls}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
       className={`relative group bg-black overflow-hidden flex items-center justify-center select-none ${className} ${
         isFullscreen ? 'fixed inset-0 z-50 w-screen h-screen' : ''
       }`}
@@ -354,6 +391,25 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             : 'object-fill'
         }`}
       />
+
+      {/* Zap Feedback Overlay */}
+      {zapFeedback && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-40">
+          <div className="bg-black/60 backdrop-blur-xl p-6 rounded-full border border-white/20 animate-bounce">
+            {zapFeedback === 'next' ? (
+              <div className="flex flex-col items-center">
+                <ChevronRight className="w-12 h-12 text-rose-500 rotate-90" />
+                <span className="text-[10px] font-black text-rose-500 uppercase mt-1">Siguiente</span>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center">
+                <ChevronLeft className="w-12 h-12 text-rose-500 rotate-90" />
+                <span className="text-[10px] font-black text-rose-500 uppercase mt-1">Anterior</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Loading Spinner */}
       {isLoading && !hasError && (

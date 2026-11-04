@@ -142,6 +142,20 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
     );
   };
 
+  const handleNextChannel = () => {
+    if (!selectedStream || filteredStreams.length === 0) return;
+    const currentIndex = filteredStreams.findIndex((s) => s.stream_id === selectedStream.stream_id);
+    const nextIndex = (currentIndex + 1) % filteredStreams.length;
+    setSelectedStream(filteredStreams[nextIndex]);
+  };
+
+  const handlePrevChannel = () => {
+    if (!selectedStream || filteredStreams.length === 0) return;
+    const currentIndex = filteredStreams.findIndex((s) => s.stream_id === selectedStream.stream_id);
+    const prevIndex = (currentIndex - 1 + filteredStreams.length) % filteredStreams.length;
+    setSelectedStream(filteredStreams[prevIndex]);
+  };
+
   const handleOpenFullscreen = () => {
     if (selectedStream) {
       onPlayStream({
@@ -170,6 +184,8 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
               autoPlay={true}
               className="w-full h-full"
               onExpand={handleOpenFullscreen}
+              onNextChannel={handleNextChannel}
+              onPrevChannel={handlePrevChannel}
               isMiniPlayer={false}
             />
           ) : (
@@ -423,6 +439,8 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
                 autoPlay={true}
                 className="w-full h-full"
                 onExpand={handleOpenFullscreen}
+                onNextChannel={handleNextChannel}
+                onPrevChannel={handlePrevChannel}
                 isMiniPlayer={true}
               />
             ) : (
