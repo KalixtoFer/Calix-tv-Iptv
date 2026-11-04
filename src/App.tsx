@@ -26,6 +26,7 @@ import { ApkExportGuideModal } from './components/ApkExportGuideModal';
 import { AppUpdateModal } from './components/AppUpdateModal';
 import { Loader2 } from 'lucide-react';
 import { ScreenOrientation } from '@capacitor/screen-orientation';
+import { App as CapacitorApp } from '@capacitor/app';
 
 export default function App() {
   const [config, setConfig] = useState<CentralizedConfig | null>(null);
@@ -211,6 +212,31 @@ export default function App() {
     }
   }, [activePlayback, viewMode]);
 
+  // 3.1 Handle Android Hardware Back Button
+  useEffect(() => {
+    const handleCapacitorBack = () => {
+      if (activePlayback) {
+        setActivePlayback(null);
+      } else if (isAdminOpen) {
+        setIsAdminOpen(false);
+      } else if (isRemoteOpen) {
+        setIsRemoteOpen(false);
+      } else if (isApkGuideOpen) {
+        setIsApkGuideOpen(false);
+      } else if (activeSection !== 'home') {
+        setActiveSection('home');
+      } else {
+        // If already at home with no modals, exit app
+        CapacitorApp.exitApp();
+      }
+    };
+
+    const listener = CapacitorApp.addListener('backButton', handleCapacitorBack);
+    return () => {
+      listener.then(l => l.remove());
+    };
+  }, [activePlayback, activeSection, isAdminOpen, isRemoteOpen, isApkGuideOpen]);
+
   // 4. Remote Control Key Listener (TV Remote D-Pad & shortcuts)
   const handleRemoteKey = useCallback(
     (key: RemoteKey) => {
@@ -363,7 +389,7 @@ export default function App() {
 
   return (
     <div
-      className={`min-h-screen flex flex-col bg-[#08090d] text-zinc-100 ${
+      className={`h-screen h-[100dvh] flex flex-col bg-[#08090d] text-zinc-100 overflow-hidden ${
         viewMode === 'tv' ? 'tv-overscan text-base' : 'text-sm'
       }`}
     >

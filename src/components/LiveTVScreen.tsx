@@ -174,8 +174,8 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
   if (viewMode === 'mobile') {
     return (
       <div className="flex-1 flex flex-col h-full bg-[#05060a] text-white select-none overflow-hidden relative">
-        {/* Top: Live Player */}
-        <div className="w-full aspect-video bg-black shrink-0 relative z-40 border-b border-zinc-900 shadow-xl">
+        {/* Top: Live Player - Sticky to ensure it never scrolls away */}
+        <div className="w-full aspect-video bg-black shrink-0 sticky top-0 z-50 border-b border-zinc-900 shadow-2xl overflow-hidden">
           {selectedStream ? (
             <VideoPlayer
               url={iptvApi.buildStreamUrl('live', selectedStream.stream_id, 'm3u8', username)}
@@ -189,9 +189,9 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
               isMiniPlayer={false}
             />
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center text-zinc-700 bg-[#0a0c14]">
-              <Radio className="w-10 h-10 mb-2 opacity-20" />
-              <span className="text-xs font-bold uppercase tracking-widest">Selecciona un canal</span>
+            <div className="w-full h-full flex flex-col items-center justify-center text-zinc-700 bg-[#0a0c14] border-b border-zinc-800">
+              <div className="w-12 h-12 rounded-full border-2 border-zinc-800 border-t-rose-600 animate-spin mb-3" />
+              <span className="text-[10px] font-black uppercase tracking-[3px] animate-pulse">Sintonizando...</span>
             </div>
           )}
         </div>
