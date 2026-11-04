@@ -91,35 +91,7 @@ const DEFAULT_CONFIG: CentralizedConfig = {
   serviceName: 'Calix TV',
   announcement: '¡Bienvenidos a Calix TV! Servidores optimizados con baja latencia y calidad 4K.',
   showAnnouncement: true,
-  banners: [
-    {
-      id: 'b1',
-      title: 'SUPER DOMINGO DE FÚTBOL',
-      subtitle: 'La Liga, Champions League y Copa Libertadores en vivo en 4K 60FPS sin cortes.',
-      badge: 'EN VIVO AHORA',
-      imageUrl: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1200&q=80',
-      tagColor: '#06b6d4',
-      actionSection: 'live',
-    },
-    {
-      id: 'b2',
-      title: 'ESTRENOS CINEMATOGRÁFICOS',
-      subtitle: 'Más de 4,500 películas agregadas esta semana con audio dual y subtítulos.',
-      badge: 'NUEVO EN CINE',
-      imageUrl: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=80',
-      tagColor: '#eab308',
-      actionSection: 'movies',
-    },
-    {
-      id: 'b3',
-      title: 'MARATÓN DE SERIES & ANIME',
-      subtitle: 'Temporadas completas en calidad FHD y 4K UHD listas para maratonear.',
-      badge: 'TOP SERIES',
-      imageUrl: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=1200&q=80',
-      tagColor: '#a855f7',
-      actionSection: 'series',
-    },
-  ],
+  banners: [],
   featuredStream: {
     streamId: 'demo-live-1',
     name: 'ESPN 1 Premium HD',
@@ -705,8 +677,7 @@ function getDemoData(action: string, params: any) {
         { category_id: '4', category_name: '🧸 INFANTIL & FAMILIAR', parent_id: 0 },
         { category_id: '5', category_name: '🦁 DOCUMENTALES & NATURALEZA', parent_id: 0 },
         { category_id: '6', category_name: '🎶 MÚSICA & CONCIERTOS', parent_id: 0 },
-        { category_id: '7', category_name: '⚡ ANIME CHANNELS 24/7', parent_id: 0 },
-        { category_id: '8', category_name: '🔥 ESPECIALES & EVENTOS PPV', parent_id: 0 },
+        { category_id: '7', category_name: '⚽ EVENTOS DEPORTIVOS DEL DÍA', parent_id: 0 },
       ];
 
     case 'get_live_streams':
@@ -795,30 +766,18 @@ function getDemoData(action: string, params: any) {
         },
         {
           num: 7,
-          name: 'Crunchyroll TV 24/7 Anime',
+          name: 'Agenda Deportiva VIP 24/7',
           stream_type: 'live',
           stream_id: 107,
           stream_icon: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=300&q=80',
-          epg_channel_id: 'anime.tv',
+          epg_channel_id: 'events.tv',
           added: '1700000000',
           category_id: '7',
-          current_program: 'Attack on Titan: The Final Season',
-          next_program: 'Demon Slayer: Kimetsu no Yaiba',
+          current_program: 'Resumen de Goles y Próximos Partidos',
+          next_program: 'Debate Deportivo Central',
           stream_url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
         },
-        {
-          num: 8,
-          name: 'UFC Fight Pass PPV 4K',
-          stream_type: 'live',
-          stream_id: 108,
-          stream_icon: 'https://images.unsplash.com/photo-1517438476312-10d79c077509?auto=format&fit=crop&w=300&q=80',
-          epg_channel_id: 'ufc.ppv',
-          added: '1700000000',
-          category_id: '8',
-          current_program: 'Cartelera Principal: Campeonato Mundial',
-          next_program: 'Conferencia de Prensa Post-Pelea',
-          stream_url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
-        },
+
       ];
 
     case 'get_vod_categories':

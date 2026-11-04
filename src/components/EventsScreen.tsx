@@ -6,13 +6,12 @@ import {
   Tv,
   Clapperboard,
   Play,
-  Star,
   Flame,
 } from 'lucide-react';
 import { LiveStream, SeriesItem } from '../types/iptv';
 import { iptvApi } from '../services/iptvApi';
 
-interface AnimeScreenProps {
+interface EventsScreenProps {
   username: string;
   onBack: () => void;
   onPlayStream: (stream: {
@@ -25,7 +24,7 @@ interface AnimeScreenProps {
   }) => void;
 }
 
-export const AnimeScreen: React.FC<AnimeScreenProps> = ({
+export const EventsScreen: React.FC<EventsScreenProps> = ({
   username,
   onBack,
   onPlayStream,
@@ -46,7 +45,7 @@ export const AnimeScreen: React.FC<AnimeScreenProps> = ({
           iptvApi.getCategories('series', username),
         ]);
 
-        const keywords = ['deporte', 'event', 'fútbol', 'conmebol', 'liga', 'champions', 'boxing', 'ufc', 'f1', 'motogp'];
+        const keywords = ['deporte', 'event', 'fútbol', 'conmebol', 'liga', 'champions', 'boxing', 'ufc', 'f1', 'motogp', 'soccer', 'sports'];
         
         const eventLiveCat = liveCats.find((c) => 
           keywords.some(k => c.category_name.toLowerCase().includes(k))

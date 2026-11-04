@@ -16,8 +16,7 @@ import { HomeScreen } from './components/HomeScreen';
 import { LiveTVScreen } from './components/LiveTVScreen';
 import { MoviesScreen } from './components/MoviesScreen';
 import { SeriesScreen } from './components/SeriesScreen';
-import { AnimeScreen } from './components/AnimeScreen';
-import { EspecialScreen } from './components/EspecialScreen';
+import { EventsScreen } from './components/EventsScreen';
 import { LoginScreen } from './components/LoginScreen';
 import { AdminPanelModal } from './components/AdminPanelModal';
 import { VideoPlayer } from './components/VideoPlayer';
@@ -454,16 +453,8 @@ export default function App() {
           />
         )}
 
-        {activeSection === 'anime' && (
-          <AnimeScreen
-            username={session.username}
-            onBack={() => setActiveSection('home')}
-            onPlayStream={handlePlayStream}
-          />
-        )}
-
-        {activeSection === 'especial' && (
-          <EspecialScreen
+        {activeSection === 'events' && (
+          <EventsScreen
             username={session.username}
             onBack={() => setActiveSection('home')}
             onPlayStream={handlePlayStream}

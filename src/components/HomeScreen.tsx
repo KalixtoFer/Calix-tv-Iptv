@@ -103,19 +103,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
 
 
-  const handleOpenLiveStream = () => {
-    const featured = config.featuredStream;
-    onPlayStream({
-      streamId: featured?.streamId || 'demo-live-1',
-      title: featured?.name || 'Fútbol Sin Cortes - En Vivo HD',
-      url:
-        featured?.streamUrl ||
-        'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
-      type: 'live',
-      poster: featured?.poster,
-      category: 'Deportes En Vivo',
-    });
-  };
+
 
   // =========================================================================
   // 1. MOBILE SMARTPHONE VIEW (Diseño optimizado para celulares verticales/horizontales)
@@ -182,38 +170,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
         </div>
 
-        {/* Hero Banner: Fútbol Sin Cortes (Mobile 16:9 proportioned) */}
-        <div
-          onClick={handleOpenLiveStream}
-          className="my-3 rounded-2xl bg-gradient-to-r from-blue-950 via-zinc-950 to-black border border-cyan-500/70 p-4 relative overflow-hidden shadow-xl shadow-cyan-950/40 cursor-pointer active:scale-98 transition"
-        >
-          <div
-            className="absolute inset-0 bg-cover bg-center opacity-70"
-            style={{
-              backgroundImage: `url('https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=800&q=80')`,
-            }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent" />
 
-          <div className="relative z-10 space-y-2">
-            <span className="px-2.5 py-0.5 rounded-full bg-rose-600 text-white font-mono text-[10px] font-black uppercase inline-flex items-center gap-1 shadow">
-              <span className="w-2 h-2 rounded-full bg-white animate-ping" />
-              ● EN VIVO
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-black italic tracking-tight text-white leading-tight">
-              FÚTBOL <span className="text-cyan-400">SIN CORTES</span>
-            </h2>
-            <p className="text-[11px] text-cyan-200 font-bold uppercase tracking-wider">
-              Todos los partidos en 4K 60FPS
-            </p>
-            <div className="pt-1">
-              <span className="px-3 py-1.5 rounded-xl bg-cyan-500 text-black text-xs font-black inline-flex items-center gap-1.5 shadow-md shadow-cyan-500/30">
-                <Play className="w-3.5 h-3.5 fill-black" />
-                VER EN VIVO AHORA
-              </span>
-            </div>
-          </div>
-        </div>
 
         {/* 5 Neon Category Touch Tiles */}
         <div className="space-y-1.5 my-2">
@@ -277,7 +234,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
             {/* 4. Eventos Deportivos */}
             <button
-              onClick={() => onNavigate('anime')}
+              onClick={() => onNavigate('events')}
               className="col-span-2 sm:col-span-1 p-3.5 rounded-2xl bg-gradient-to-br from-amber-950/90 to-orange-950/90 border border-amber-400/80 shadow-[0_0_15px_rgba(245,158,11,0.3)] flex items-center gap-3 active:scale-95 transition text-left cursor-pointer"
             >
               <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-400 flex items-center justify-center shrink-0">
@@ -285,10 +242,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               </div>
               <div className="min-w-0">
                 <span className="font-black text-xs sm:text-sm text-white block truncate uppercase">
-                  EVENTOS
+                  EVENTOS DEPORTIVOS
                 </span>
                 <span className="text-[10px] text-amber-300 font-semibold block truncate">
-                  Agenda Deportiva
+                  Agenda del Día
                 </span>
               </div>
             </button>
@@ -499,103 +456,56 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </div>
       </div>
 
-      {/* MIDDLE SECTION: EN VIVO Banner (Left) + PELÍCULAS DESTACADAS Grid (Right) */}
-      <div className="grid grid-cols-12 gap-3 sm:gap-4 flex-1 my-2 z-10 min-h-0">
-        {/* Left Card: EN VIVO - FÚTBOL SIN CORTES */}
-        <div
-          onClick={handleOpenLiveStream}
-          className="tv-focusable col-span-12 lg:col-span-7 bg-gradient-to-br from-blue-950/80 via-zinc-950 to-black rounded-3xl border-2 border-cyan-500/80 shadow-[0_0_35px_rgba(6,182,212,0.25)] relative overflow-hidden flex flex-col justify-between p-5 sm:p-7 group cursor-pointer"
-        >
-          {/* Background Stadium & Trophy Image */}
-          <div
-            className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105 opacity-80"
-            style={{
-              backgroundImage: `url('https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1200&q=80')`,
-            }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-950/90 via-black/70 to-transparent" />
-
-          {/* Top Tag: ● EN VIVO */}
-          <div className="relative z-10 flex items-center justify-start">
-            <div className="px-3.5 py-1 bg-rose-600 text-white rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-lg shadow-rose-600/40">
-              <span className="w-2.5 h-2.5 rounded-full bg-white animate-ping" />
-              <span>● EN VIVO</span>
-            </div>
+      {/* MIDDLE SECTION: RECIÉN AGREGADOS */}
+      <div className="flex-1 flex flex-col justify-between bg-zinc-950/80 border border-rose-900/50 rounded-3xl p-6 shadow-xl relative z-10 my-2 min-h-0">
+        <div className="flex items-center justify-between pb-4 border-b border-rose-900/40">
+          <div className="flex items-center gap-3 text-rose-500 font-extrabold text-lg sm:text-xl tracking-wider uppercase">
+            <Flame className="w-6 h-6 fill-rose-500" />
+            <span>PELÍCULAS RECIÉN AGREGADAS</span>
           </div>
-
-          {/* Main Hero Text */}
-          <div className="relative z-10 space-y-2 max-w-xl my-auto">
-            <h1 className="text-3xl sm:text-5xl md:text-6xl font-black italic tracking-tight text-white leading-none drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">
-              FÚTBOL <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-cyan-100 to-blue-400">
-                SIN CORTES
-              </span>
-            </h1>
-            <p className="text-xs sm:text-sm font-extrabold text-cyan-200 tracking-wide uppercase drop-shadow">
-              DISFRUTÁ TODOS LOS PARTIDOS EN LA MEJOR CALIDAD 4K
-            </p>
-          </div>
-
-          {/* Bottom Action Prompt */}
-          <div className="relative z-10 flex items-center gap-2 text-xs font-extrabold text-cyan-300">
-            <div className="px-3 py-1.5 bg-cyan-950/90 border border-cyan-500/80 rounded-xl flex items-center gap-2 shadow-md">
-              <Play className="w-3.5 h-3.5 fill-cyan-400 text-cyan-400" />
-              <span>REPRODUCIR CANAL EN VIVO</span>
-            </div>
-          </div>
+          <button
+            onClick={() => onNavigate('movies')}
+            className="tv-focusable px-4 py-2 bg-rose-950/50 text-rose-400 hover:text-rose-200 text-sm font-bold flex items-center gap-1.5 cursor-pointer rounded-xl border border-rose-800/40 transition"
+          >
+            <span>Ver Catálogo Completo</span>
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
 
-        {/* Right Section: RECIÉN AGREGADOS */}
-        <div className="col-span-12 lg:col-span-5 flex flex-col justify-between bg-zinc-950/80 border border-rose-900/50 rounded-3xl p-3.5 sm:p-4 shadow-xl relative">
-          <div className="flex items-center justify-between pb-2 border-b border-rose-900/40">
-            <div className="flex items-center gap-2 text-rose-500 font-extrabold text-xs sm:text-sm tracking-wider uppercase">
-              <Flame className="w-4 h-4 fill-rose-500" />
-              <span>RECIÉN AGREGADOS</span>
-            </div>
-            <button
-              onClick={() => onNavigate('movies')}
-              className="tv-focusable text-rose-400 hover:text-rose-200 text-xs font-bold flex items-center gap-0.5 cursor-pointer"
-            >
-              <span>Ver Catálogo</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-
-          {/* 2x2 Movie Cards Grid */}
-          <div className="grid grid-cols-2 gap-2 sm:gap-3 flex-1 my-2 min-h-0">
-            {recentMovies.length > 0 ? (
-              recentMovies.slice(0, 4).map((movie) => (
-                <div
-                  key={movie.stream_id}
-                  onClick={() => onPlayStream({
-                    streamId: movie.stream_id,
-                    title: movie.name,
-                    url: iptvApi.buildStreamUrl('movie', movie.stream_id, movie.container_extension || 'mp4', username),
-                    type: 'movie',
-                    poster: movie.stream_icon,
-                    category: movie.category_id
-                  })}
-                  className="tv-focusable group relative rounded-2xl overflow-hidden border border-zinc-800/80 hover:border-rose-500 bg-zinc-900 transition-all duration-300 shadow-md cursor-pointer flex flex-col"
-                >
-                  <img
-                    src={movie.stream_icon}
-                    alt={movie.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity flex items-end p-2 sm:p-2.5">
-                    <span className="text-[11px] sm:text-xs font-black text-white leading-tight uppercase tracking-wider drop-shadow line-clamp-2">
-                      {movie.name}
-                    </span>
-                  </div>
+        {/* 1x6 Movie Cards Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 flex-1 mt-4 min-h-0">
+          {recentMovies.length > 0 ? (
+            recentMovies.slice(0, 6).map((movie) => (
+              <div
+                key={movie.stream_id}
+                onClick={() => onPlayStream({
+                  streamId: movie.stream_id,
+                  title: movie.name,
+                  url: iptvApi.buildStreamUrl('movie', movie.stream_id, movie.container_extension || 'mp4', username),
+                  type: 'movie',
+                  poster: movie.stream_icon,
+                  category: movie.category_id
+                })}
+                className="tv-focusable group relative rounded-2xl overflow-hidden border border-zinc-800/80 hover:border-rose-500 bg-zinc-900 transition-all duration-300 shadow-lg cursor-pointer flex flex-col"
+              >
+                <img
+                  src={movie.stream_icon}
+                  alt={movie.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                  <span className="text-xs sm:text-sm font-black text-white leading-tight uppercase tracking-tight drop-shadow line-clamp-2">
+                    {movie.name}
+                  </span>
                 </div>
-              ))
-            ) : (
-              [1, 2, 3, 4].map((i) => (
-                <div key={i} className="rounded-2xl bg-zinc-900/50 border border-zinc-800 animate-pulse" />
-              ))
-            )}
-          </div>
+              </div>
+            ))
+          ) : (
+            [1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="rounded-2xl bg-zinc-900/50 border border-zinc-800 animate-pulse" />
+            ))
+          )}
         </div>
       </div>
 
@@ -642,14 +552,14 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
         {/* 4. EVENTOS */}
         <button
-          onClick={() => onNavigate('anime')}
+          onClick={() => onNavigate('events')}
           className="tv-focusable group relative flex flex-col items-center justify-center py-3.5 sm:py-5 px-2 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-blue-700 via-blue-800 to-blue-950 border border-blue-400/80 shadow-[0_0_20px_rgba(59,130,246,0.35)] hover:border-rose-400 hover:shadow-[0_0_30px_rgba(225,29,72,0.7)] hover:scale-105 transition-all duration-300 cursor-pointer active:scale-95"
         >
           <div className="w-10 h-8 sm:w-12 sm:h-10 rounded-xl overflow-hidden mb-1.5 flex items-center justify-center bg-blue-950 border border-blue-400/60 group-hover:border-rose-400">
             <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-rose-400 stroke-[2.5]" />
           </div>
           <span className="font-black text-xs sm:text-sm md:text-base text-white tracking-wider uppercase drop-shadow">
-            EVENTOS
+            EVENTOS DEPORTIVOS
           </span>
         </button>
       </div>

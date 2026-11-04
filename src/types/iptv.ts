@@ -168,7 +168,7 @@ export interface CentralizedConfig {
   appUpdate?: AppUpdateConfig;
 }
 
-export type ActiveSection = 'home' | 'live' | 'series' | 'movies' | 'anime' | 'especial';
+export type ActiveSection = 'home' | 'live' | 'series' | 'movies' | 'events';
 export type DeviceViewMode = 'tv' | 'mobile' | 'web';
 
 export interface PlaybackState {
