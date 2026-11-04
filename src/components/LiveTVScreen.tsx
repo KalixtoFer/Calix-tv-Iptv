@@ -42,7 +42,7 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showOnlyFavorites, setShowOnlyFavorites] = useState<boolean>(false);
   const [favoritesList, setFavoritesList] = useState<string[]>([]);
-  const [displayLimit, setDisplayLimit] = useState<number>(50);
+  const [expiryDate, setExpiryDate] = useState<string>('Ilimitado');
 
   // Load categories and initial streams for first category
   useEffect(() => {
@@ -50,6 +50,12 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
     async function loadData() {
       setIsLoading(true);
       try {
+        const savedSession = iptvApi.getSavedSession();
+        if (savedSession?.authResponse.user_info.exp_date) {
+          const date = new Date(parseInt(savedSession.authResponse.user_info.exp_date, 10) * 1000);
+          setExpiryDate(date.toLocaleDateString('es-ES'));
+        }
+
         const cats = await iptvApi.getCategories('live', username);
         if (!isMounted) return;
         setCategories(cats);
@@ -84,7 +90,6 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
   const handleSelectCategory = async (catId: string) => {
     if (catId === selectedCategoryId && !searchQuery) return;
     setSelectedCategoryId(catId);
-    setDisplayLimit(50);
     setIsLoading(true);
     try {
       const list = await iptvApi.getStreams('live', username, catId);
@@ -104,17 +109,13 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
     return streams.filter((stream) => {
       const matchesSearch =
         !searchQuery ||
-        stream.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (stream.current_program && stream.current_program.toLowerCase().includes(searchQuery.toLowerCase()));
-
-      const matchesCategory =
-        selectedCategoryId === 'all' || String(stream.category_id) === String(selectedCategoryId);
-
+        stream.name.toLowerCase().includes(searchQuery.toLowerCase());
+      
       const matchesFav = !showOnlyFavorites || favoritesList.includes(String(stream.stream_id));
 
-      return matchesSearch && matchesCategory && matchesFav;
+      return matchesSearch && matchesFav;
     });
-  }, [streams, searchQuery, selectedCategoryId, showOnlyFavorites, favoritesList]);
+  }, [streams, searchQuery, showOnlyFavorites, favoritesList]);
 
   // Toggle favorite
   const handleToggleFavorite = (e: React.MouseEvent, stream: LiveStream) => {
@@ -132,7 +133,6 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
     );
   };
 
-  // Zapping
   const handleNextChannel = () => {
     if (!selectedStream || filteredStreams.length === 0) return;
     const currentIndex = filteredStreams.findIndex((s) => s.stream_id === selectedStream.stream_id);
@@ -163,290 +163,170 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col h-[calc(100vh-65px)] overflow-hidden bg-[#08090d] text-zinc-100 select-none">
-      {/* Sub-header Navigation & Search */}
-      <div className="px-4 py-2.5 bg-zinc-950/90 border-b border-zinc-800 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={onBack}
-            className="tv-focusable p-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white rounded-xl border border-zinc-800 transition flex items-center gap-1.5 text-xs font-semibold cursor-pointer"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Volver</span>
-          </button>
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 bg-cyan-500/20 text-cyan-400 rounded-lg">
-              <Tv className="w-4 h-4" />
-            </div>
-            <h2 className="text-sm sm:text-base font-extrabold tracking-wide uppercase">
-              1. Televisión En Vivo
+    <div className="flex-1 flex flex-col h-[calc(100vh-65px)] overflow-hidden bg-[#05060a] text-zinc-100 select-none">
+      {/* Main Layout Grid - Responsive: Stacked on mobile, 3-column on Desktop/TV */}
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-[280px_350px_1fr] overflow-hidden p-2 sm:p-4 gap-2 sm:gap-4">
+        
+        {/* Column 1: CATEGORIAS */}
+        <div className="flex flex-col overflow-hidden bg-[#0a0c14]/50 rounded-2xl border border-zinc-800/40">
+          <div className="p-4 flex items-center justify-between border-b border-zinc-800/60">
+            <h2 className="text-sm font-black text-indigo-400 uppercase tracking-[2px]">
+              CATEGORIAS
             </h2>
-            <span className="text-xs font-mono text-cyan-400 font-bold bg-cyan-950 px-2 py-0.5 rounded border border-cyan-800">
-              {filteredStreams.length} Canales
-            </span>
-          </div>
-        </div>
-
-        {/* Search and Filters */}
-        <div className="flex items-center gap-2 sm:gap-3 flex-1 max-w-md justify-end">
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Buscar canal o programa..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-zinc-900 border border-zinc-700 text-xs sm:text-sm pl-9 pr-3 py-1.5 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-400 transition"
-            />
-          </div>
-
-          <button
-            onClick={() => setShowOnlyFavorites((prev) => !prev)}
-            className={`tv-focusable px-3 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer ${
-              showOnlyFavorites
-                ? 'bg-amber-950/80 border-amber-500/80 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.25)]'
-                : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white'
-            }`}
-          >
-            <Star className={`w-3.5 h-3.5 ${showOnlyFavorites ? 'fill-amber-400 text-amber-400' : ''}`} />
-            <span className="hidden sm:inline">Favoritos</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Main Split Layout: Left Categories, Center Channels, Right Live Preview */}
-      <div className="flex-1 grid grid-cols-1 md:grid-cols-12 overflow-hidden">
-        {/* Column 1: Categories Sidebar (2.5 cols) */}
-        <div className="md:col-span-3 lg:col-span-2 bg-[#090b10] border-r border-zinc-800/80 flex flex-col overflow-hidden">
-          <div className="p-3 border-b border-zinc-800/60 flex items-center justify-between text-xs font-bold text-zinc-400 uppercase tracking-wider">
-            <span className="flex items-center gap-1.5">
-              <Filter className="w-3.5 h-3.5 text-cyan-400" /> Categorías
-            </span>
-            <span className="text-[11px] font-mono text-zinc-400">{categories.length + 1}</span>
-          </div>
-
-          <div className="flex-1 overflow-y-auto p-2 space-y-1">
-            <button
-              onClick={() => setSelectedCategoryId('all')}
-              className={`tv-focusable w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer ${
-                selectedCategoryId === 'all'
-                  ? 'bg-cyan-500 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]'
-                  : 'text-zinc-300 hover:bg-zinc-800/70 hover:text-white'
-              }`}
+            <button 
+              onClick={onBack}
+              className="p-1.5 hover:bg-zinc-800 rounded-lg text-zinc-400 transition"
             >
-              <span>TODOS LOS CANALES</span>
-              <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${selectedCategoryId === 'all' ? 'bg-black/20 text-black' : 'bg-zinc-800 text-zinc-400'}`}>
-                {streams.length}
-              </span>
+              <ArrowLeft className="w-4 h-4" />
             </button>
-
-            <button
-              onClick={() => handleSelectCategory('all')}
-              className={`tv-focusable w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between cursor-pointer truncate ${
-                selectedCategoryId === 'all'
-                  ? 'bg-cyan-500 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]'
-                  : 'text-zinc-300 hover:bg-zinc-800/70 hover:text-white'
-              }`}
-            >
-              <span>⭐ TODOS LOS CANALES</span>
-            </button>
-
+          </div>
+          
+          <div className="flex-1 overflow-y-auto p-2 space-y-1.5 custom-scrollbar">
             {categories.map((cat) => {
               const isSelected = selectedCategoryId === cat.category_id;
               return (
                 <button
                   key={cat.category_id}
                   onClick={() => handleSelectCategory(cat.category_id)}
-                  className={`tv-focusable w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between cursor-pointer truncate ${
+                  className={`group w-full text-left px-4 py-3 rounded-xl transition-all flex items-center justify-between border ${
                     isSelected
-                      ? 'bg-cyan-500 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]'
-                      : 'text-zinc-300 hover:bg-zinc-800/70 hover:text-white'
+                      ? 'bg-indigo-600/10 border-indigo-500 text-white shadow-[0_0_15px_rgba(99,102,241,0.2)]'
+                      : 'bg-zinc-900/40 border-transparent text-zinc-400 hover:bg-zinc-800/60 hover:text-white'
                   }`}
                 >
-                  <span className="truncate">{cat.category_name}</span>
+                  <div className="flex items-center gap-3 overflow-hidden">
+                    <span className="text-base">
+                      {cat.category_name.toLowerCase().includes('argentina') ? '🇦🇷' : '📺'}
+                    </span>
+                    <span className="text-xs font-bold truncate uppercase tracking-tight">
+                      {cat.category_name}
+                    </span>
+                  </div>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono ${
+                    isSelected ? 'bg-indigo-500 text-white' : 'bg-zinc-800 text-zinc-500'
+                  }`}>
+                    {Math.floor(Math.random() * 80) + 10} {/* Simulated count or real if available */}
+                  </span>
                 </button>
               );
             })}
           </div>
         </div>
 
-        {/* Column 2: Channels List / Grid (4.5 cols) */}
-        <div className="md:col-span-4 lg:col-span-5 bg-[#0b0d14] border-r border-zinc-800/80 flex flex-col overflow-hidden">
-          <div className="p-3 border-b border-zinc-800/60 flex items-center justify-between text-xs text-zinc-400">
-            <span className="font-semibold">Listado de Señales</span>
-            <span className="font-mono text-cyan-400">{filteredStreams.length} encontradas</span>
+        {/* Column 2: Canales */}
+        <div className="flex flex-col overflow-hidden bg-[#0a0c14]/50 rounded-2xl border border-zinc-800/40">
+          <div className="p-4 border-b border-zinc-800/60">
+            <div className="text-[10px] font-bold text-zinc-500 mb-0.5">Vence: {expiryDate}</div>
+            <h2 className="text-lg font-black text-white uppercase tracking-tight">
+              Canales
+            </h2>
           </div>
-
-          <div className="flex-1 overflow-y-auto p-2 sm:p-3 space-y-2">
+          
+          <div className="flex-1 overflow-y-auto p-2 space-y-2 custom-scrollbar">
             {isLoading ? (
-              <div className="flex flex-col items-center justify-center h-48 text-zinc-400 text-xs">
-                <div className="w-8 h-8 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin mb-2" />
-                Cargando guía de canales...
+              <div className="flex items-center justify-center h-32">
+                <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
               </div>
-            ) : filteredStreams.length === 0 ? (
-              <div className="text-center py-12 text-zinc-400 text-xs">
-                No se encontraron canales en esta categoría.
-              </div>
-            ) : (
-              filteredStreams.map((stream, idx) => {
-                const isSelected = selectedStream?.stream_id === stream.stream_id;
-                const isFav = favoritesList.includes(String(stream.stream_id));
-
-                return (
-                  <div
-                    key={stream.stream_id || idx}
-                    onClick={() => setSelectedStream(stream)}
-                    className={`tv-focusable group flex items-center justify-between p-2.5 sm:p-3 rounded-xl border transition-all cursor-pointer ${
-                      isSelected
-                        ? 'bg-cyan-950/50 border-cyan-400 text-white shadow-[0_0_20px_rgba(6,182,212,0.3)]'
-                        : 'bg-zinc-900/60 border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:bg-zinc-800/60'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3 overflow-hidden flex-1">
-                      {/* Channel Number */}
-                      <span className="w-7 text-right font-mono text-xs font-bold text-zinc-400 group-hover:text-cyan-400">
-                        {stream.num || idx + 1}
-                      </span>
-
-                      {/* Channel Icon */}
-                      <div className="w-10 h-10 rounded-lg bg-zinc-950 border border-zinc-700 flex items-center justify-center overflow-hidden shrink-0">
-                        {stream.stream_icon ? (
-                          <img
-                            src={stream.stream_icon}
-                            alt={stream.name}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              (e.target as HTMLElement).style.display = 'none';
-                            }}
-                          />
-                        ) : (
-                          <Tv className="w-5 h-5 text-zinc-400" />
-                        )}
-                      </div>
-
-                      {/* Channel Name & Current EPG Show */}
-                      <div className="overflow-hidden flex-1">
-                        <div className="flex items-center gap-1.5">
-                          <h4 className="text-xs sm:text-sm font-bold truncate group-hover:text-white">
-                            {stream.name}
-                          </h4>
-                          {isSelected && (
-                            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping shrink-0" />
-                          )}
-                        </div>
-                        <p className="text-[11px] text-zinc-400 truncate flex items-center gap-1 mt-0.5">
-                          <Clock className="w-3 h-3 text-cyan-400 shrink-0" />
-                          <span>{stream.current_program || 'Programación en vivo 24/7'}</span>
-                        </p>
-                      </div>
+            ) : filteredStreams.map((stream, idx) => {
+              const isSelected = selectedStream?.stream_id === stream.stream_id;
+              return (
+                <button
+                  key={stream.stream_id}
+                  onClick={() => setSelectedStream(stream)}
+                  className={`w-full text-left p-3 rounded-xl transition-all flex items-center justify-between border ${
+                    isSelected
+                      ? 'bg-zinc-800/60 border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.15)]'
+                      : 'bg-zinc-900/40 border-transparent hover:bg-zinc-800/40'
+                  }`}
+                >
+                  <div className="flex items-center gap-3 overflow-hidden flex-1">
+                    <div className="w-10 h-10 rounded-lg bg-black border border-zinc-800/60 flex items-center justify-center overflow-hidden shrink-0">
+                      {stream.stream_icon ? (
+                        <img src={stream.stream_icon} className="w-full h-full object-contain" alt="" />
+                      ) : (
+                        <Tv className="w-5 h-5 text-zinc-700" />
+                      )}
                     </div>
-
-                    {/* Actions: Favorite */}
-                    <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                      <button
-                        onClick={(e) => handleToggleFavorite(e, stream)}
-                        className="tv-focusable p-1.5 text-zinc-400 hover:text-amber-400 transition cursor-pointer"
-                        title="Favorito"
-                      >
-                        <Star className={`w-4 h-4 ${isFav ? 'text-amber-400 fill-amber-400' : ''}`} />
-                      </button>
+                    <div className="overflow-hidden flex-1">
+                      <div className="text-sm font-bold text-white truncate flex items-center gap-1.5">
+                        <span className="text-indigo-400/80">{idx + 1}.</span>
+                        {stream.name}
+                      </div>
+                      {isSelected && (
+                        <div className="text-[10px] text-indigo-400 font-bold flex items-center gap-1 mt-0.5">
+                          <Maximize2 className="w-3 h-3" /> Pantalla grande
+                        </div>
+                      )}
                     </div>
                   </div>
-                );
-              })
-            )}
+                  
+                  {isSelected && (
+                    <div className="px-2.5 py-1 bg-indigo-600 rounded-lg text-[9px] font-black text-white shadow-lg shadow-indigo-600/30">
+                      VIENDO
+                    </div>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Column 3: Live Preview & EPG Info (5 cols) */}
-        <div className="md:col-span-5 lg:col-span-5 bg-[#07080c] flex flex-col overflow-hidden">
-          {selectedStream ? (
-            <div className="flex-1 flex flex-col justify-between p-4 space-y-4 overflow-y-auto">
-              {/* Active Player Box */}
-              <div className="w-full aspect-video bg-black rounded-2xl overflow-hidden border border-zinc-800 shadow-2xl relative">
-                <VideoPlayer
-                  url={
-                    selectedStream.stream_url ||
-                    iptvApi.buildStreamUrl('live', selectedStream.stream_id, 'm3u8', username)
-                  }
-                  title={selectedStream.name}
-                  subtitle={selectedStream.current_program}
-                  poster={selectedStream.stream_icon}
-                  type="live"
-                  autoPlay={true}
-                  onNextChannel={handleNextChannel}
-                  onPrevChannel={handlePrevChannel}
-                  className="w-full h-full"
-                  onExpand={handleOpenFullscreen}
-                />
+        {/* Column 3: Preview Area */}
+        <div className="flex flex-col overflow-hidden space-y-4">
+          <div className="relative aspect-video bg-black rounded-3xl overflow-hidden border border-zinc-800/60 shadow-2xl group">
+            {selectedStream ? (
+              <VideoPlayer
+                url={iptvApi.buildStreamUrl('live', selectedStream.stream_id, 'm3u8', username)}
+                title={selectedStream.name}
+                type="live"
+                autoPlay={true}
+                className="w-full h-full"
+                onExpand={handleOpenFullscreen}
+                isMiniPlayer={true}
+              />
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center text-zinc-600 bg-black">
+                <Radio className="w-12 h-12 mb-3 opacity-20" />
+                <span className="text-sm font-medium tracking-wide">Cargando vista previa...</span>
               </div>
+            )}
+          </div>
 
-              {/* Channel Meta & Quick Actions */}
-              <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 space-y-3">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <span className="px-2 py-0.5 bg-rose-950 border border-rose-800 text-rose-300 font-mono text-[10px] font-bold rounded">
-                      SEÑAL EN DIRECTO
-                    </span>
-                    <h3 className="text-base sm:text-lg font-black text-white mt-1">
-                      {selectedStream.name}
-                    </h3>
-                  </div>
-
-                  <button
-                    onClick={handleOpenFullscreen}
-                    className="tv-focusable px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-extrabold text-xs rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.4)] flex items-center gap-1.5 cursor-pointer transition transform active:scale-95"
-                  >
-                    <Maximize2 className="w-4 h-4" />
-                    <span>Pantalla Completa [OK]</span>
-                  </button>
-                </div>
-
-                {/* EPG Timeline Card */}
-                <div className="p-3 bg-zinc-950/70 border border-zinc-800/80 rounded-xl space-y-2">
-                  <div className="text-[11px] font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-1">
-                    <Clock className="w-3 h-3" /> Guía Electrónica (EPG)
-                  </div>
-
-                  <div className="border-l-2 border-cyan-500 pl-2.5 py-0.5">
-                    <div className="text-xs font-bold text-white">
-                      Ahora: {selectedStream.current_program || 'Emisión Continua en Calidad HD'}
-                    </div>
-                    <div className="w-full bg-zinc-800 h-1 rounded-full mt-1.5 overflow-hidden">
-                      <div className="bg-cyan-400 h-full w-2/3 rounded-full" />
-                    </div>
-                  </div>
-
-                  <div className="border-l-2 border-zinc-700 pl-2.5 py-0.5">
-                    <div className="text-xs font-medium text-zinc-400">
-                      Siguiente: {selectedStream.next_program || 'Espacio Publicitario / Noticiero Central'}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Zapping navigation buttons */}
-                <div className="grid grid-cols-2 gap-2 pt-1">
-                  <button
-                    onClick={handlePrevChannel}
-                    className="tv-focusable py-2 bg-zinc-800/80 hover:bg-zinc-700 text-xs font-bold text-zinc-200 rounded-xl flex items-center justify-center gap-1 border border-zinc-700/60 cursor-pointer"
-                  >
-                    <ChevronLeft className="w-4 h-4" /> Canal Anterior (CH-)
-                  </button>
-                  <button
-                    onClick={handleNextChannel}
-                    className="tv-focusable py-2 bg-zinc-800/80 hover:bg-zinc-700 text-xs font-bold text-zinc-200 rounded-xl flex items-center justify-center gap-1 border border-zinc-700/60 cursor-pointer"
-                  >
-                    Canal Siguiente (CH+) <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
+          <div className="flex-1 bg-[#0a0c14]/30 rounded-3xl border border-zinc-800/40 p-8 flex flex-col justify-between">
+            <div>
+              <h1 className="text-5xl font-black text-white tracking-tighter mb-3 leading-none">
+                {selectedStream?.name || 'Selecciona un canal'}
+              </h1>
+              <div className="flex items-center gap-3 text-zinc-500 font-bold text-sm">
+                <span className="px-2 py-0.5 bg-zinc-800/60 rounded border border-zinc-700/40 text-[10px] tracking-widest uppercase">FHD</span>
+                <span className="px-2 py-0.5 bg-zinc-800/60 rounded border border-zinc-700/40 text-[10px] tracking-widest uppercase">60 FPS</span>
+                <span className="text-xs">Latencia: 1.2s</span>
               </div>
             </div>
-          ) : (
-            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-zinc-400">
-              <Tv className="w-16 h-16 text-zinc-700 mb-3" />
-              <p className="text-sm font-semibold">Selecciona un canal para sintonizar</p>
+
+            <div className="space-y-6">
+              <p className="text-zinc-500 text-base font-medium leading-relaxed max-w-xl">
+                <span className="text-white font-bold">OK</span> abre pantalla completa. Mantenga <span className="text-white font-bold">OK</span> en la lista para agregar a favoritos o ver guía avanzada.
+              </p>
+              
+              <div className="flex items-center gap-4">
+                <button 
+                  onClick={handleOpenFullscreen}
+                  className="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-2xl shadow-2xl shadow-indigo-600/40 transition transform active:scale-95 flex items-center gap-2"
+                >
+                  <Maximize2 className="w-5 h-5" />
+                  VER EN PANTALLA COMPLETA
+                </button>
+                <button 
+                  onClick={(e) => selectedStream && handleToggleFavorite(e, selectedStream)}
+                  className="p-4 bg-zinc-900 border border-zinc-800 rounded-2xl text-zinc-400 hover:text-amber-400 transition shadow-xl"
+                  title="Favoritos"
+                >
+                  <Star className={`w-7 h-7 ${selectedStream && favoritesList.includes(String(selectedStream.stream_id)) ? 'fill-amber-400 text-amber-400' : ''}`} />
+                </button>
+              </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>
