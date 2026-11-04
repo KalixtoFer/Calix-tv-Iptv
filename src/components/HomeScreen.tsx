@@ -7,15 +7,21 @@ import {
   Tv,
   Clapperboard,
   Monitor,
+  Smartphone,
   Star,
   ChevronRight,
   Play,
   Flame,
+  Home,
+  Film,
+  Sparkles,
 } from 'lucide-react';
-import { ActiveSection, CentralizedConfig } from '../types/iptv';
+import { ActiveSection, CentralizedConfig, DeviceViewMode } from '../types/iptv';
 
 interface HomeScreenProps {
   config: CentralizedConfig;
+  viewMode?: DeviceViewMode;
+  onChangeViewMode?: (mode: DeviceViewMode) => void;
   onNavigate: (section: ActiveSection) => void;
   onPlayStream: (stream: {
     streamId: string | number;
@@ -32,6 +38,8 @@ interface HomeScreenProps {
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
   config,
+  viewMode = 'tv',
+  onChangeViewMode,
   onNavigate,
   onPlayStream,
   onOpenSettings,
@@ -82,12 +90,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     {
       id: 'm3',
       title: 'TOP GUN MAVERICK',
-      imageUrl: 'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=600&q=80',
+      imageUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80',
     },
     {
       id: 'm4',
-      title: 'JURASSIC WORLD EL RENACER',
-      imageUrl: 'https://images.unsplash.com/photo-1534567153574-2b12153a87f0?auto=format&fit=crop&w=600&q=80',
+      title: 'JURASSIC WORLD',
+      imageUrl: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=600&q=80',
     },
   ];
 
@@ -95,23 +103,308 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     const featured = config.featuredStream;
     onPlayStream({
       streamId: featured?.streamId || 'demo-live-1',
-      title: featured?.name || 'Fútbol En Vivo HD',
-      url: featured?.streamUrl || 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+      title: featured?.name || 'Fútbol Sin Cortes - En Vivo HD',
+      url:
+        featured?.streamUrl ||
+        'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
       type: 'live',
       poster: featured?.poster,
       category: 'Deportes En Vivo',
     });
   };
 
+  // =========================================================================
+  // 1. MOBILE SMARTPHONE VIEW (Diseño optimizado para celulares verticales/horizontales)
+  // =========================================================================
+  if (viewMode === 'mobile') {
+    return (
+      <div className="flex-1 min-h-screen bg-[#030612] text-white p-3 sm:p-4 flex flex-col pb-24 overflow-y-auto select-none relative">
+        {/* Ambient Glow */}
+        <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full h-80 bg-cyan-600/10 rounded-full blur-[120px] pointer-events-none" />
+
+        {/* Top Header Mobile */}
+        <div className="flex items-center justify-between pb-3 border-b border-zinc-800/80 z-20">
+          <div className="flex items-center gap-2.5">
+            <img
+              src="/logo.png"
+              alt="CALIX TV"
+              className="h-9 sm:h-10 w-auto object-contain drop-shadow-[0_0_15px_rgba(6,182,212,0.6)]"
+            />
+            <div>
+              <span className="font-black text-lg tracking-tight text-white block leading-none">
+                CALIX TV
+              </span>
+              <span className="text-[10px] font-bold text-cyan-400 tracking-wider">
+                Móvil • Tu Servicio Digital
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {/* Mode Switcher Pill (3 Versiones: Móvil, TV, PC) */}
+            {onChangeViewMode && (
+              <div className="flex items-center bg-zinc-900 border border-zinc-700/80 rounded-xl p-0.5 text-[11px] font-bold">
+                <button
+                  onClick={() => onChangeViewMode('mobile')}
+                  className="px-2 py-1 rounded-lg flex items-center gap-1 transition bg-cyan-500 text-black shadow font-black"
+                >
+                  <Smartphone className="w-3 h-3" />
+                  <span>Móvil</span>
+                </button>
+                <button
+                  onClick={() => onChangeViewMode('tv')}
+                  className="px-2 py-1 rounded-lg flex items-center gap-1 transition text-zinc-400 hover:text-white"
+                >
+                  <Tv className="w-3 h-3" />
+                  <span>TV</span>
+                </button>
+                <button
+                  onClick={() => onChangeViewMode('web')}
+                  className="px-2 py-1 rounded-lg flex items-center gap-1 transition text-zinc-400 hover:text-white"
+                >
+                  <Monitor className="w-3 h-3" />
+                  <span>PC</span>
+                </button>
+              </div>
+            )}
+
+            <button
+              onClick={onOpenSettings}
+              className="w-8 h-8 rounded-xl bg-zinc-900 border border-zinc-700 flex items-center justify-center text-zinc-300 hover:text-cyan-400"
+              title="Ajustes"
+            >
+              <Settings className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Hero Banner: Fútbol Sin Cortes (Mobile 16:9 proportioned) */}
+        <div
+          onClick={handleOpenLiveStream}
+          className="my-3 rounded-2xl bg-gradient-to-r from-blue-950 via-zinc-950 to-black border border-cyan-500/70 p-4 relative overflow-hidden shadow-xl shadow-cyan-950/40 cursor-pointer active:scale-98 transition"
+        >
+          <div
+            className="absolute inset-0 bg-cover bg-center opacity-70"
+            style={{
+              backgroundImage: `url('https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=800&q=80')`,
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent" />
+
+          <div className="relative z-10 space-y-2">
+            <span className="px-2.5 py-0.5 rounded-full bg-rose-600 text-white font-mono text-[10px] font-black uppercase inline-flex items-center gap-1 shadow">
+              <span className="w-2 h-2 rounded-full bg-white animate-ping" />
+              ● EN VIVO
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-black italic tracking-tight text-white leading-tight">
+              FÚTBOL <span className="text-cyan-400">SIN CORTES</span>
+            </h2>
+            <p className="text-[11px] text-cyan-200 font-bold uppercase tracking-wider">
+              Todos los partidos en 4K 60FPS
+            </p>
+            <div className="pt-1">
+              <span className="px-3 py-1.5 rounded-xl bg-cyan-500 text-black text-xs font-black inline-flex items-center gap-1.5 shadow-md shadow-cyan-500/30">
+                <Play className="w-3.5 h-3.5 fill-black" />
+                VER EN VIVO AHORA
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* 5 Neon Category Touch Tiles */}
+        <div className="space-y-1.5 my-2">
+          <h3 className="text-xs font-black uppercase tracking-wider text-zinc-400 px-1">
+            Secciones Principales
+          </h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+            {/* 1. TV En Vivo */}
+            <button
+              onClick={() => onNavigate('live')}
+              className="p-3.5 rounded-2xl bg-gradient-to-br from-blue-900/80 to-cyan-950/90 border border-cyan-400/80 shadow-[0_0_15px_rgba(6,182,212,0.3)] flex items-center gap-3 active:scale-95 transition text-left cursor-pointer"
+            >
+              <div className="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-400 flex items-center justify-center shrink-0">
+                <Tv className="w-5 h-5 text-cyan-400" />
+              </div>
+              <div className="min-w-0">
+                <span className="font-black text-xs sm:text-sm text-white block truncate">
+                  TV EN VIVO
+                </span>
+                <span className="text-[10px] text-cyan-300 font-semibold block truncate">
+                  Canales 24/7
+                </span>
+              </div>
+            </button>
+
+            {/* 2. Películas */}
+            <button
+              onClick={() => onNavigate('movies')}
+              className="p-3.5 rounded-2xl bg-gradient-to-br from-blue-950/90 to-indigo-950/90 border border-blue-400/80 shadow-[0_0_15px_rgba(59,130,246,0.3)] flex items-center gap-3 active:scale-95 transition text-left cursor-pointer"
+            >
+              <div className="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-400 flex items-center justify-center shrink-0">
+                <Clapperboard className="w-5 h-5 text-blue-400" />
+              </div>
+              <div className="min-w-0">
+                <span className="font-black text-xs sm:text-sm text-white block truncate">
+                  PELÍCULAS
+                </span>
+                <span className="text-[10px] text-blue-300 font-semibold block truncate">
+                  Estrenos VOD
+                </span>
+              </div>
+            </button>
+
+            {/* 3. Series */}
+            <button
+              onClick={() => onNavigate('series')}
+              className="p-3.5 rounded-2xl bg-gradient-to-br from-indigo-950/90 to-purple-950/90 border border-indigo-400/80 shadow-[0_0_15px_rgba(99,102,241,0.3)] flex items-center gap-3 active:scale-95 transition text-left cursor-pointer"
+            >
+              <div className="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-400 flex items-center justify-center shrink-0">
+                <Monitor className="w-5 h-5 text-indigo-400" />
+              </div>
+              <div className="min-w-0">
+                <span className="font-black text-xs sm:text-sm text-white block truncate">
+                  SERIES
+                </span>
+                <span className="text-[10px] text-indigo-300 font-semibold block truncate">
+                  Temporadas HD
+                </span>
+              </div>
+            </button>
+
+            {/* 4. Anime */}
+            <button
+              onClick={() => onNavigate('anime')}
+              className="p-3.5 rounded-2xl bg-gradient-to-br from-amber-950/90 to-orange-950/90 border border-amber-400/80 shadow-[0_0_15px_rgba(245,158,11,0.3)] flex items-center gap-3 active:scale-95 transition text-left cursor-pointer"
+            >
+              <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-400 flex items-center justify-center shrink-0">
+                <Sparkles className="w-5 h-5 text-amber-400" />
+              </div>
+              <div className="min-w-0">
+                <span className="font-black text-xs sm:text-sm text-white block truncate">
+                  ANIME
+                </span>
+                <span className="text-[10px] text-amber-300 font-semibold block truncate">
+                  Capítulos & OVAS
+                </span>
+              </div>
+            </button>
+
+            {/* 5. Especiales (Full width in 2-col) */}
+            <button
+              onClick={() => onNavigate('especial')}
+              className="col-span-2 sm:col-span-1 p-3.5 rounded-2xl bg-gradient-to-br from-yellow-950/90 to-amber-950/90 border border-yellow-400/80 shadow-[0_0_15px_rgba(234,179,8,0.3)] flex items-center gap-3 active:scale-95 transition text-left cursor-pointer"
+            >
+              <div className="w-10 h-10 rounded-xl bg-yellow-500/20 border border-yellow-400 flex items-center justify-center shrink-0">
+                <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+              </div>
+              <div className="min-w-0">
+                <span className="font-black text-xs sm:text-sm text-white block truncate">
+                  ESPECIALES
+                </span>
+                <span className="text-[10px] text-yellow-300 font-semibold block truncate">
+                  Eventos VIP & PPV
+                </span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {/* Featured Movies Carousel (Horizontal swipe without distortion) */}
+        <div className="my-2 space-y-2">
+          <div className="flex items-center justify-between px-1">
+            <span className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-1">
+              <Star className="w-3.5 h-3.5 fill-amber-400" />
+              Películas Destacadas
+            </span>
+            <button
+              onClick={() => onNavigate('movies')}
+              className="text-[11px] font-bold text-cyan-400 flex items-center"
+            >
+              <span>Ver todas</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none">
+            {featuredMovies.map((movie) => (
+              <div
+                key={movie.id}
+                onClick={() => onNavigate('movies')}
+                className="w-28 sm:w-32 shrink-0 aspect-[2/3] rounded-xl overflow-hidden border border-zinc-800 bg-zinc-900 relative shadow-md active:scale-95 transition cursor-pointer"
+              >
+                <img
+                  src={movie.imageUrl}
+                  alt={movie.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent flex items-end p-1.5">
+                  <span className="text-[10px] font-bold text-white leading-tight line-clamp-2">
+                    {movie.title}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Fixed Mobile Bottom Navigation Bar */}
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-[#0a0d14]/95 backdrop-blur-xl border-t border-zinc-800/90 px-4 py-2 flex items-center justify-around shadow-2xl">
+          <button
+            onClick={() => onNavigate('home')}
+            className="flex flex-col items-center gap-0.5 text-cyan-400 font-bold text-[10px]"
+          >
+            <Home className="w-5 h-5" />
+            <span>Inicio</span>
+          </button>
+          <button
+            onClick={() => onNavigate('live')}
+            className="flex flex-col items-center gap-0.5 text-zinc-400 hover:text-cyan-400 font-bold text-[10px]"
+          >
+            <Tv className="w-5 h-5" />
+            <span>Canales</span>
+          </button>
+          <button
+            onClick={() => onNavigate('movies')}
+            className="flex flex-col items-center gap-0.5 text-zinc-400 hover:text-cyan-400 font-bold text-[10px]"
+          >
+            <Film className="w-5 h-5" />
+            <span>Películas</span>
+          </button>
+          <button
+            onClick={() => onNavigate('series')}
+            className="flex flex-col items-center gap-0.5 text-zinc-400 hover:text-cyan-400 font-bold text-[10px]"
+          >
+            <Clapperboard className="w-5 h-5" />
+            <span>Series</span>
+          </button>
+          <button
+            onClick={onOpenSettings}
+            className="flex flex-col items-center gap-0.5 text-zinc-400 hover:text-cyan-400 font-bold text-[10px]"
+          >
+            <Settings className="w-5 h-5" />
+            <span>Ajustes</span>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // 2. ANDROID TV & PC / WEB VIEW (Diseño cinematográfico 16:9 con soporte D-Pad y ratón)
+  // =========================================================================
+  const isWeb = viewMode === 'web';
+
   return (
-    <div className="flex-1 flex flex-col justify-between w-full h-screen max-h-screen bg-[#02050e] text-white p-3 sm:p-5 select-none overflow-hidden relative">
+    <div
+      className={`flex-1 flex flex-col justify-between w-full ${
+        isWeb ? 'min-h-screen overflow-y-auto pb-8' : 'h-screen max-h-screen overflow-hidden'
+      } bg-[#02050e] text-white p-3 sm:p-5 select-none relative`}
+    >
       {/* Background ambient lighting */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-96 bg-cyan-600/10 rounded-full blur-[140px] pointer-events-none" />
       <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-blue-600/15 rounded-full blur-[140px] pointer-events-none" />
 
-      {/* ========================================================
-          1. TOP BAR: Logo CALIX TV (Izq) | Fecha + Hora + Ajustes + Wifi (Der)
-         ======================================================== */}
+      {/* TOP BAR: Logo CALIX TV (Izq) | Mode Switcher + Fecha + Hora + Ajustes (Der) */}
       <div className="flex items-center justify-between w-full z-20 pb-1">
         {/* Top Left: CALIX TV Branding */}
         <div className="flex items-center gap-3">
@@ -125,13 +418,51 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               CALIXTV
             </span>
             <span className="text-xs font-bold text-cyan-400 tracking-wider">
-              Tu Servicio Digital
+              {isWeb ? 'Versión Web • PC' : 'Tu Servicio Digital'}
             </span>
           </div>
         </div>
 
-        {/* Top Right: Date Pill | Clock | Settings Gear | Wifi Signal */}
+        {/* Top Right: Device Switcher (3 Versiones) | Date | Clock | Settings */}
         <div className="flex items-center gap-3 sm:gap-4">
+          {/* Mode Switcher */}
+          {onChangeViewMode && (
+            <div className="flex items-center bg-zinc-900 border border-zinc-700/80 rounded-xl p-0.5 text-xs font-bold">
+              <button
+                onClick={() => onChangeViewMode('mobile')}
+                className="px-2.5 py-1 rounded-lg flex items-center gap-1 cursor-pointer transition text-zinc-400 hover:text-white"
+                title="Cambiar a Modo Celular"
+              >
+                <Smartphone className="w-3.5 h-3.5" />
+                <span className="hidden md:inline">Móvil</span>
+              </button>
+              <button
+                onClick={() => onChangeViewMode('tv')}
+                className={`px-2.5 py-1 rounded-lg flex items-center gap-1 cursor-pointer transition ${
+                  viewMode === 'tv'
+                    ? 'bg-cyan-500 text-black font-black shadow'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+                title="Modo Android TV Activo"
+              >
+                <Tv className="w-3.5 h-3.5" />
+                <span className="hidden md:inline">TV</span>
+              </button>
+              <button
+                onClick={() => onChangeViewMode('web')}
+                className={`px-2.5 py-1 rounded-lg flex items-center gap-1 cursor-pointer transition ${
+                  viewMode === 'web'
+                    ? 'bg-cyan-500 text-black font-black shadow'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+                title="Modo PC / Navegador Activo"
+              >
+                <Monitor className="w-3.5 h-3.5" />
+                <span className="hidden md:inline">PC</span>
+              </button>
+            </div>
+          )}
+
           {/* Date Badge */}
           <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-cyan-950/80 border border-cyan-800/80 rounded-xl text-xs font-semibold text-cyan-200 shadow-md">
             <Calendar className="w-4 h-4 text-cyan-400" />
@@ -150,7 +481,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
           <div className="h-6 w-[1px] bg-zinc-800" />
 
-          {/* Admin Settings Gear Button (⚙️) */}
+          {/* Admin Settings Gear Button */}
           <button
             onClick={onOpenSettings}
             aria-label="Configuración y Administración"
@@ -167,11 +498,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </div>
       </div>
 
-      {/* ========================================================
-          2. MIDDLE SECTION: EN VIVO Banner (Left) + PELÍCULAS DESTACADAS Grid (Right)
-         ======================================================== */}
+      {/* MIDDLE SECTION: EN VIVO Banner (Left) + PELÍCULAS DESTACADAS Grid (Right) */}
       <div className="grid grid-cols-12 gap-3 sm:gap-4 flex-1 my-2 z-10 min-h-0">
-        {/* Left Card: EN VIVO - FÚTBOL SIN CORTES (approx 7 cols) */}
+        {/* Left Card: EN VIVO - FÚTBOL SIN CORTES */}
         <div
           onClick={handleOpenLiveStream}
           className="tv-focusable col-span-12 lg:col-span-7 bg-gradient-to-br from-blue-950/80 via-zinc-950 to-black rounded-3xl border-2 border-cyan-500/80 shadow-[0_0_35px_rgba(6,182,212,0.25)] relative overflow-hidden flex flex-col justify-between p-5 sm:p-7 group cursor-pointer"
@@ -215,53 +544,56 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
         </div>
 
-        {/* Right Section: PELÍCULAS DESTACADAS (approx 5 cols) */}
+        {/* Right Section: PELÍCULAS DESTACADAS */}
         <div className="col-span-12 lg:col-span-5 flex flex-col justify-between bg-zinc-950/80 border border-cyan-900/50 rounded-3xl p-3.5 sm:p-4 shadow-xl relative">
-          {/* Section Header */}
-          <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
-            <div className="flex items-center gap-2 text-amber-400 font-extrabold text-sm sm:text-base tracking-wide uppercase">
-              <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-              <span className="text-white">PELÍCULAS DESTACADAS</span>
+          <div className="flex items-center justify-between pb-2 border-b border-cyan-900/40">
+            <div className="flex items-center gap-2 text-amber-400 font-extrabold text-xs sm:text-sm tracking-wider uppercase">
+              <Star className="w-4 h-4 fill-amber-400" />
+              <span>PELÍCULAS DESTACADAS</span>
             </div>
-            <ChevronRight className="w-5 h-5 text-cyan-400" />
+            <button
+              onClick={() => onNavigate('movies')}
+              className="tv-focusable text-cyan-400 hover:text-cyan-200 text-xs font-bold flex items-center gap-0.5 cursor-pointer"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
 
-          {/* 2x2 Movie Grid */}
-          <div className="grid grid-cols-2 gap-2.5 sm:gap-3 flex-1 mt-2.5">
+          {/* 2x2 Movie Cards Grid */}
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 flex-1 my-2 min-h-0">
             {featuredMovies.map((movie) => (
               <div
                 key={movie.id}
                 onClick={() => onNavigate('movies')}
-                className="tv-focusable relative rounded-2xl overflow-hidden border border-zinc-800 hover:border-cyan-400 transition-all duration-300 group cursor-pointer bg-zinc-900 shadow-md min-h-[100px] flex items-end p-2.5"
+                className="tv-focusable group relative rounded-2xl overflow-hidden border border-zinc-800/80 hover:border-cyan-400 bg-zinc-900 transition-all duration-300 shadow-md cursor-pointer flex flex-col"
               >
-                <div
-                  className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                  style={{ backgroundImage: `url(${movie.imageUrl})` }}
+                <img
+                  src={movie.imageUrl}
+                  alt={movie.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
-
-                <span className="relative z-10 text-[11px] font-black text-white tracking-tight uppercase leading-tight drop-shadow">
-                  {movie.title}
-                </span>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity flex items-end p-2 sm:p-2.5">
+                  <span className="text-[11px] sm:text-xs font-black text-white leading-tight uppercase tracking-wider drop-shadow">
+                    {movie.title}
+                  </span>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* ========================================================
-          3. BOTTOM NAVIGATION BAR (5 Glowing Glass Buttons)
-         ======================================================== */}
-      <div className="grid grid-cols-5 gap-2.5 sm:gap-3.5 w-full z-20 pt-1">
+      {/* BOTTOM NAVIGATION: 5 Big High-Contrast Neon-Glow Rounded Rectangles */}
+      <div className="grid grid-cols-5 gap-3 sm:gap-4 z-20 pt-2">
         {/* 1. TV EN VIVO */}
         <button
           onClick={() => onNavigate('live')}
-          className="tv-focusable group py-3 sm:py-4 px-2 rounded-2xl bg-gradient-to-b from-cyan-950 via-zinc-900 to-black border-2 border-cyan-400/90 shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.6)] text-white flex flex-col items-center justify-center cursor-pointer transition transform active:scale-95"
+          className="tv-focusable group relative flex flex-col items-center justify-center py-3.5 sm:py-5 px-2 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-blue-600 via-blue-700 to-cyan-700 border-2 border-cyan-400 shadow-[0_0_25px_rgba(6,182,212,0.6)] hover:shadow-[0_0_35px_rgba(6,182,212,0.9)] hover:scale-105 transition-all duration-300 cursor-pointer active:scale-95"
         >
-          <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-cyan-500/20 border border-cyan-400 flex items-center justify-center mb-1 text-cyan-300 group-hover:scale-110 transition-transform">
-            <Tv className="w-5 h-5 sm:w-6 sm:h-6" />
+          <div className="w-10 h-8 sm:w-12 sm:h-10 rounded-xl bg-blue-950/80 border border-cyan-300 flex items-center justify-center mb-1.5 shadow-inner group-hover:bg-cyan-900">
+            <Tv className="w-5 h-5 sm:w-6 sm:h-6 text-white stroke-[2.5]" />
           </div>
-          <span className="font-black text-xs sm:text-sm tracking-wider uppercase text-white drop-shadow">
+          <span className="font-black text-xs sm:text-sm md:text-base text-white tracking-wider uppercase drop-shadow">
             TV EN VIVO
           </span>
         </button>
@@ -269,12 +601,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         {/* 2. PELÍCULAS */}
         <button
           onClick={() => onNavigate('movies')}
-          className="tv-focusable group py-3 sm:py-4 px-2 rounded-2xl bg-gradient-to-b from-blue-950 via-zinc-900 to-black border border-blue-600/70 hover:border-blue-400 shadow-lg text-white flex flex-col items-center justify-center cursor-pointer transition transform active:scale-95"
+          className="tv-focusable group relative flex flex-col items-center justify-center py-3.5 sm:py-5 px-2 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-blue-700 via-blue-800 to-blue-950 border border-blue-400/80 shadow-[0_0_20px_rgba(59,130,246,0.35)] hover:border-cyan-400 hover:shadow-[0_0_30px_rgba(6,182,212,0.7)] hover:scale-105 transition-all duration-300 cursor-pointer active:scale-95"
         >
-          <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-blue-500/20 border border-blue-400 flex items-center justify-center mb-1 text-blue-300 group-hover:scale-110 transition-transform">
-            <Clapperboard className="w-5 h-5 sm:w-6 sm:h-6" />
+          <div className="w-10 h-8 sm:w-12 sm:h-10 rounded-xl bg-blue-950/80 border border-blue-300/80 flex items-center justify-center mb-1.5 shadow-inner group-hover:bg-blue-900">
+            <Clapperboard className="w-5 h-5 sm:w-6 sm:h-6 text-white stroke-[2.2]" />
           </div>
-          <span className="font-black text-xs sm:text-sm tracking-wider uppercase text-white drop-shadow">
+          <span className="font-black text-xs sm:text-sm md:text-base text-white tracking-wider uppercase drop-shadow">
             PELÍCULAS
           </span>
         </button>
@@ -282,12 +614,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         {/* 3. SERIES */}
         <button
           onClick={() => onNavigate('series')}
-          className="tv-focusable group py-3 sm:py-4 px-2 rounded-2xl bg-gradient-to-b from-indigo-950 via-zinc-900 to-black border border-indigo-600/70 hover:border-indigo-400 shadow-lg text-white flex flex-col items-center justify-center cursor-pointer transition transform active:scale-95"
+          className="tv-focusable group relative flex flex-col items-center justify-center py-3.5 sm:py-5 px-2 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-blue-700 via-blue-800 to-blue-950 border border-blue-400/80 shadow-[0_0_20px_rgba(59,130,246,0.35)] hover:border-cyan-400 hover:shadow-[0_0_30px_rgba(6,182,212,0.7)] hover:scale-105 transition-all duration-300 cursor-pointer active:scale-95"
         >
-          <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-indigo-500/20 border border-indigo-400 flex items-center justify-center mb-1 text-indigo-300 group-hover:scale-110 transition-transform">
-            <Monitor className="w-5 h-5 sm:w-6 sm:h-6" />
+          <div className="w-10 h-8 sm:w-12 sm:h-10 rounded-xl bg-blue-950/80 border border-blue-300/80 flex items-center justify-center mb-1.5 shadow-inner group-hover:bg-blue-900">
+            <Monitor className="w-5 h-5 sm:w-6 sm:h-6 text-white stroke-[2.2]" />
           </div>
-          <span className="font-black text-xs sm:text-sm tracking-wider uppercase text-white drop-shadow">
+          <span className="font-black text-xs sm:text-sm md:text-base text-white tracking-wider uppercase drop-shadow">
             SERIES
           </span>
         </button>
@@ -295,12 +627,16 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         {/* 4. ANIME */}
         <button
           onClick={() => onNavigate('anime')}
-          className="tv-focusable group py-3 sm:py-4 px-2 rounded-2xl bg-gradient-to-b from-purple-950 via-zinc-900 to-black border border-purple-600/70 hover:border-purple-400 shadow-lg text-white flex flex-col items-center justify-center cursor-pointer transition transform active:scale-95"
+          className="tv-focusable group relative flex flex-col items-center justify-center py-3.5 sm:py-5 px-2 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-blue-700 via-blue-800 to-blue-950 border border-blue-400/80 shadow-[0_0_20px_rgba(59,130,246,0.35)] hover:border-cyan-400 hover:shadow-[0_0_30px_rgba(6,182,212,0.7)] hover:scale-105 transition-all duration-300 cursor-pointer active:scale-95"
         >
-          <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-purple-500/20 border border-purple-400 flex items-center justify-center mb-1 text-purple-300 group-hover:scale-110 transition-transform overflow-hidden">
-            <Flame className="w-5 h-5 sm:w-6 sm:h-6 text-purple-300" />
+          <div className="w-10 h-8 sm:w-12 sm:h-10 rounded-xl overflow-hidden mb-1.5 flex items-center justify-center bg-blue-950 border border-blue-400/60 group-hover:border-amber-400">
+            <img
+              src="https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=200&q=80"
+              alt="Goku Anime"
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform"
+            />
           </div>
-          <span className="font-black text-xs sm:text-sm tracking-wider uppercase text-white drop-shadow">
+          <span className="font-black text-xs sm:text-sm md:text-base text-white tracking-wider uppercase drop-shadow">
             ANIME
           </span>
         </button>
@@ -308,12 +644,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         {/* 5. ESPECIALES */}
         <button
           onClick={() => onNavigate('especial')}
-          className="tv-focusable group py-3 sm:py-4 px-2 rounded-2xl bg-gradient-to-b from-amber-950 via-zinc-900 to-black border border-amber-600/70 hover:border-amber-400 shadow-lg text-white flex flex-col items-center justify-center cursor-pointer transition transform active:scale-95"
+          className="tv-focusable group relative flex flex-col items-center justify-center py-3.5 sm:py-5 px-2 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-blue-700 via-blue-800 to-blue-950 border border-blue-400/80 shadow-[0_0_20px_rgba(59,130,246,0.35)] hover:border-yellow-400 hover:shadow-[0_0_30px_rgba(234,179,8,0.7)] hover:scale-105 transition-all duration-300 cursor-pointer active:scale-95"
         >
-          <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-amber-500/20 border border-amber-400 flex items-center justify-center mb-1 text-amber-300 group-hover:scale-110 transition-transform">
-            <Star className="w-5 h-5 sm:w-6 sm:h-6 fill-amber-400 text-amber-400" />
+          <div className="w-10 h-8 sm:w-12 sm:h-10 rounded-xl bg-blue-950/80 border border-yellow-400/80 flex items-center justify-center mb-1.5 shadow-inner group-hover:bg-yellow-950">
+            <Star className="w-5 h-5 sm:w-6 sm:h-6 fill-yellow-400 text-yellow-400" />
           </div>
-          <span className="font-black text-xs sm:text-sm tracking-wider uppercase text-white drop-shadow">
+          <span className="font-black text-xs sm:text-sm md:text-base text-white tracking-wider uppercase drop-shadow">
             ESPECIALES
           </span>
         </button>

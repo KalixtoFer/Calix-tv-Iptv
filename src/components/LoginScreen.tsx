@@ -8,12 +8,18 @@ import {
   ShieldCheck,
   AlertCircle,
   Loader2,
+  Smartphone,
+  Tv,
+  Monitor,
+  CheckCircle2,
 } from 'lucide-react';
-import { CentralizedConfig, XtreamAuthResponse } from '../types/iptv';
+import { CentralizedConfig, DeviceViewMode, XtreamAuthResponse } from '../types/iptv';
 import { iptvApi } from '../services/iptvApi';
 
 interface LoginScreenProps {
   config: CentralizedConfig;
+  viewMode: DeviceViewMode;
+  onChangeViewMode: (mode: DeviceViewMode) => void;
   onLoginSuccess: (auth: XtreamAuthResponse, username: string) => void;
   onOpenAdmin: () => void;
   onEnterGuest: () => void;
@@ -21,6 +27,8 @@ interface LoginScreenProps {
 
 export const LoginScreen: React.FC<LoginScreenProps> = ({
   config,
+  viewMode,
+  onChangeViewMode,
   onLoginSuccess,
   onOpenAdmin,
   onEnterGuest,
@@ -30,6 +38,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [rememberMe, setRememberMe] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [preloadStatus, setPreloadStatus] = useState<string>('');
+  const [preloadPercent, setPreloadPercent] = useState<number>(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = async (e?: React.FormEvent) => {
@@ -41,6 +51,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
 
     setIsLoading(true);
     setErrorMessage(null);
+    setPreloadStatus('Verificando credenciales con Calix TV...');
+    setPreloadPercent(10);
 
     try {
       const auth = await iptvApi.login(username.trim(), password.trim());
@@ -49,6 +61,16 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
           `La cuenta se encuentra en estado: ${auth.user_info.status}. Comuníquese con su proveedor.`
         );
       }
+
+      // Preload initial catalogs to avoid freezes on movies and series
+      setPreloadStatus('Cargando catálogo inicial sin cortes...');
+      setPreloadPercent(30);
+
+      await iptvApi.preloadInitialData(username.trim(), (msg, pct) => {
+        setPreloadStatus(msg);
+        setPreloadPercent(pct);
+      });
+
       onLoginSuccess(auth, username.trim());
     } catch (err: any) {
       setErrorMessage(
@@ -57,9 +79,10 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
       );
     } finally {
       setIsLoading(false);
+      setPreloadStatus('');
+      setPreloadPercent(0);
     }
   };
-
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-4 bg-[#06070a] relative overflow-hidden select-none">
@@ -69,6 +92,51 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
 
       {/* Main Glass Login Card */}
       <div className="w-full max-w-md bg-zinc-950/85 backdrop-blur-2xl border border-zinc-800/90 rounded-3xl p-6 sm:p-8 shadow-2xl relative z-10 space-y-6">
+        {/* Device Profile Switcher (3 Versiones) */}
+        <div className="flex flex-col items-center gap-1.5 pb-1 border-b border-zinc-800/60">
+          <span className="text-[11px] font-bold tracking-wider text-zinc-400 uppercase">
+            Selecciona tu dispositivo:
+          </span>
+          <div className="grid grid-cols-3 gap-1.5 w-full bg-zinc-900/90 p-1 rounded-2xl border border-zinc-800">
+            <button
+              type="button"
+              onClick={() => onChangeViewMode('mobile')}
+              className={`py-2 px-2 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                viewMode === 'mobile'
+                  ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-black shadow-lg shadow-cyan-500/30'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              <Smartphone className="w-3.5 h-3.5" />
+              <span>Celular</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => onChangeViewMode('tv')}
+              className={`py-2 px-2 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                viewMode === 'tv'
+                  ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-black shadow-lg shadow-cyan-500/30'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              <Tv className="w-3.5 h-3.5" />
+              <span>Android TV</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => onChangeViewMode('web')}
+              className={`py-2 px-2 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                viewMode === 'web'
+                  ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-black shadow-lg shadow-cyan-500/30'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              <Monitor className="w-3.5 h-3.5" />
+              <span>PC / Web</span>
+            </button>
+          </div>
+        </div>
+
         {/* Logo & Branding */}
         <div className="text-center space-y-2">
           <div className="flex justify-center mb-1">
@@ -83,7 +151,9 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
             CALIX TV
           </h1>
           <p className="text-xs text-cyan-400 font-semibold tracking-wide">
-            Tu Servicio Digital • Versión 1.0
+            Tu Servicio Digital • Versión 1.0 (
+            {viewMode === 'mobile' ? 'Móvil' : viewMode === 'tv' ? 'Android TV' : 'Web'}
+            )
           </p>
         </div>
 
@@ -92,6 +162,22 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
           <div className="p-3 rounded-xl bg-rose-950/70 border border-rose-800 text-rose-200 text-xs flex items-start gap-2.5 animate-shake">
             <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
             <span className="leading-snug">{errorMessage}</span>
+          </div>
+        )}
+
+        {/* Preload / Synchronization Progress Bar */}
+        {isLoading && (
+          <div className="p-3.5 bg-cyan-950/40 border border-cyan-800/80 rounded-2xl space-y-2 text-center animate-fadeIn">
+            <div className="flex items-center justify-between text-xs text-cyan-300 font-bold">
+              <span className="truncate">{preloadStatus || 'Conectando con el servidor...'}</span>
+              <span>{preloadPercent}%</span>
+            </div>
+            <div className="w-full bg-zinc-900 h-2 rounded-full overflow-hidden border border-zinc-700/60">
+              <div
+                className="bg-gradient-to-r from-cyan-400 to-blue-500 h-full transition-all duration-300 rounded-full"
+                style={{ width: `${preloadPercent}%` }}
+              />
+            </div>
           </div>
         )}
 
@@ -162,7 +248,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
             {isLoading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin text-black" />
-                <span>Validando Credenciales...</span>
+                <span>Sincronizando Catálogo...</span>
               </>
             ) : (
               <>
@@ -177,7 +263,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
         <div className="pt-4 border-t border-zinc-800/80 flex items-center justify-center text-xs text-zinc-400">
           <div className="flex items-center gap-1.5 text-[11px] text-zinc-400">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Conexión Encriptada SSL</span>
+            <span>Conexión Directa Encriptada SSL</span>
           </div>
         </div>
       </div>

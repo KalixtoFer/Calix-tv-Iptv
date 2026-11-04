@@ -40,34 +40,28 @@ export const AnimeScreen: React.FC<AnimeScreenProps> = ({
     let isMounted = true;
     async function loadAnimeData() {
       setIsLoading(true);
-      const [liveList, seriesList] = await Promise.all([
-        iptvApi.getStreams('live', username, 'all'),
-        iptvApi.getStreams('series', username, 'all'),
-      ]);
+      try {
+        const [liveCats, seriesCats] = await Promise.all([
+          iptvApi.getCategories('live', username),
+          iptvApi.getCategories('series', username),
+        ]);
 
-      if (isMounted) {
-        // Filter streams that relate to anime
-        const animeLive = liveList.filter(
-          (s) =>
-            s.name.toLowerCase().includes('anime') ||
-            s.name.toLowerCase().includes('crunchy') ||
-            s.name.toLowerCase().includes('dragon ball') ||
-            s.name.toLowerCase().includes('toonami') ||
-            s.category_id === '7'
-        );
+        const animeLiveCat = liveCats.find((c) => c.category_name.toLowerCase().includes('anime')) || liveCats[0];
+        const animeSeriesCat = seriesCats.find((c) => c.category_name.toLowerCase().includes('anime')) || seriesCats[0];
 
-        const animeSer = seriesList.filter(
-          (s) =>
-            s.name.toLowerCase().includes('shinobi') ||
-            s.name.toLowerCase().includes('anime') ||
-            s.name.toLowerCase().includes('titan') ||
-            s.genre?.toLowerCase().includes('anime') ||
-            s.category_id === '304'
-        );
+        const [liveList, seriesList] = await Promise.all([
+          animeLiveCat ? iptvApi.getStreams('live', username, animeLiveCat.category_id) : Promise.resolve([]),
+          animeSeriesCat ? iptvApi.getStreams('series', username, animeSeriesCat.category_id) : Promise.resolve([]),
+        ]);
 
-        setAnimeLiveStreams(animeLive.length > 0 ? animeLive : liveList.slice(0, 4));
-        setAnimeSeries(animeSer.length > 0 ? animeSer : seriesList.slice(0, 4));
-        setIsLoading(false);
+        if (isMounted) {
+          setAnimeLiveStreams(liveList);
+          setAnimeSeries(seriesList);
+        }
+      } catch (err) {
+        console.error('Error loading Anime:', err);
+      } finally {
+        if (isMounted) setIsLoading(false);
       }
     }
 

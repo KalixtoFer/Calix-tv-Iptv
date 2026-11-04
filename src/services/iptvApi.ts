@@ -41,12 +41,46 @@ export interface WatchHistoryRecord {
 class IptvApiService {
   private activeConfig: CentralizedConfig | null = null;
   private activePassword = '';
+  private categoryCache: Map<string, any[]> = new Map();
+  private streamCache: Map<string, any[]> = new Map();
 
   private getEffectivePassword(overridePass?: string): string {
     if (overridePass && overridePass !== '•••') return overridePass;
     if (this.activePassword) return this.activePassword;
     const session = this.getSavedSession();
     return session?.authResponse?.user_info?.password || '';
+  }
+
+  // Pre-load catalogs during splash/login to prevent freezes
+  async preloadInitialData(
+    username: string,
+    onProgress?: (message: string, percent: number) => void
+  ): Promise<void> {
+    try {
+      onProgress?.('Sincronizando categorías de TV...', 20);
+      const liveCats = await this.getCategories('live', username);
+
+      onProgress?.('Sincronizando catálogo de Películas...', 45);
+      const vodCats = await this.getCategories('vod', username);
+
+      onProgress?.('Sincronizando catálogo de Series...', 70);
+      const seriesCats = await this.getCategories('series', username);
+
+      onProgress?.('Cargando primeros contenidos...', 90);
+      if (liveCats.length > 0) {
+        await this.getStreams('live', username, liveCats[0].category_id);
+      }
+      if (vodCats.length > 0) {
+        await this.getStreams('vod', username, vodCats[0].category_id);
+      }
+      if (seriesCats.length > 0) {
+        await this.getStreams('series', username, seriesCats[0].category_id);
+      }
+
+      onProgress?.('¡Catálogo de Calix TV listo!', 100);
+    } catch (e) {
+      console.warn('Preload non-fatal error:', e);
+    }
   }
 
   // 1. Fetch Centralized Server Configuration
@@ -221,12 +255,16 @@ class IptvApiService {
     localStorage.removeItem(STORAGE_SESSION_KEY);
   }
 
-  // 4. Fetch Categories (Direct + Proxy fallback)
+  // 4. Fetch Categories (Direct + Proxy fallback + Memory Cache)
   async getCategories(
     type: 'live' | 'vod' | 'series',
     username: string,
     password?: string
   ): Promise<any[]> {
+    if (this.categoryCache.has(type)) {
+      return this.categoryCache.get(type)!;
+    }
+
     const action =
       type === 'live'
         ? 'get_live_categories'
@@ -246,7 +284,10 @@ class IptvApiService {
         const text = await res.text();
         if (text.trim().startsWith('[')) {
           const data = JSON.parse(text);
-          if (Array.isArray(data)) return data;
+          if (Array.isArray(data)) {
+            this.categoryCache.set(type, data);
+            return data;
+          }
         }
       }
     } catch {
@@ -262,7 +303,10 @@ class IptvApiService {
         const text = await res.text();
         if (text.trim().startsWith('[')) {
           const data = JSON.parse(text);
-          return Array.isArray(data) ? data : [];
+          if (Array.isArray(data)) {
+            this.categoryCache.set(type, data);
+            return data;
+          }
         }
       }
     } catch (e) {
@@ -271,13 +315,18 @@ class IptvApiService {
     return [];
   }
 
-  // 5. Fetch Streams (Direct + Proxy fallback)
+  // 5. Fetch Streams (Direct + Proxy fallback + Memory Cache)
   async getStreams(
     type: 'live' | 'vod' | 'series',
     username: string,
     categoryId?: string,
     password?: string
   ): Promise<any[]> {
+    const cacheKey = `${type}_${categoryId || 'all'}`;
+    if (this.streamCache.has(cacheKey)) {
+      return this.streamCache.get(cacheKey)!;
+    }
+
     const action =
       type === 'live'
         ? 'get_live_streams'
@@ -302,7 +351,10 @@ class IptvApiService {
         const text = await res.text();
         if (text.trim().startsWith('[')) {
           const data = JSON.parse(text);
-          if (Array.isArray(data)) return data;
+          if (Array.isArray(data)) {
+            this.streamCache.set(cacheKey, data);
+            return data;
+          }
         }
       }
     } catch {
@@ -317,7 +369,10 @@ class IptvApiService {
         const text = await res.text();
         if (text.trim().startsWith('[')) {
           const data = JSON.parse(text);
-          return Array.isArray(data) ? data : [];
+          if (Array.isArray(data)) {
+            this.streamCache.set(cacheKey, data);
+            return data;
+          }
         }
       }
     } catch (e) {

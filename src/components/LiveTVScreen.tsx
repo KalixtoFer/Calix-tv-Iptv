@@ -42,24 +42,32 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showOnlyFavorites, setShowOnlyFavorites] = useState<boolean>(false);
   const [favoritesList, setFavoritesList] = useState<string[]>([]);
+  const [displayLimit, setDisplayLimit] = useState<number>(50);
 
-  // Load categories and initial streams
+  // Load categories and initial streams for first category
   useEffect(() => {
     let isMounted = true;
     async function loadData() {
       setIsLoading(true);
-      const [cats, strList] = await Promise.all([
-        iptvApi.getCategories('live', username),
-        iptvApi.getStreams('live', username, 'all'),
-      ]);
-
-      if (isMounted) {
+      try {
+        const cats = await iptvApi.getCategories('live', username);
+        if (!isMounted) return;
         setCategories(cats);
-        setStreams(strList);
-        if (strList.length > 0) {
-          setSelectedStream(strList[0]);
+
+        const initialCat = cats.length > 0 ? cats[0].category_id : 'all';
+        setSelectedCategoryId(initialCat);
+
+        const strList = await iptvApi.getStreams('live', username, initialCat);
+        if (isMounted) {
+          setStreams(strList);
+          if (strList.length > 0) {
+            setSelectedStream(strList[0]);
+          }
         }
-        setIsLoading(false);
+      } catch (err) {
+        console.error('Error loading Live TV:', err);
+      } finally {
+        if (isMounted) setIsLoading(false);
       }
     }
 
@@ -72,6 +80,24 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
       isMounted = false;
     };
   }, [username]);
+
+  const handleSelectCategory = async (catId: string) => {
+    if (catId === selectedCategoryId && !searchQuery) return;
+    setSelectedCategoryId(catId);
+    setDisplayLimit(50);
+    setIsLoading(true);
+    try {
+      const list = await iptvApi.getStreams('live', username, catId);
+      setStreams(list);
+      if (list.length > 0) {
+        setSelectedStream(list[0]);
+      }
+    } catch (err) {
+      console.error('Error switching TV category:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Filtered streams
   const filteredStreams = useMemo(() => {
@@ -214,12 +240,23 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
               </span>
             </button>
 
+            <button
+              onClick={() => handleSelectCategory('all')}
+              className={`tv-focusable w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between cursor-pointer truncate ${
+                selectedCategoryId === 'all'
+                  ? 'bg-cyan-500 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]'
+                  : 'text-zinc-300 hover:bg-zinc-800/70 hover:text-white'
+              }`}
+            >
+              <span>⭐ TODOS LOS CANALES</span>
+            </button>
+
             {categories.map((cat) => {
               const isSelected = selectedCategoryId === cat.category_id;
               return (
                 <button
                   key={cat.category_id}
-                  onClick={() => setSelectedCategoryId(cat.category_id)}
+                  onClick={() => handleSelectCategory(cat.category_id)}
                   className={`tv-focusable w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between cursor-pointer truncate ${
                     isSelected
                       ? 'bg-cyan-500 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]'

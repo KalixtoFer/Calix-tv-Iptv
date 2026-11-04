@@ -21,7 +21,8 @@ interface HeaderProps {
   serverUrl?: string;
   isOnline?: boolean;
   viewMode: DeviceViewMode;
-  onToggleViewMode: () => void;
+  onChangeViewMode?: (mode: DeviceViewMode) => void;
+  onToggleViewMode?: () => void;
   onOpenSettings: () => void;
   onOpenRemote: () => void;
   onOpenApkGuide: () => void;
@@ -36,6 +37,7 @@ export const Header: React.FC<HeaderProps> = ({
   serverUrl = '',
   isOnline = true,
   viewMode,
+  onChangeViewMode,
   onToggleViewMode,
   onOpenSettings,
   onOpenRemote,
@@ -155,28 +157,45 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Device View Mode Toggle (TV vs Mobile) */}
-        <button
-          onClick={onToggleViewMode}
-          className={`tv-focusable p-2 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer ${
-            viewMode === 'tv'
-              ? 'bg-cyan-950/70 border-cyan-700/60 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.2)]'
-              : 'bg-zinc-900/80 border-zinc-700/60 text-zinc-300 hover:text-white'
-          }`}
-          title={viewMode === 'tv' ? 'Modo Android TV activo (Optimizado para control remoto)' : 'Modo Móvil/Tablet activo'}
-        >
-          {viewMode === 'tv' ? (
-            <>
-              <Monitor className="w-4 h-4 text-cyan-400" />
-              <span className="hidden md:inline">Modo TV</span>
-            </>
-          ) : (
-            <>
-              <Smartphone className="w-4 h-4 text-zinc-400" />
-              <span className="hidden md:inline">Modo Móvil</span>
-            </>
-          )}
-        </button>
+        {/* Device View Mode Toggle (Celular, TV, PC) */}
+        <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-lg p-0.5 text-xs font-semibold">
+          <button
+            onClick={() => (onChangeViewMode ? onChangeViewMode('mobile') : onToggleViewMode && onToggleViewMode())}
+            className={`px-2 py-1 rounded-md flex items-center gap-1 transition cursor-pointer ${
+              viewMode === 'mobile'
+                ? 'bg-cyan-500 text-black font-bold shadow'
+                : 'text-zinc-400 hover:text-white'
+            }`}
+            title="Modo Celular (Táctil)"
+          >
+            <Smartphone className="w-3.5 h-3.5" />
+            <span className="hidden md:inline">Celular</span>
+          </button>
+          <button
+            onClick={() => (onChangeViewMode ? onChangeViewMode('tv') : onToggleViewMode && onToggleViewMode())}
+            className={`px-2 py-1 rounded-md flex items-center gap-1 transition cursor-pointer ${
+              viewMode === 'tv'
+                ? 'bg-cyan-500 text-black font-bold shadow'
+                : 'text-zinc-400 hover:text-white'
+            }`}
+            title="Modo Android TV (Control Remoto)"
+          >
+            <Tv className="w-3.5 h-3.5" />
+            <span className="hidden md:inline">TV</span>
+          </button>
+          <button
+            onClick={() => (onChangeViewMode ? onChangeViewMode('web') : onToggleViewMode && onToggleViewMode())}
+            className={`px-2 py-1 rounded-md flex items-center gap-1 transition cursor-pointer ${
+              viewMode === 'web'
+                ? 'bg-cyan-500 text-black font-bold shadow'
+                : 'text-zinc-400 hover:text-white'
+            }`}
+            title="Modo PC / Navegador"
+          >
+            <Monitor className="w-3.5 h-3.5" />
+            <span className="hidden md:inline">PC</span>
+          </button>
+        </div>
 
         {/* Remote Control HUD Toggle */}
         <button

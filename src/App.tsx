@@ -33,7 +33,29 @@ export default function App() {
 
   // Navigation State
   const [activeSection, setActiveSection] = useState<ActiveSection>('home');
-  const [viewMode, setViewMode] = useState<DeviceViewMode>('tv');
+  const [viewMode, setViewMode] = useState<DeviceViewMode>(() => {
+    try {
+      const saved = localStorage.getItem('calixtv_device_mode') as DeviceViewMode | null;
+      if (saved === 'mobile' || saved === 'tv' || saved === 'web') {
+        return saved;
+      }
+      if (typeof window !== 'undefined') {
+        const isMobileUA = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+        const isSmall = window.innerWidth <= 768;
+        if (isMobileUA || isSmall) return 'mobile';
+      }
+    } catch {
+      // fallback
+    }
+    return 'tv';
+  });
+
+  const handleViewModeChange = (mode: DeviceViewMode) => {
+    setViewMode(mode);
+    try {
+      localStorage.setItem('calixtv_device_mode', mode);
+    } catch {}
+  };
 
   // Modals
   const [isAdminOpen, setIsAdminOpen] = useState<boolean>(false);
@@ -288,7 +310,7 @@ export default function App() {
   };
 
   const toggleViewMode = () => {
-    setViewMode((prev) => (prev === 'tv' ? 'mobile' : 'tv'));
+    handleViewModeChange(viewMode === 'tv' ? 'mobile' : viewMode === 'mobile' ? 'web' : 'tv');
   };
 
   // Loading Screen while bootstrapping
@@ -308,6 +330,8 @@ export default function App() {
       <>
         <LoginScreen
           config={config}
+          viewMode={viewMode}
+          onChangeViewMode={handleViewModeChange}
           onLoginSuccess={handleLoginSuccess}
           onOpenAdmin={() => setIsAdminOpen(true)}
           onEnterGuest={handleEnterGuestMode}
@@ -338,6 +362,7 @@ export default function App() {
           serverUrl={config.serverUrl}
           isOnline={true}
           viewMode={viewMode}
+          onChangeViewMode={handleViewModeChange}
           onToggleViewMode={toggleViewMode}
           onOpenSettings={() => setIsAdminOpen(true)}
           onOpenRemote={() => setIsRemoteOpen((prev) => !prev)}
@@ -352,6 +377,8 @@ export default function App() {
         {activeSection === 'home' && (
           <HomeScreen
             config={config}
+            viewMode={viewMode}
+            onChangeViewMode={handleViewModeChange}
             onNavigate={(sec) => setActiveSection(sec)}
             onPlayStream={handlePlayStream}
             onOpenSettings={() => setIsAdminOpen(true)}

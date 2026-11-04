@@ -77,6 +77,7 @@ export interface VodStream {
   plot?: string;
   genre?: string;
   director?: string;
+  cast?: string;
   stream_url?: string;
 }
 
@@ -168,7 +169,7 @@ export interface CentralizedConfig {
 }
 
 export type ActiveSection = 'home' | 'live' | 'series' | 'movies' | 'anime' | 'especial';
-export type DeviceViewMode = 'tv' | 'mobile';
+export type DeviceViewMode = 'tv' | 'mobile' | 'web';
 
 export interface PlaybackState {
   streamId: string | number;
