@@ -36,6 +36,15 @@ interface LiveTVScreenProps {
   }) => void;
 }
 
+const adjustTime = (text: string | undefined): string => {
+  if (!text) return '';
+  return text.replace(/(\d{1,2}):(\d{2})/g, (match, hh, mm) => {
+    let h = parseInt(hh, 10);
+    h = (h + 2) % 24;
+    return `${h.toString().padStart(2, '0')}:${mm}`;
+  });
+};
+
 export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
   username,
   viewMode,
@@ -160,7 +169,7 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
     if (selectedStream) {
       onPlayStream({
         streamId: selectedStream.stream_id,
-        title: selectedStream.name,
+        title: adjustTime(selectedStream.name),
         url:
           selectedStream.stream_url ||
           iptvApi.buildStreamUrl('live', selectedStream.stream_id, 'm3u8', username),
@@ -179,7 +188,7 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
           {selectedStream ? (
             <VideoPlayer
               url={iptvApi.buildStreamUrl('live', selectedStream.stream_id, 'm3u8', username)}
-              title={selectedStream.name}
+              title={adjustTime(selectedStream.name)}
               type="live"
               autoPlay={true}
               className="w-full h-full"
@@ -257,11 +266,11 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
                       <div className="flex items-center gap-1.5 overflow-hidden mb-0.5">
                         {isSelected && <PlayIcon className="w-3 h-3 text-rose-600 fill-rose-600 shrink-0" />}
                         <h4 className={`text-[13px] font-black tracking-tight truncate ${isSelected ? 'text-rose-500' : 'text-zinc-100'}`}>
-                          {idx + 1}. {stream.name}
+                          {idx + 1}. {adjustTime(stream.name)}
                         </h4>
                       </div>
                       <p className="text-[11px] text-zinc-500 font-bold truncate opacity-80">
-                        {stream.current_program || 'No información'}
+                        {adjustTime(stream.current_program) || 'No información'}
                       </p>
                     </div>
 
@@ -408,7 +417,7 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
                     <div className="overflow-hidden flex-1">
                       <div className="text-[15px] font-black text-white truncate flex items-center gap-2">
                         <span className="text-zinc-500 font-mono text-sm">{idx + 1}.</span>
-                        {stream.name}
+                        {adjustTime(stream.name)}
                       </div>
                       {isSelected && (
                         <div className="text-[10px] text-zinc-500 font-bold flex items-center gap-1.5 mt-1">
@@ -436,7 +445,7 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
             {selectedStream ? (
               <VideoPlayer
                 url={iptvApi.buildStreamUrl('live', selectedStream.stream_id, 'm3u8', username)}
-                title={selectedStream.name}
+                title={adjustTime(selectedStream.name)}
                 type="live"
                 autoPlay={true}
                 className="w-full h-full"
@@ -457,7 +466,7 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
           <div className="flex-1 bg-[#0c0e18]/40 rounded-[40px] border border-zinc-800/30 p-10 flex flex-col justify-between">
             <div className="space-y-4">
               <h1 className="text-6xl font-black text-white tracking-tighter leading-none">
-                {selectedStream?.name || 'Calix TV'}
+                {adjustTime(selectedStream?.name) || 'Calix TV'}
               </h1>
               <div className="flex items-center gap-4 text-zinc-500 font-bold">
                 <span className="px-3 py-1 bg-zinc-800/80 rounded-lg border border-zinc-700/50 text-[11px] tracking-[2px] text-white">4K UHD</span>

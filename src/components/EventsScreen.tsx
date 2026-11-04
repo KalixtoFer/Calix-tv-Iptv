@@ -24,6 +24,16 @@ interface EventsScreenProps {
   }) => void;
 }
 
+// Utility to add 2 hours to HH:mm patterns found in strings
+const adjustTime = (text: string | undefined): string => {
+  if (!text) return '';
+  return text.replace(/(\d{1,2}):(\d{2})/g, (match, hh, mm) => {
+    let h = parseInt(hh, 10);
+    h = (h + 2) % 24;
+    return `${h.toString().padStart(2, '0')}:${mm}`;
+  });
+};
+
 export const EventsScreen: React.FC<EventsScreenProps> = ({
   username,
   onBack,
@@ -170,7 +180,7 @@ export const EventsScreen: React.FC<EventsScreenProps> = ({
                   onClick={() =>
                     onPlayStream({
                       streamId: stream.stream_id,
-                      title: stream.name,
+                      title: adjustTime(stream.name),
                       url:
                         stream.stream_url ||
                         iptvApi.buildStreamUrl('live', stream.stream_id, 'm3u8', username),
@@ -198,11 +208,11 @@ export const EventsScreen: React.FC<EventsScreenProps> = ({
 
                   <div>
                     <h4 className="text-sm font-black text-white truncate group-hover:text-rose-400 transition-colors">
-                      {stream.name}
+                      {adjustTime(stream.name)}
                     </h4>
                     <p className="text-[11px] text-zinc-400 font-bold truncate mt-0.5 flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      {stream.current_program || 'Señal deportiva estable'}
+                      {adjustTime(stream.current_program) || 'Señal deportiva estable'}
                     </p>
                   </div>
                 </div>

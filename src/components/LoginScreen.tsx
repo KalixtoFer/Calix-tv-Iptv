@@ -143,17 +143,12 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
             <img
               src="/logo.png"
               alt="Calix TV"
-              className="h-20 sm:h-24 w-auto object-contain drop-shadow-[0_0_25px_rgba(6,182,212,0.6)]"
+              className="h-24 sm:h-28 w-auto object-contain drop-shadow-[0_0_30px_rgba(6,182,212,0.7)]"
             />
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            CALIX TV
-          </h1>
-          <p className="text-xs text-cyan-400 font-semibold tracking-wide">
-            Tu Servicio Digital • Versión 1.0 (
-            {viewMode === 'mobile' ? 'Móvil' : viewMode === 'tv' ? 'Android TV' : 'Web'}
-            )
+          <p className="text-[10px] text-cyan-400/60 font-bold tracking-[4px] uppercase mt-2">
+            Versión 1.0 • {viewMode === 'mobile' ? 'Móvil' : viewMode === 'tv' ? 'Android TV' : 'Web'}
           </p>
         </div>
 

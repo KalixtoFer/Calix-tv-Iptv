@@ -120,12 +120,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             <img
               src="/logo.png"
               alt="CALIX TV"
-              className="h-9 sm:h-10 w-auto object-contain drop-shadow-[0_0_15px_rgba(6,182,212,0.6)]"
+              className="h-12 sm:h-14 w-auto object-contain drop-shadow-[0_0_15px_rgba(6,182,212,0.6)]"
             />
             <div>
-              <span className="font-black text-lg tracking-tight text-white block leading-none">
-                CALIX TV
-              </span>
               <span className="text-[10px] font-bold text-cyan-400 tracking-wider">
                 Móvil • Tu Servicio Digital
               </span>
@@ -372,9 +369,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             className="h-12 sm:h-14 md:h-16 w-auto object-contain drop-shadow-[0_0_20px_rgba(6,182,212,0.6)]"
           />
           <div className="hidden sm:flex flex-col leading-tight">
-            <span className="font-black text-2xl sm:text-3xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 via-white to-blue-400 drop-shadow">
-              CALIXTV
-            </span>
             <span className="text-xs font-bold text-cyan-400 tracking-wider">
               {isWeb ? 'Versión Web • PC' : 'Tu Servicio Digital'}
             </span>

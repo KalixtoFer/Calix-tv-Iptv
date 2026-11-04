@@ -102,9 +102,6 @@ export const Header: React.FC<HeaderProps> = ({
 
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-extrabold tracking-wider text-base sm:text-lg text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-100 to-cyan-400">
-                CALIX TV
-              </span>
               <span className="px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-cyan-950/80 text-cyan-400 border border-cyan-800/60 rounded">
                 1.0
               </span>
