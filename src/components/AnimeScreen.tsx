@@ -31,14 +31,14 @@ export const AnimeScreen: React.FC<AnimeScreenProps> = ({
   onPlayStream,
 }) => {
   const [activeTab, setActiveTab] = useState<'live' | 'series'>('live');
-  const [animeLiveStreams, setAnimeLiveStreams] = useState<LiveStream[]>([]);
-  const [animeSeries, setAnimeSeries] = useState<SeriesItem[]>([]);
+  const [eventsLiveStreams, setEventsLiveStreams] = useState<LiveStream[]>([]);
+  const [eventsVod, setEventsVod] = useState<SeriesItem[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     let isMounted = true;
-    async function loadAnimeData() {
+    async function loadEventsData() {
       setIsLoading(true);
       try {
         const [liveCats, seriesCats] = await Promise.all([
@@ -46,36 +46,43 @@ export const AnimeScreen: React.FC<AnimeScreenProps> = ({
           iptvApi.getCategories('series', username),
         ]);
 
-        const animeLiveCat = liveCats.find((c) => c.category_name.toLowerCase().includes('anime')) || liveCats[0];
-        const animeSeriesCat = seriesCats.find((c) => c.category_name.toLowerCase().includes('anime')) || seriesCats[0];
+        const keywords = ['deporte', 'event', 'fútbol', 'conmebol', 'liga', 'champions', 'boxing', 'ufc', 'f1', 'motogp'];
+        
+        const eventLiveCat = liveCats.find((c) => 
+          keywords.some(k => c.category_name.toLowerCase().includes(k))
+        ) || liveCats[0];
+        
+        const eventSeriesCat = seriesCats.find((c) => 
+          keywords.some(k => c.category_name.toLowerCase().includes(k))
+        ) || seriesCats[0];
 
         const [liveList, seriesList] = await Promise.all([
-          animeLiveCat ? iptvApi.getStreams('live', username, animeLiveCat.category_id) : Promise.resolve([]),
-          animeSeriesCat ? iptvApi.getStreams('series', username, animeSeriesCat.category_id) : Promise.resolve([]),
+          eventLiveCat ? iptvApi.getStreams('live', username, eventLiveCat.category_id) : Promise.resolve([]),
+          eventSeriesCat ? iptvApi.getStreams('series', username, eventSeriesCat.category_id) : Promise.resolve([]),
         ]);
 
         if (isMounted) {
-          setAnimeLiveStreams(liveList);
-          setAnimeSeries(seriesList);
+          setEventsLiveStreams(liveList);
+          setEventsVod(seriesList);
         }
       } catch (err) {
-        console.error('Error loading Anime:', err);
+        console.error('Error loading Events:', err);
       } finally {
         if (isMounted) setIsLoading(false);
       }
     }
 
-    loadAnimeData();
+    loadEventsData();
     return () => {
       isMounted = false;
     };
   }, [username]);
 
-  const filteredLive = animeLiveStreams.filter(
+  const filteredLive = eventsLiveStreams.filter(
     (s) => !searchQuery || s.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const filteredSeries = animeSeries.filter(
+  const filteredVod = eventsVod.filter(
     (s) => !searchQuery || s.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -92,14 +99,14 @@ export const AnimeScreen: React.FC<AnimeScreenProps> = ({
             <span>Volver</span>
           </button>
           <div className="flex items-center gap-2">
-            <div className="p-1.5 bg-emerald-500/20 text-emerald-400 rounded-lg">
+            <div className="p-1.5 bg-rose-500/20 text-rose-400 rounded-lg">
               <Sparkles className="w-4 h-4" />
             </div>
             <h2 className="text-sm sm:text-base font-extrabold tracking-wide uppercase">
-              4. Anime 24/7 & Series
+              Eventos Deportivos del Día
             </h2>
-            <span className="text-xs font-mono text-emerald-400 font-bold bg-emerald-950 px-2 py-0.5 rounded border border-emerald-800">
-              Audio Dual & Sub
+            <span className="text-xs font-mono text-rose-400 font-bold bg-rose-950 px-2 py-0.5 rounded border border-rose-800">
+              AGENDA VIP
             </span>
           </div>
         </div>
@@ -111,21 +118,21 @@ export const AnimeScreen: React.FC<AnimeScreenProps> = ({
               onClick={() => setActiveTab('live')}
               className={`tv-focusable px-3 py-1 text-xs font-bold rounded-lg transition cursor-pointer ${
                 activeTab === 'live'
-                  ? 'bg-emerald-500 text-black shadow-md'
+                  ? 'bg-rose-600 text-white shadow-md'
                   : 'text-zinc-400 hover:text-white'
               }`}
             >
-              Canales 24/7
+              En Vivo
             </button>
             <button
               onClick={() => setActiveTab('series')}
               className={`tv-focusable px-3 py-1 text-xs font-bold rounded-lg transition cursor-pointer ${
                 activeTab === 'series'
-                  ? 'bg-emerald-500 text-black shadow-md'
+                  ? 'bg-rose-600 text-white shadow-md'
                   : 'text-zinc-400 hover:text-white'
               }`}
             >
-              Series Anime
+              Grabaciones / Replays
             </button>
           </div>
 
@@ -133,27 +140,27 @@ export const AnimeScreen: React.FC<AnimeScreenProps> = ({
             <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Buscar anime..."
+              placeholder="Buscar evento..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-36 sm:w-48 bg-zinc-900 border border-zinc-700 text-xs pl-9 pr-3 py-1.5 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-400 transition"
+              className="w-36 sm:w-48 bg-zinc-900 border border-zinc-700 text-xs pl-9 pr-3 py-1.5 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-rose-400 transition"
             />
           </div>
         </div>
       </div>
 
-      {/* Anime Content Area */}
+      {/* Events Content Area */}
       <div className="flex-1 overflow-y-auto p-4 sm:p-6">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center h-64 text-zinc-400 text-sm">
-            <div className="w-10 h-10 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin mb-3" />
-            Cargando catálogo de anime...
+            <div className="w-10 h-10 border-2 border-rose-500 border-t-transparent rounded-full animate-spin mb-3" />
+            <span>Sincronizando agenda deportiva...</span>
           </div>
         ) : activeTab === 'live' ? (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
-                <Tv className="w-4 h-4" /> Emisiones de Anime en Directo
+              <h3 className="text-sm font-bold text-rose-400 uppercase tracking-wider flex items-center gap-2">
+                <Tv className="w-4 h-4" /> Partidos y Eventos En Directo
               </h3>
             </div>
 
@@ -172,30 +179,31 @@ export const AnimeScreen: React.FC<AnimeScreenProps> = ({
                       poster: stream.stream_icon,
                     })
                   }
-                  className="tv-focusable group bg-zinc-900/70 border border-zinc-800 rounded-2xl overflow-hidden hover:border-emerald-400 transition cursor-pointer shadow-lg p-3 space-y-3"
+                  className="tv-focusable group bg-zinc-900/70 border border-zinc-800 rounded-2xl overflow-hidden hover:border-rose-500 transition cursor-pointer shadow-lg p-3 space-y-3"
                 >
-                  <div className="aspect-video w-full rounded-xl bg-zinc-950 overflow-hidden relative">
+                  <div className="aspect-video w-full rounded-xl bg-zinc-950 overflow-hidden relative border border-zinc-800/50">
                     <img
                       src={stream.stream_icon}
                       alt={stream.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                     />
-                    <div className="absolute top-2 left-2 px-2 py-0.5 bg-rose-600 text-white font-mono text-[10px] font-extrabold rounded">
-                      24/7 EN VIVO
+                    <div className="absolute top-2 left-2 px-2 py-0.5 bg-rose-600 text-white font-mono text-[10px] font-extrabold rounded shadow-lg">
+                      LIVE VIP
                     </div>
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <div className="p-3 bg-emerald-500 text-black rounded-full shadow-lg">
-                        <Play className="w-5 h-5 fill-current ml-0.5" />
+                      <div className="p-3 bg-rose-600 text-white rounded-full shadow-xl">
+                        <Play className="w-6 h-6 fill-current ml-0.5" />
                       </div>
                     </div>
                   </div>
 
                   <div>
-                    <h4 className="text-sm font-bold text-white truncate group-hover:text-emerald-300">
+                    <h4 className="text-sm font-black text-white truncate group-hover:text-rose-400 transition-colors">
                       {stream.name}
                     </h4>
-                    <p className="text-xs text-zinc-400 truncate mt-0.5">
-                      {stream.current_program || 'Maratón continuo de episodios'}
+                    <p className="text-[11px] text-zinc-400 font-bold truncate mt-0.5 flex items-center gap-1">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      {stream.current_program || 'Señal deportiva estable'}
                     </p>
                   </div>
                 </div>
@@ -204,24 +212,24 @@ export const AnimeScreen: React.FC<AnimeScreenProps> = ({
           </div>
         ) : (
           <div className="space-y-4">
-            <h3 className="text-sm font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
-              <Clapperboard className="w-4 h-4" /> Series Anime Completas
+            <h3 className="text-sm font-bold text-rose-400 uppercase tracking-wider flex items-center gap-2">
+              <Clapperboard className="w-4 h-4" /> Repeticiones y Resúmenes
             </h3>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {filteredSeries.map((series) => (
+              {filteredVod.map((series) => (
                 <div
                   key={series.series_id}
                   onClick={() =>
                     onPlayStream({
                       streamId: series.series_id,
-                      title: `${series.name} - Temporada Completa`,
+                      title: `${series.name}`,
                       url: iptvApi.buildStreamUrl('episode', series.series_id, 'mp4', username),
                       type: 'episode',
                       poster: series.cover,
                     })
                   }
-                  className="tv-focusable group bg-zinc-900/70 border border-zinc-800 rounded-2xl overflow-hidden hover:border-emerald-400 transition cursor-pointer shadow-lg"
+                  className="tv-focusable group bg-zinc-900/70 border border-zinc-800 rounded-2xl overflow-hidden hover:border-rose-500 transition cursor-pointer shadow-lg"
                 >
                   <div className="aspect-[2/3] w-full bg-zinc-950 overflow-hidden relative">
                     <img
@@ -229,23 +237,18 @@ export const AnimeScreen: React.FC<AnimeScreenProps> = ({
                       alt={series.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                     />
-                    <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-black/80 text-amber-400 font-mono text-[11px] font-bold rounded flex items-center gap-0.5 border border-amber-500/40">
-                      <Star className="w-3 h-3 fill-amber-400" />
-                      {series.rating || '9.6'}
-                    </div>
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <div className="p-3 bg-emerald-500 text-black rounded-full shadow-lg">
-                        <Play className="w-5 h-5 fill-current ml-0.5" />
-                      </div>
+                    <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-black/80 text-rose-400 font-mono text-[11px] font-bold rounded flex items-center gap-0.5 border border-rose-500/40">
+                      <Flame className="w-3 h-3 fill-rose-500" />
+                      HD
                     </div>
                   </div>
 
                   <div className="p-3">
-                    <h4 className="text-xs sm:text-sm font-bold text-white truncate group-hover:text-emerald-300">
+                    <h4 className="text-xs sm:text-sm font-black text-white truncate group-hover:text-rose-400 transition-colors">
                       {series.name}
                     </h4>
-                    <p className="text-[11px] text-zinc-400 truncate mt-0.5">
-                      {series.genre || 'Acción, Shonen'}
+                    <p className="text-[10px] text-zinc-500 font-bold truncate mt-0.5">
+                      {series.genre || 'Fútbol, Sports'}
                     </p>
                   </div>
                 </div>

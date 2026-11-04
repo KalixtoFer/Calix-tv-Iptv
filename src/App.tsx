@@ -417,6 +417,7 @@ export default function App() {
         {activeSection === 'home' && (
           <HomeScreen
             config={config}
+            username={session.username}
             viewMode={viewMode}
             onChangeViewMode={handleViewModeChange}
             onNavigate={(sec) => setActiveSection(sec)}
