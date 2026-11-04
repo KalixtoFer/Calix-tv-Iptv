@@ -227,10 +227,11 @@ export const Header: React.FC<HeaderProps> = ({
         {userInfo && (
           <button
             onClick={onLogout}
-            className="tv-focusable p-2 bg-rose-950/50 hover:bg-rose-900/60 border border-rose-800/40 text-rose-300 hover:text-rose-100 rounded-lg transition cursor-pointer"
+            className="tv-focusable px-2.5 py-1.5 bg-rose-950/80 hover:bg-rose-900/90 border border-rose-800/80 text-rose-300 hover:text-white rounded-lg transition cursor-pointer flex items-center gap-1.5 text-xs font-bold shadow-md"
             title="Cerrar Sesión"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-4 h-4 text-rose-400" />
+            <span className="hidden sm:inline">Salir</span>
           </button>
         )}
       </div>

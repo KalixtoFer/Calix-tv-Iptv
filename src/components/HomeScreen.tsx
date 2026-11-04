@@ -15,6 +15,7 @@ import {
   Home,
   Film,
   Sparkles,
+  LogOut,
 } from 'lucide-react';
 import { ActiveSection, CentralizedConfig, DeviceViewMode } from '../types/iptv';
 
@@ -37,6 +38,7 @@ interface HomeScreenProps {
   onOpenSettings?: () => void;
   onOpenSpeedTest?: () => void;
   onOpenFavorites?: () => void;
+  onLogout?: () => void;
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
@@ -49,6 +51,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onOpenSettings,
   onOpenSpeedTest,
   onOpenFavorites,
+  onLogout,
 }) => {
   const [timeStr, setTimeStr] = useState<string>('13:45');
   const [dateStr, setDateStr] = useState<string>('Mié, 03 Nov. 2026');
@@ -164,6 +167,16 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             >
               <Settings className="w-4 h-4" />
             </button>
+
+            {onLogout && (
+              <button
+                onClick={onLogout}
+                className="w-8 h-8 rounded-xl bg-rose-950/80 border border-rose-800 flex items-center justify-center text-rose-300 hover:text-rose-100"
+                title="Cerrar Sesión"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </div>
 
@@ -339,6 +352,15 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             <Settings className="w-5 h-5" />
             <span>Ajustes</span>
           </button>
+          {onLogout && (
+            <button
+              onClick={onLogout}
+              className="flex flex-col items-center gap-0.5 text-rose-400 hover:text-rose-200 font-bold text-[10px]"
+            >
+              <LogOut className="w-5 h-5" />
+              <span>Salir</span>
+            </button>
+          )}
         </div>
       </div>
     );
@@ -442,6 +464,18 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           >
             <Settings className="w-5 h-5" />
           </button>
+
+          {/* Logout Button */}
+          {onLogout && (
+            <button
+              onClick={onLogout}
+              className="tv-focusable px-3 py-2 rounded-xl bg-rose-950/80 hover:bg-rose-900/90 border border-rose-800/80 flex items-center gap-1.5 text-xs font-bold text-rose-300 hover:text-white transition cursor-pointer shadow-lg active:scale-95"
+              title="Cerrar Sesión"
+            >
+              <LogOut className="w-4 h-4 text-rose-400" />
+              <span className="hidden sm:inline">Cerrar Sesión</span>
+            </button>
+          )}
 
           {/* Wifi Signal Indicator */}
           <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-emerald-400">

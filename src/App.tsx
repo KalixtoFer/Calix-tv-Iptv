@@ -424,6 +424,7 @@ export default function App() {
             onOpenSettings={() => setIsAdminOpen(true)}
             onOpenSpeedTest={() => setIsAdminOpen(true)}
             onOpenFavorites={() => setActiveSection('live')}
+            onLogout={handleLogout}
           />
         )}
 
