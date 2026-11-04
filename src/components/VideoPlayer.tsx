@@ -192,8 +192,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         });
       }
     } else {
-      // Native MP4 / WebM
+      // Native MP4 / WebM / TS / MKV VOD stream
       video.src = url;
+      video.load();
       if (autoPlay) {
         video.play().catch(() => {
           video.muted = true;
@@ -379,7 +380,25 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         onEnded={() => setIsPlaying(false)}
         onError={() => {
           setIsLoading(false);
+          const v = videoRef.current;
           if (url && url.trim() !== '') {
+            // Attempt HLS fallback if URL is not .m3u8 and HLS is supported
+            if (!url.includes('.m3u8') && Hls.isSupported() && !hlsRef.current) {
+              const hlsUrl = url.replace(/\.[a-zA-Z0-9]+$/, '.m3u8');
+              console.log('Attempting HLS fallback for VOD:', hlsUrl);
+              const hls = new Hls({ enableWorker: true });
+              hlsRef.current = hls;
+              hls.loadSource(hlsUrl);
+              if (v) hls.attachMedia(v);
+              hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                setHasError(null);
+                v?.play().catch(() => {});
+              });
+              hls.on(Hls.Events.ERROR, () => {
+                setHasError('No se pudo reproducir este título. Verifique el servidor o su conexión.');
+              });
+              return;
+            }
             setHasError('Señal no disponible o canal temporalmente fuera de línea.');
           }
         }}

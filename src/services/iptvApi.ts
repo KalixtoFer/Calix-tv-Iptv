@@ -45,10 +45,16 @@ class IptvApiService {
   private streamCache: Map<string, any[]> = new Map();
 
   private getEffectivePassword(overridePass?: string): string {
-    if (overridePass && overridePass !== '•••') return overridePass;
-    if (this.activePassword) return this.activePassword;
+    if (overridePass && overridePass !== '•••' && overridePass.trim() !== '') return overridePass;
+    if (this.activePassword && this.activePassword !== '•••' && this.activePassword.trim() !== '') return this.activePassword;
+    try {
+      const storedPass = localStorage.getItem('calixtv_active_pass');
+      if (storedPass && storedPass !== '•••' && storedPass.trim() !== '') return storedPass;
+    } catch {}
     const session = this.getSavedSession();
-    return session?.authResponse?.user_info?.password || '';
+    const pass = session?.authResponse?.user_info?.password;
+    if (pass && pass !== '•••' && pass.trim() !== '') return pass;
+    return 'demo';
   }
 
   // Pre-load catalogs during splash/login to prevent freezes
@@ -139,7 +145,7 @@ class IptvApiService {
       const demoAuth: XtreamAuthResponse = {
         user_info: {
           username: trimmedUser,
-          password: '•••',
+          password: trimmedPass,
           message: 'Cuenta Premium Autorizada',
           auth: 1,
           status: 'Active',
@@ -219,6 +225,11 @@ class IptvApiService {
   // 3. Save & Restore Session
   saveSession(username: string, authResponse: XtreamAuthResponse): void {
     try {
+      if (this.activePassword && this.activePassword !== '•••') {
+        localStorage.setItem('calixtv_active_pass', this.activePassword);
+      } else if (authResponse.user_info?.password && authResponse.user_info.password !== '•••') {
+        localStorage.setItem('calixtv_active_pass', authResponse.user_info.password);
+      }
       const session: StoredSession = {
         username,
         authResponse,
@@ -435,8 +446,9 @@ class IptvApiService {
     const cleanBase = base.endsWith('/') ? base.slice(0, -1) : base;
 
     const session = this.getSavedSession();
-    const activeUser = username || session?.username || 'ferdemo';
-    const activePass = password || this.getEffectivePassword();
+    const activeUser = username || session?.username || 'demo';
+    let activePass = password || this.getEffectivePassword();
+    if (activePass === '•••' || !activePass) activePass = 'demo';
 
     if (type === 'live') {
       const ext = extension || 'm3u8';
