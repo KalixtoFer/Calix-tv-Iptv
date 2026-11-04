@@ -43,10 +43,33 @@ jobs:
             npx cap sync android
           fi
 
-      - name: 6.5. Forzar compileSdk y targetSdk 35
+      - name: 6.5. Asegurar estructura de paquete, colores y SDK 35
         run: |
           sed -i 's/compileSdkVersion = [0-9]*/compileSdkVersion = 35/' android/variables.gradle
           sed -i 's/targetSdkVersion = [0-9]*/targetSdkVersion = 35/' android/variables.gradle
+          mkdir -p android/app/src/main/java/com/calixtv/app
+          cat << 'EOF' > android/app/src/main/java/com/calixtv/app/MainActivity.java
+          package com.calixtv.app;
+
+          import android.os.Bundle;
+          import com.getcapacitor.BridgeActivity;
+
+          public class MainActivity extends BridgeActivity {
+              @Override
+              public void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+              }
+          }
+          EOF
+          mkdir -p android/app/src/main/res/values
+          cat << 'EOF' > android/app/src/main/res/values/colors.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <color name="colorPrimary">#06b6d4</color>
+              <color name="colorPrimaryDark">#08090d</color>
+              <color name="colorAccent">#3b82f6</color>
+          </resources>
+          EOF
           echo "--- variables.gradle ---"
           cat android/variables.gradle
 
@@ -71,7 +94,7 @@ jobs:
       - name: 10. Compilar APK con Gradle
         run: |
           cd android
-          ./gradlew clean assembleDebug --no-daemon --console=plain
+          ./gradlew clean assembleDebug --no-daemon --console=plain --stacktrace
           cd ..
           cp android/app/build/outputs/apk/debug/app-debug.apk CalixTV-v1.0.apk
 

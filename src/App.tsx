@@ -268,9 +268,9 @@ export default function App() {
             max_connections: '1',
           },
           server_info: {
-            url: config?.serverUrl || 'http://xtream.demo-nexus.tv:8080',
-            port: '8080',
-            server_protocol: 'http',
+            url: config?.serverUrl || 'https://sneoplus.net:8443',
+            port: '8443',
+            server_protocol: 'https',
           },
         },
         savedAt: Date.now(),

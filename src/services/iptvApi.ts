@@ -56,13 +56,13 @@ class IptvApiService {
       console.warn('Could not fetch server config from backend, using client default:', err);
     }
 
-    // Default fallback if backend unreachable
+    // Default fallback if backend unreachable (e.g. running as standalone APK)
     return {
-      serverUrl: 'http://xtream.demo-nexus.tv:8080',
-      serverPort: '8080',
-      serverProtocol: 'http',
-      serviceName: 'NEXUS IPTV ULTRA HD',
-      announcement: '¡Bienvenidos a Nexus IPTV Pro! Servidores 4K optimizados con baja latencia.',
+      serverUrl: 'https://sneoplus.net:8443',
+      serverPort: '8443',
+      serverProtocol: 'https',
+      serviceName: 'Calix TV',
+      announcement: '¡Bienvenidos a Calix TV! Tu Servicio Digital en la mejor calidad.',
       showAnnouncement: true,
       banners: [],
       featuredStream: {
