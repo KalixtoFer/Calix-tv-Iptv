@@ -39,7 +39,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
   onConfigSaved,
 }) => {
   // Login form state (Strict username + password authentication)
-  const [username, setUsername] = useState<string>('admin');
+  const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
   const [authError, setAuthError] = useState<string | null>(null);

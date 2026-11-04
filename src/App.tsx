@@ -64,8 +64,38 @@ export default function App() {
         }
 
         const savedSession = iptvApi.getSavedSession();
+        const isCalixtvRoute =
+          window.location.hash.toLowerCase().includes('calixtv') ||
+          window.location.pathname.toLowerCase().includes('calixtv') ||
+          window.location.search.toLowerCase().includes('calixtv') ||
+          window.location.href.toLowerCase().includes('calixtv');
+
         if (savedSession) {
           setSession(savedSession);
+        } else if (isCalixtvRoute) {
+          // If accessing via admin route #calixtv, show full app behind admin modal
+          const defaultGuestSession: StoredSession = {
+            username: 'Invitado',
+            authResponse: {
+              user_info: {
+                username: 'Invitado',
+                auth: 1,
+                status: 'Active',
+                exp_date: '1798761600',
+                is_trial: '1',
+                active_cons: '1',
+                created_at: '1704067200',
+                max_connections: '1',
+              },
+              server_info: {
+                url: fetchedConfig?.serverUrl || 'https://sneoplus.net:8443',
+                port: '8443',
+                server_protocol: 'https',
+              },
+            },
+            savedAt: Date.now(),
+          };
+          setSession(defaultGuestSession);
         }
 
         // Check URL route for calixtv admin access
@@ -82,6 +112,30 @@ export default function App() {
             currentUrl.includes('calixtv')
           ) {
             setIsAdminOpen(true);
+            setSession((prev) => {
+              if (prev) return prev;
+              return {
+                username: 'Invitado',
+                authResponse: {
+                  user_info: {
+                    username: 'Invitado',
+                    auth: 1,
+                    status: 'Active',
+                    exp_date: '1798761600',
+                    is_trial: '1',
+                    active_cons: '1',
+                    created_at: '1704067200',
+                    max_connections: '1',
+                  },
+                  server_info: {
+                    url: fetchedConfig?.serverUrl || 'https://sneoplus.net:8443',
+                    port: '8443',
+                    server_protocol: 'https',
+                  },
+                },
+                savedAt: Date.now(),
+              };
+            });
           }
         };
 
