@@ -19,6 +19,7 @@ import { SeriesScreen } from './components/SeriesScreen';
 import { EventsScreen } from './components/EventsScreen';
 import { LoginScreen } from './components/LoginScreen';
 import { AdminPanelModal } from './components/AdminPanelModal';
+import { UserProfileModal } from './components/UserProfileModal';
 import { VideoPlayer } from './components/VideoPlayer';
 import { VirtualRemote } from './components/VirtualRemote';
 import { ApkExportGuideModal } from './components/ApkExportGuideModal';
@@ -59,6 +60,7 @@ export default function App() {
   };
 
   // Modals
+  const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
   const [isAdminOpen, setIsAdminOpen] = useState<boolean>(false);
   const [isRemoteOpen, setIsRemoteOpen] = useState<boolean>(false);
   const [isApkGuideOpen, setIsApkGuideOpen] = useState<boolean>(false);
@@ -216,6 +218,8 @@ export default function App() {
     const handleCapacitorBack = () => {
       if (activePlayback) {
         setActivePlayback(null);
+      } else if (isProfileOpen) {
+        setIsProfileOpen(false);
       } else if (isAdminOpen) {
         setIsAdminOpen(false);
       } else if (isRemoteOpen) {
@@ -403,7 +407,7 @@ export default function App() {
           viewMode={viewMode}
           onChangeViewMode={handleViewModeChange}
           onToggleViewMode={toggleViewMode}
-          onOpenSettings={() => setIsAdminOpen(true)}
+          onOpenSettings={() => setIsProfileOpen(true)}
           onOpenRemote={() => setIsRemoteOpen((prev) => !prev)}
           onOpenApkGuide={() => setIsApkGuideOpen(true)}
           onLogout={handleLogout}
@@ -421,8 +425,8 @@ export default function App() {
             onChangeViewMode={handleViewModeChange}
             onNavigate={(sec) => setActiveSection(sec)}
             onPlayStream={handlePlayStream}
-            onOpenSettings={() => setIsAdminOpen(true)}
-            onOpenSpeedTest={() => setIsAdminOpen(true)}
+            onOpenSettings={() => setIsProfileOpen(true)}
+            onOpenSpeedTest={() => setIsProfileOpen(true)}
             onOpenFavorites={() => setActiveSection('live')}
             onLogout={handleLogout}
           />
@@ -477,6 +481,17 @@ export default function App() {
             className="w-full h-full"
           />
         </div>
+      )}
+
+      {/* User Profile & Subscription Expiration Modal */}
+      {isProfileOpen && (
+        <UserProfileModal
+          userInfo={session?.authResponse?.user_info || null}
+          serverUrl={config.serverUrl}
+          onClose={() => setIsProfileOpen(false)}
+          onLogout={handleLogout}
+          onOpenAdminPanel={() => setIsAdminOpen(true)}
+        />
       )}
 
       {/* Admin Panel Modal */}
