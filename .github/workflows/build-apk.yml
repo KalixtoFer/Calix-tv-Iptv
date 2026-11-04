@@ -71,7 +71,7 @@ jobs:
       - name: 10. Compilar APK con Gradle
         run: |
           cd android
-          ./gradlew assembleDebug --no-daemon --console=plain
+          ./gradlew clean assembleDebug --no-daemon --console=plain
           cd ..
           cp android/app/build/outputs/apk/debug/app-debug.apk CalixTV-v1.0.apk
 
