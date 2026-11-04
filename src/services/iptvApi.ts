@@ -448,7 +448,7 @@ class IptvApiService {
     const session = this.getSavedSession();
     const activeUser = username || session?.username || 'demo';
     let activePass = password || this.getEffectivePassword();
-    if (activePass === '•••' || !activePass) activePass = 'demo';
+    if (activePass === '•••') activePass = '';
 
     if (type === 'live') {
       const ext = extension || 'm3u8';
