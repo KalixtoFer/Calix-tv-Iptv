@@ -40,16 +40,27 @@ export interface WatchHistoryRecord {
 
 class IptvApiService {
   private activeConfig: CentralizedConfig | null = null;
+  private activePassword = '';
+
+  private getEffectivePassword(overridePass?: string): string {
+    if (overridePass && overridePass !== '•••') return overridePass;
+    if (this.activePassword) return this.activePassword;
+    const session = this.getSavedSession();
+    return session?.authResponse?.user_info?.password || '';
+  }
 
   // 1. Fetch Centralized Server Configuration
   async fetchConfig(): Promise<CentralizedConfig> {
     try {
       const res = await fetch('/api/iptv/config');
       if (res.ok) {
-        const data = await res.json();
-        if (data.config) {
-          this.activeConfig = data.config;
-          return data.config;
+        const text = await res.text();
+        if (text.trim().startsWith('{')) {
+          const data = JSON.parse(text);
+          if (data.config) {
+            this.activeConfig = data.config;
+            return data.config;
+          }
         }
       }
     } catch (err) {
@@ -57,7 +68,7 @@ class IptvApiService {
     }
 
     // Default fallback if backend unreachable (e.g. running as standalone APK)
-    return {
+    const fallback: CentralizedConfig = {
       serverUrl: 'https://sneoplus.net:8443',
       serverPort: '8443',
       serverProtocol: 'https',
@@ -76,24 +87,99 @@ class IptvApiService {
       },
       demoModeEnabled: true,
     };
+    this.activeConfig = fallback;
+    return fallback;
   }
 
-  // 2. Xtream Codes Login (Proxied through backend)
+  // 2. Xtream Codes Login (Direct Xtream API + Proxy Fallback)
   async login(username: string, password: string): Promise<XtreamAuthResponse> {
-    const res = await fetch('/api/iptv/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
-    });
+    const trimmedUser = username.trim();
+    const trimmedPass = password.trim();
+    this.activePassword = trimmedPass;
 
-    const data = await res.json();
-    if (!res.ok || !data.success) {
-      throw new Error(data.message || 'Error al autenticar en el servidor IPTV');
+    // Demo credentials
+    if (
+      (trimmedUser.toLowerCase() === 'demo' && trimmedPass.toLowerCase() === 'demo') ||
+      (trimmedUser.toLowerCase() === 'nexus' && trimmedPass.toLowerCase() === 'nexus2026')
+    ) {
+      const demoAuth: XtreamAuthResponse = {
+        user_info: {
+          username: trimmedUser,
+          password: '•••',
+          message: 'Cuenta Premium Autorizada',
+          auth: 1,
+          status: 'Active',
+          exp_date: '1798761600',
+          is_trial: '0',
+          active_cons: '1',
+          created_at: '1704067200',
+          max_connections: '3',
+          allowed_output_formats: ['m3u8', 'ts', 'rtmp'],
+        },
+        server_info: {
+          url: this.activeConfig?.serverUrl || 'https://sneoplus.net:8443',
+          port: this.activeConfig?.serverPort || '8443',
+          server_protocol: this.activeConfig?.serverProtocol || 'https',
+        },
+      };
+      this.saveSession(trimmedUser, demoAuth);
+      return demoAuth;
     }
 
-    // Save session
-    this.saveSession(username, data);
-    return data;
+    const base = this.activeConfig?.serverUrl || 'https://sneoplus.net:8443';
+    const cleanBase = base.endsWith('/') ? base.slice(0, -1) : base;
+
+    // A. Direct call to Xtream Codes server (Works natively on Android APK and with CORS)
+    try {
+      const directUrl = `${cleanBase}/player_api.php?username=${encodeURIComponent(trimmedUser)}&password=${encodeURIComponent(trimmedPass)}`;
+      const directRes = await fetch(directUrl);
+
+      if (directRes.ok) {
+        const text = await directRes.text();
+        if (text.trim().startsWith('{')) {
+          const data = JSON.parse(text);
+          if (data.user_info && data.user_info.auth === 1) {
+            data.user_info.password = trimmedPass;
+            this.saveSession(trimmedUser, data);
+            return data;
+          } else if (data.user_info && data.user_info.auth === 0) {
+            throw new Error(data.user_info?.message || 'Usuario o contraseña incorrectos en el proveedor IPTV.');
+          }
+        }
+      }
+    } catch (err: any) {
+      if (err.message && !err.message.includes('fetch') && !err.message.includes('NetworkError') && !err.message.includes('JSON')) {
+        throw err;
+      }
+      console.warn('Direct Xtream login failed, attempting proxy endpoint:', err);
+    }
+
+    // B. Backend proxy fallback (Works when running inside browser on dev server)
+    try {
+      const proxyRes = await fetch('/api/iptv/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: trimmedUser, password: trimmedPass }),
+      });
+
+      const text = await proxyRes.text();
+      if (text.trim().startsWith('{')) {
+        const data = JSON.parse(text);
+        if (proxyRes.ok && data.success) {
+          if (data.user_info) data.user_info.password = trimmedPass;
+          this.saveSession(trimmedUser, data);
+          return data;
+        } else {
+          throw new Error(data.message || 'Usuario o contraseña incorrectos.');
+        }
+      }
+    } catch (proxyErr: any) {
+      if (proxyErr.message && !proxyErr.message.includes('JSON')) {
+        throw proxyErr;
+      }
+    }
+
+    throw new Error('No se pudo autenticar con el servidor IPTV. Verifique sus credenciales y su conexión a internet.');
   }
 
   // 3. Save & Restore Session
@@ -135,11 +221,11 @@ class IptvApiService {
     localStorage.removeItem(STORAGE_SESSION_KEY);
   }
 
-  // 4. Fetch Categories
+  // 4. Fetch Categories (Direct + Proxy fallback)
   async getCategories(
     type: 'live' | 'vod' | 'series',
     username: string,
-    password = '•••'
+    password?: string
   ): Promise<any[]> {
     const action =
       type === 'live'
@@ -148,13 +234,36 @@ class IptvApiService {
         ? 'get_vod_categories'
         : 'get_series_categories';
 
+    const effectivePass = this.getEffectivePassword(password);
+    const base = this.activeConfig?.serverUrl || 'https://sneoplus.net:8443';
+    const cleanBase = base.endsWith('/') ? base.slice(0, -1) : base;
+
+    // 1. Direct call
+    try {
+      const directUrl = `${cleanBase}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(effectivePass)}&action=${action}`;
+      const res = await fetch(directUrl);
+      if (res.ok) {
+        const text = await res.text();
+        if (text.trim().startsWith('[')) {
+          const data = JSON.parse(text);
+          if (Array.isArray(data)) return data;
+        }
+      }
+    } catch {
+      // Fallback to proxy
+    }
+
+    // 2. Proxy call fallback
     try {
       const res = await fetch(
-        `/api/iptv/proxy?action=${action}&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
+        `/api/iptv/proxy?action=${action}&username=${encodeURIComponent(username)}&password=${encodeURIComponent(effectivePass)}`
       );
       if (res.ok) {
-        const data = await res.json();
-        return Array.isArray(data) ? data : [];
+        const text = await res.text();
+        if (text.trim().startsWith('[')) {
+          const data = JSON.parse(text);
+          return Array.isArray(data) ? data : [];
+        }
       }
     } catch (e) {
       console.error(`Error loading ${type} categories:`, e);
@@ -162,12 +271,12 @@ class IptvApiService {
     return [];
   }
 
-  // 5. Fetch Streams
+  // 5. Fetch Streams (Direct + Proxy fallback)
   async getStreams(
     type: 'live' | 'vod' | 'series',
     username: string,
     categoryId?: string,
-    password = '•••'
+    password?: string
   ): Promise<any[]> {
     const action =
       type === 'live'
@@ -176,16 +285,40 @@ class IptvApiService {
         ? 'get_vod_streams'
         : 'get_series';
 
-    let url = `/api/iptv/proxy?action=${action}&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
+    const effectivePass = this.getEffectivePassword(password);
+    const base = this.activeConfig?.serverUrl || 'https://sneoplus.net:8443';
+    const cleanBase = base.endsWith('/') ? base.slice(0, -1) : base;
+
+    let catParam = '';
     if (categoryId && categoryId !== 'all') {
-      url += `&category_id=${encodeURIComponent(categoryId)}`;
+      catParam = `&category_id=${encodeURIComponent(categoryId)}`;
     }
 
+    // 1. Direct call
     try {
-      const res = await fetch(url);
+      const directUrl = `${cleanBase}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(effectivePass)}&action=${action}${catParam}`;
+      const res = await fetch(directUrl);
       if (res.ok) {
-        const data = await res.json();
-        return Array.isArray(data) ? data : [];
+        const text = await res.text();
+        if (text.trim().startsWith('[')) {
+          const data = JSON.parse(text);
+          if (Array.isArray(data)) return data;
+        }
+      }
+    } catch {
+      // Fallback to proxy
+    }
+
+    // 2. Proxy call fallback
+    try {
+      const proxyUrl = `/api/iptv/proxy?action=${action}&username=${encodeURIComponent(username)}&password=${encodeURIComponent(effectivePass)}${catParam}`;
+      const res = await fetch(proxyUrl);
+      if (res.ok) {
+        const text = await res.text();
+        if (text.trim().startsWith('[')) {
+          const data = JSON.parse(text);
+          return Array.isArray(data) ? data : [];
+        }
       }
     } catch (e) {
       console.error(`Error loading ${type} streams:`, e);
@@ -197,14 +330,36 @@ class IptvApiService {
   async getSeriesInfo(
     seriesId: string | number,
     username: string,
-    password = '•••'
+    password?: string
   ): Promise<SeriesDetails | null> {
+    const effectivePass = this.getEffectivePassword(password);
+    const base = this.activeConfig?.serverUrl || 'https://sneoplus.net:8443';
+    const cleanBase = base.endsWith('/') ? base.slice(0, -1) : base;
+
+    // 1. Direct call
+    try {
+      const directUrl = `${cleanBase}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(effectivePass)}&action=get_series_info&series_id=${encodeURIComponent(seriesId)}`;
+      const res = await fetch(directUrl);
+      if (res.ok) {
+        const text = await res.text();
+        if (text.trim().startsWith('{')) {
+          return JSON.parse(text);
+        }
+      }
+    } catch {
+      // Fallback to proxy
+    }
+
+    // 2. Proxy call fallback
     try {
       const res = await fetch(
-        `/api/iptv/proxy?action=get_series_info&series_id=${seriesId}&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
+        `/api/iptv/proxy?action=get_series_info&series_id=${seriesId}&username=${encodeURIComponent(username)}&password=${encodeURIComponent(effectivePass)}`
       );
       if (res.ok) {
-        return await res.json();
+        const text = await res.text();
+        if (text.trim().startsWith('{')) {
+          return JSON.parse(text);
+        }
       }
     } catch (e) {
       console.error('Error loading series info:', e);
@@ -225,8 +380,8 @@ class IptvApiService {
     const cleanBase = base.endsWith('/') ? base.slice(0, -1) : base;
 
     const session = this.getSavedSession();
-    const activeUser = username || session?.username || 'demo';
-    const activePass = password || session?.authResponse?.user_info?.password || 'demo';
+    const activeUser = username || session?.username || 'ferdemo';
+    const activePass = password || this.getEffectivePassword();
 
     if (type === 'live') {
       const ext = extension || 'm3u8';
