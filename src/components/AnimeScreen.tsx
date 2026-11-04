@@ -202,7 +202,7 @@ export const AnimeScreen: React.FC<AnimeScreenProps> = ({
                       {stream.name}
                     </h4>
                     <p className="text-[11px] text-zinc-400 font-bold truncate mt-0.5 flex items-center gap-1">
-                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                       {stream.current_program || 'Señal deportiva estable'}
                     </p>
                   </div>
