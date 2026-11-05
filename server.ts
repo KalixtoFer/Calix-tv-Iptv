@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
+import { Readable } from 'stream';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -191,6 +192,65 @@ function recordAdminFailedAttempt(ip: string) {
 function resetAdminFailedAttempts(ip: string) {
   failedAdminAttempts.delete(ip);
 }
+
+const PROXY_SECRET = crypto.randomBytes(32).toString('hex');
+const signUrl = (u: string) => crypto.createHmac('sha256', PROXY_SECRET).update(u).digest('hex');
+const proxify = (u: string) => `/api/iptv/stream?u=${encodeURIComponent(u)}&s=${signUrl(u)}`;
+
+app.get('/api/iptv/stream', async (req, res) => {
+  const target = String(req.query.u || '');
+  const sig = String(req.query.s || '');
+  let allowed = false;
+  try {
+    const t = new URL(target);
+    const base = new URL(currentConfig.serverUrl);
+    // Permitido si lo firmó este servidor, o si apunta al host IPTV configurado
+    allowed = sig === signUrl(target) || t.host === base.host;
+  } catch {}
+  if (!allowed) return res.status(403).json({ success: false, message: 'URL no permitida' });
+
+  const controller = new AbortController();
+  req.on('close', () => controller.abort());
+
+  try {
+    const headers: Record<string, string> = { 'User-Agent': 'CalixTvIptvPro/1.0 (Android TV; Linux)' };
+    if (req.headers.range) headers['Range'] = String(req.headers.range);
+    const up = await fetch(target, { headers, redirect: 'follow', signal: controller.signal });
+
+    const ctype = up.headers.get('content-type') || '';
+    const looksM3u8 = /mpegurl/i.test(ctype) || /\.m3u8(\?|$)/i.test(up.url);
+
+    if (looksM3u8) {
+      const text = await up.text();
+      const rewritten = text
+        .split('\n')
+        .map((line) => {
+          const l = line.trim();
+          if (!l) return line;
+          if (l.startsWith('#')) {
+            return line.replace(/URI="([^"]+)"/g, (_m, uri) => `URI="${proxify(new URL(uri, up.url).toString())}"`);
+          }
+          return proxify(new URL(l, up.url).toString());
+        })
+        .join('\n');
+      res.status(up.status);
+      res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
+      res.setHeader('Cache-Control', 'no-store');
+      return res.send(rewritten);
+    }
+
+    res.status(up.status);
+    for (const h of ['content-type', 'content-length', 'content-range', 'accept-ranges']) {
+      const v = up.headers.get(h);
+      if (v) res.setHeader(h, v);
+    }
+    if (!up.body) return res.end();
+    Readable.fromWeb(up.body as any).on('error', () => res.end()).pipe(res);
+  } catch (e: any) {
+    if (!res.headersSent) res.status(502).json({ success: false, message: `Proxy error: ${e.message}` });
+    else res.end();
+  }
+});
 
 // -------------------------------------------------------------
 // Centralized Configuration API

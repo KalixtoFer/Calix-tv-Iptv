@@ -17,6 +17,8 @@ import {
   Layers,
   AlertCircle,
   Loader2,
+  Copy,
+  ExternalLink,
 } from 'lucide-react';
 import { ScreenOrientation } from '@capacitor/screen-orientation';
 
@@ -36,6 +38,30 @@ export interface VideoPlayerProps {
   isMiniPlayer?: boolean;
   onExpand?: () => void;
 }
+
+const getExt = (u: string): string => {
+  const m = u.split('?')[0].match(/\.([a-z0-9]+)$/i);
+  return m ? m[1].toLowerCase() : '';
+};
+
+const describeMediaError = (code: number | undefined, ext: string): string => {
+  const webUnfriendly = ['mkv', 'avi', 'ts', 'wmv', 'flv', 'mpg', 'mpeg'];
+  switch (code) {
+    case 2: return 'Error de red al descargar el video. Puede ser el servidor (límite de conexiones, bloqueo) o tu conexión.';
+    case 3: return 'El dispositivo no pudo decodificar el video (códec no soportado, por ejemplo HEVC/H.265).';
+    case 4:
+      if (webUnfriendly.includes(ext)) return `El motor web de este dispositivo no reproduce el formato .${ext} (o su códec de video/audio). Probá abrirlo en otro reproductor (VLC / MX Player).`;
+      return 'No se pudo abrir el archivo: formato o códec no soportado, o el servidor rechazó la solicitud (401/403/404).';
+    default: return 'No se pudo reproducir este contenido.';
+  }
+};
+
+const describeHlsError = (httpCode: number | undefined): string => {
+  if (httpCode === 401 || httpCode === 403) return 'El servidor rechazó la solicitud (credenciales, límite de conexiones o bloqueo).';
+  if (httpCode === 404) return 'El canal o la URL no existe en el servidor.';
+  if (httpCode && httpCode >= 500) return 'El servidor IPTV respondió con error interno.';
+  return 'No se pudo cargar la señal. En el navegador suele ser bloqueo CORS o contenido mixto (http dentro de https); en el celular, revisá la conexión.';
+};
 
 type AspectRatioMode = 'cover' | 'contain' | 'fill' | 'scale-down';
 
@@ -71,6 +97,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const [aspectRatio, setAspectRatio] = useState<AspectRatioMode>('contain');
   const [qualityText, setQualityText] = useState<string>('FHD 1080p');
   const [zapFeedback, setZapFeedback] = useState<'next' | 'prev' | null>(null);
+  const [errorDetail, setErrorDetail] = useState<string>('');
+  const retryCountRef = useRef<number>(0);
 
   const touchStartY = useRef<number>(0);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -103,6 +131,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
     setIsLoading(true);
     setHasError(null);
+    setErrorDetail('');
+    retryCountRef.current = 0;
 
     // Clean up previous HLS instance safely
     if (hlsRef.current) {
@@ -163,23 +193,14 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       });
 
       hls.on(Hls.Events.ERROR, (_event, data) => {
-        if (data.fatal) {
-          switch (data.type) {
-            case Hls.ErrorTypes.NETWORK_ERROR:
-              console.warn('HLS Network Error, attempting recovery...');
-              hls.startLoad();
-              break;
-            case Hls.ErrorTypes.MEDIA_ERROR:
-              console.warn('HLS Media Error, recovering media...');
-              hls.recoverMediaError();
-              break;
-            default:
-              hls.destroy();
-              setIsLoading(false);
-              setHasError('Señal no disponible o canal temporalmente fuera de línea.');
-              break;
-          }
-        }
+        if (!data.fatal) return;
+        const httpCode: number | undefined = (data as any).response?.code;
+        if (data.type === Hls.ErrorTypes.NETWORK_ERROR && retryCountRef.current < 3) { retryCountRef.current += 1; hls.startLoad(); return; }
+        if (data.type === Hls.ErrorTypes.MEDIA_ERROR && retryCountRef.current < 3) { retryCountRef.current += 1; hls.recoverMediaError(); return; }
+        hls.destroy(); hlsRef.current = null;
+        setIsLoading(false);
+        setHasError('Señal no disponible o canal temporalmente fuera de línea.');
+        setErrorDetail(describeHlsError(httpCode));
       });
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
       // Safari / iOS Native HLS

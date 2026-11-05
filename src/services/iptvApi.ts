@@ -9,6 +9,7 @@ import {
   SeriesItem,
   SeriesDetails,
 } from '../types/iptv';
+import { Capacitor } from '@capacitor/core';
 
 const STORAGE_SESSION_KEY = 'nexus_iptv_session_v1';
 const STORAGE_FAVORITES_KEY = 'nexus_iptv_favorites_v1';
@@ -433,6 +434,11 @@ class IptvApiService {
     return null;
   }
 
+  private maybeProxy(url: string): string {
+    if (Capacitor.isNativePlatform()) return url; // en el APK se usa la URL directa
+    return `/api/iptv/stream?u=${encodeURIComponent(url)}`;
+  }
+
   // 7. Generate Stream URL for Video Player
   buildStreamUrl(
     type: 'live' | 'movie' | 'episode',
@@ -450,16 +456,18 @@ class IptvApiService {
     let activePass = password || this.getEffectivePassword();
     if (activePass === '•••') activePass = '';
 
+    let direct = '';
     if (type === 'live') {
       const ext = extension || 'm3u8';
-      return `${cleanBase}/live/${encodeURIComponent(activeUser)}/${encodeURIComponent(activePass)}/${streamId}.${ext}`;
+      direct = `${cleanBase}/live/${encodeURIComponent(activeUser)}/${encodeURIComponent(activePass)}/${streamId}.${ext}`;
     } else if (type === 'movie') {
       const ext = extension || 'mp4';
-      return `${cleanBase}/movie/${encodeURIComponent(activeUser)}/${encodeURIComponent(activePass)}/${streamId}.${ext}`;
+      direct = `${cleanBase}/movie/${encodeURIComponent(activeUser)}/${encodeURIComponent(activePass)}/${streamId}.${ext}`;
     } else {
       const ext = extension || 'mp4';
-      return `${cleanBase}/series/${encodeURIComponent(activeUser)}/${encodeURIComponent(activePass)}/${streamId}.${ext}`;
+      direct = `${cleanBase}/series/${encodeURIComponent(activeUser)}/${encodeURIComponent(activePass)}/${streamId}.${ext}`;
     }
+    return this.maybeProxy(direct);
   }
 
   // 8. Test Server Connection
