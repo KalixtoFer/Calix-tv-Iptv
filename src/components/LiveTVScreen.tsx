@@ -38,11 +38,23 @@ interface LiveTVScreenProps {
 
 const adjustTime = (text: string | undefined): string => {
   if (!text) return '';
-  return text.replace(/(\d{1,2}):(\d{2})/g, (match, hh, mm) => {
+  
+  // 1. Match HH:MM, HH.MM, or HHhMM (e.g. 18:30, 18.30, 18h30, 08:15)
+  let result = text.replace(/\b([0-1]?\d|2[0-3])[:.hH]([0-5]\d)\b/g, (match, hh, mm) => {
     let h = parseInt(hh, 10);
     h = (h + 2) % 24;
-    return `${h.toString().padStart(2, '0')}:${mm}`;
+    const sep = match.includes(':') ? ':' : match.includes('.') ? '.' : 'h';
+    return `${h.toString().padStart(2, '0')}${sep}${mm}`;
   });
+
+  // 2. Match isolated hours followed by hs / hrs / h (e.g. 18hs, 18 hs, 18hrs)
+  result = result.replace(/\b([0-1]?\d|2[0-3])\s*(hs|hrs|h)\b/gi, (match, hh, unit) => {
+    let h = parseInt(hh, 10);
+    h = (h + 2) % 24;
+    return `${h.toString().padStart(2, '0')} ${unit}`;
+  });
+
+  return result;
 };
 
 export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
