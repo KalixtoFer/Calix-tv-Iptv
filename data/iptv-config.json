@@ -46,11 +46,11 @@
   },
   "demoModeEnabled": true,
   "appUpdate": {
-    "latestVersion": "1.0",
+    "latestVersion": "1.1",
     "minVersion": "1.0",
-    "apkDownloadUrl": "",
-    "releaseNotes": "Versión inicial oficial de Calix TV v1.0 con interfaz fluida para Android TV y teléfonos.",
+    "apkDownloadUrl": "https://github.com/KalixtoFer/calixtvapp/releases/latest/download/CalixTV.apk",
+    "releaseNotes": "Nueva versión 1.1 con optimizaciones de reproductor, agenda deportiva en hora de Argentina y descarga directa.",
     "forceUpdate": false,
-    "publishedAt": "2026-11-03"
+    "publishedAt": "2026-11-05"
   }
 }
