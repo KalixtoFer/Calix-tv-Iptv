@@ -1,5 +1,6 @@
 import React from 'react';
 import { Download, Sparkles, X, AlertTriangle, ArrowRight } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
 
 interface AppUpdateModalProps {
   updateInfo: {
@@ -15,7 +16,11 @@ interface AppUpdateModalProps {
 export const AppUpdateModal: React.FC<AppUpdateModalProps> = ({ updateInfo, onClose }) => {
   const handleDownload = () => {
     const url = updateInfo.apkDownloadUrl || '/api/iptv/download-apk';
-    window.open(url, '_blank');
+    if (Capacitor.isNativePlatform()) {
+      window.open(url, '_system') || (window.location.href = url);
+    } else {
+      window.open(url, '_blank');
+    }
   };
 
   return (
