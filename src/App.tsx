@@ -75,7 +75,7 @@ export default function App() {
   // Active Fullscreen Video Playback
   const [activePlayback, setActivePlayback] = useState<PlaybackState | null>(null);
 
-  // 1. Initial Load: Fetch Config, Check Updates & Restore Session + Check Admin Route (#calixtv or /calixtv)
+  // 1. Initial Load: Fetch Config, Check Updates & Restore Session
   useEffect(() => {
     async function init() {
       try {
@@ -89,75 +89,9 @@ export default function App() {
         }
 
         const savedSession = iptvApi.getSavedSession();
-        const isAdminRoute = window.location.search.includes('admin=true');
-
         if (savedSession) {
           setSession(savedSession);
-        } else if (isAdminRoute) {
-          // If accessing via admin route #calixtv, show full app behind admin modal
-          const defaultGuestSession: StoredSession = {
-            username: 'Invitado',
-            authResponse: {
-              user_info: {
-                username: 'Invitado',
-                auth: 1,
-                status: 'Active',
-                exp_date: '1798761600',
-                is_trial: '1',
-                active_cons: '1',
-                created_at: '1704067200',
-                max_connections: '1',
-              },
-              server_info: {
-                url: fetchedConfig?.serverUrl || 'https://sneoplus.net:8443',
-                port: '8443',
-                server_protocol: 'https',
-              },
-            },
-            savedAt: Date.now(),
-          };
-          setSession(defaultGuestSession);
         }
-
-        const checkAdminRoute = () => {
-          const search = window.location.search.toLowerCase();
-
-          if (search.includes('admin=true')) {
-            setIsAdminOpen(true);
-            setSession((prev) => {
-              if (prev) return prev;
-              return {
-                username: 'Invitado',
-                authResponse: {
-                  user_info: {
-                    username: 'Invitado',
-                    auth: 1,
-                    status: 'Active',
-                    exp_date: '1798761600',
-                    is_trial: '1',
-                    active_cons: '1',
-                    created_at: '1704067200',
-                    max_connections: '1',
-                  },
-                  server_info: {
-                    url: fetchedConfig?.serverUrl || 'https://sneoplus.net:8443',
-                    port: '8443',
-                    server_protocol: 'https',
-                  },
-                },
-                savedAt: Date.now(),
-              };
-            });
-          }
-        };
-
-        window.addEventListener('hashchange', checkAdminRoute);
-        window.addEventListener('popstate', checkAdminRoute);
-
-        return () => {
-          window.removeEventListener('hashchange', checkAdminRoute);
-          window.removeEventListener('popstate', checkAdminRoute);
-        };
       } catch (err) {
         console.error('Initialization error:', err);
       } finally {
