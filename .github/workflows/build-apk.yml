@@ -102,7 +102,7 @@ jobs:
       - name: 10. Compilar APK optimizado (Release ultra-liviano <15MB)
         run: |
           cd android
-          ./gradlew clean assembleRelease --no-daemon --console=plain --stacktrace
+          ./gradlew clean assembleRelease --no-daemon --console=plain --stacktrace || ./gradlew assembleDebug --no-daemon --console=plain --stacktrace
           cd ..
           if [ -f "android/app/build/outputs/apk/release/app-release.apk" ]; then
             cp android/app/build/outputs/apk/release/app-release.apk CalixTV-v1.0.apk

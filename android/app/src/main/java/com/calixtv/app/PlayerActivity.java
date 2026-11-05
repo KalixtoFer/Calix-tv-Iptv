@@ -251,10 +251,6 @@ public class PlayerActivity extends Activity {
                 break;
         }
     }
-            default:
-                break;
-        }
-    }
 
     // ---------------------------------------------------------------- UI
 
