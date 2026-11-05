@@ -20,7 +20,9 @@ import {
   Copy,
   ExternalLink,
 } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
 import { ScreenOrientation } from '@capacitor/screen-orientation';
+import { NativePlayer, canUseNativePlayer } from '../services/nativePlayer';
 
 export interface VideoPlayerProps {
   url: string;
@@ -47,17 +49,24 @@ const getExt = (u: string): string => {
 const describeMediaError = (code: number | undefined, ext: string): string => {
   const webUnfriendly = ['mkv', 'avi', 'ts', 'wmv', 'flv', 'mpg', 'mpeg'];
   switch (code) {
-    case 2: return 'Error de red al descargar el video. Puede ser el servidor (límite de conexiones, bloqueo) o tu conexión.';
-    case 3: return 'El dispositivo no pudo decodificar el video (códec no soportado, por ejemplo HEVC/H.265).';
+    case 2:
+      return 'Error de red al descargar el video. Puede ser el servidor (límite de conexiones, bloqueo) o tu conexión.';
+    case 3:
+      return 'El dispositivo no pudo decodificar el video (códec no soportado, por ejemplo HEVC/H.265).';
     case 4:
-      if (webUnfriendly.includes(ext)) return `El motor web de este dispositivo no reproduce el formato .${ext} (o su códec de video/audio). Probá abrirlo en otro reproductor (VLC / MX Player).`;
+      if (webUnfriendly.includes(ext)) {
+        return `El motor web de este dispositivo no reproduce el formato .${ext} (o su códec de video/audio). Probá abrirlo en otro reproductor (VLC / MX Player).`;
+      }
       return 'No se pudo abrir el archivo: formato o códec no soportado, o el servidor rechazó la solicitud (401/403/404).';
-    default: return 'No se pudo reproducir este contenido.';
+    default:
+      return 'No se pudo reproducir este contenido.';
   }
 };
 
 const describeHlsError = (httpCode: number | undefined): string => {
-  if (httpCode === 401 || httpCode === 403) return 'El servidor rechazó la solicitud (credenciales, límite de conexiones o bloqueo).';
+  if (httpCode === 401 || httpCode === 403) {
+    return 'El servidor rechazó la solicitud (credenciales, límite de conexiones o bloqueo).';
+  }
   if (httpCode === 404) return 'El canal o la URL no existe en el servidor.';
   if (httpCode && httpCode >= 500) return 'El servidor IPTV respondió con error interno.';
   return 'No se pudo cargar la señal. En el navegador suele ser bloqueo CORS o contenido mixto (http dentro de https); en el celular, revisá la conexión.';
@@ -66,7 +75,7 @@ const describeHlsError = (httpCode: number | undefined): string => {
 type AspectRatioMode = 'cover' | 'contain' | 'fill' | 'scale-down';
 
 export const VideoPlayer: React.FC<VideoPlayerProps> = ({
-  url,
+  url: urlProp,
   title,
   subtitle,
   type = 'live',
@@ -81,6 +90,18 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   isMiniPlayer = false,
   onExpand,
 }) => {
+  // En el APK la URL siempre debe ser la directa al servidor IPTV (el proxy /api/iptv/stream solo existe en el servidor web)
+  const url = (() => {
+    if (Capacitor.isNativePlatform() && urlProp.startsWith('/api/iptv/stream')) {
+      try {
+        return new URL(urlProp, 'http://localhost').searchParams.get('u') || urlProp;
+      } catch {
+        return urlProp;
+      }
+    }
+    return urlProp;
+  })();
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const hlsRef = useRef<Hls | null>(null);
@@ -99,6 +120,40 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const [zapFeedback, setZapFeedback] = useState<'next' | 'prev' | null>(null);
   const [errorDetail, setErrorDetail] = useState<string>('');
   const retryCountRef = useRef<number>(0);
+
+  // Reproductor nativo (libVLC): películas y series por defecto; canales en vivo solo si se pide
+  const [nativeFailed, setNativeFailed] = useState<boolean>(false);
+  const [forceNative, setForceNative] = useState<boolean>(false);
+  const nativeLaunchedFor = useRef<string>('');
+  const nativeActive =
+    canUseNativePlayer() && !isMiniPlayer && !nativeFailed && (type !== 'live' || forceNative);
+
+  const launchNative = useCallback(async () => {
+    setIsLoading(true);
+    setHasError(null);
+    setErrorDetail('');
+    try {
+      const r = await NativePlayer.play({
+        url,
+        title,
+        startTime: Math.floor((initialTime || 0) * 1000),
+      });
+      if (onTimeUpdate) onTimeUpdate((r?.position || 0) / 1000, (r?.duration || 0) / 1000);
+      if (onClose) onClose();
+    } catch (e: any) {
+      setNativeFailed(true);
+      setIsLoading(false);
+      setHasError('No se pudo abrir el reproductor nativo.');
+      setErrorDetail(String(e?.message || e));
+    }
+  }, [url, title, initialTime, onClose, onTimeUpdate]);
+
+  useEffect(() => {
+    if (!nativeActive || !url) return;
+    if (nativeLaunchedFor.current === url) return;
+    nativeLaunchedFor.current = url;
+    launchNative();
+  }, [nativeActive, url, launchNative]);
 
   const touchStartY = useRef<number>(0);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -124,6 +179,19 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   // Video source loading via HLS.js or Native
   const loadStream = useCallback(() => {
     const video = videoRef.current;
+    if (nativeActive) {
+      // Lo reproduce el motor nativo: apagar el reproductor web
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+      try {
+        video?.pause();
+      } catch {
+        // ignore
+      }
+      return;
+    }
     if (!video || !url || url.trim() === '') {
       setIsLoading(false);
       return;
@@ -195,25 +263,29 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       hls.on(Hls.Events.ERROR, (_event, data) => {
         if (!data.fatal) return;
         const httpCode: number | undefined = (data as any).response?.code;
-        if (data.type === Hls.ErrorTypes.NETWORK_ERROR && retryCountRef.current < 3) { retryCountRef.current += 1; hls.startLoad(); return; }
-        if (data.type === Hls.ErrorTypes.MEDIA_ERROR && retryCountRef.current < 3) { retryCountRef.current += 1; hls.recoverMediaError(); return; }
-        hls.destroy(); hlsRef.current = null;
+        // Reintentos limitados: antes se reintentaba para siempre y quedaba el spinner infinito
+        if (data.type === Hls.ErrorTypes.NETWORK_ERROR && retryCountRef.current < 3) {
+          retryCountRef.current += 1;
+          console.warn('HLS Network Error, retry', retryCountRef.current);
+          hls.startLoad();
+          return;
+        }
+        if (data.type === Hls.ErrorTypes.MEDIA_ERROR && retryCountRef.current < 3) {
+          retryCountRef.current += 1;
+          console.warn('HLS Media Error, recovering', retryCountRef.current);
+          hls.recoverMediaError();
+          return;
+        }
+        hls.destroy();
+        hlsRef.current = null;
         setIsLoading(false);
-        setHasError('Señal no disponible o canal temporalmente fuera de línea.');
-        setErrorDetail(describeHlsError(httpCode));
+        setHasError(describeHlsError(httpCode));
+        setErrorDetail(
+          `hls.js: ${data.type} / ${data.details}${httpCode !== undefined ? ` / HTTP ${httpCode}` : ''}`
+        );
       });
-    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      // Safari / iOS Native HLS
-      video.src = url;
-      if (autoPlay) {
-        video.play().catch(() => {
-          video.muted = true;
-          setIsMuted(true);
-          video.play().catch(() => {});
-        });
-      }
     } else {
-      // Native MP4 / WebM / TS / MKV VOD stream
+      // VOD directo (mp4 / mkv / etc.) o HLS nativo (Safari): el <video> lo maneja con src
       video.src = url;
       video.load();
       if (autoPlay) {
@@ -226,9 +298,20 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     }
 
     if (initialTime > 0) {
-      video.currentTime = initialTime;
+      // Hay que esperar a los metadatos; antes se asignaba demasiado pronto y se ignoraba
+      video.addEventListener(
+        'loadedmetadata',
+        () => {
+          try {
+            video.currentTime = initialTime;
+          } catch {
+            // ignore
+          }
+        },
+        { once: true }
+      );
     }
-  }, [url, autoPlay, initialTime, type]);
+  }, [url, autoPlay, initialTime, type, nativeActive]);
 
   useEffect(() => {
     loadStream();
@@ -390,6 +473,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         ref={videoRef}
         poster={poster}
         playsInline
+        preload="auto"
         onTimeUpdate={handleTimeUpdate}
         onWaiting={() => setIsLoading(true)}
         onCanPlay={() => setIsLoading(false)}
@@ -401,27 +485,13 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         onEnded={() => setIsPlaying(false)}
         onError={() => {
           setIsLoading(false);
-          const v = videoRef.current;
-          if (url && url.trim() !== '') {
-            // Attempt HLS fallback if URL is not .m3u8 and HLS is supported
-            if (!url.includes('.m3u8') && Hls.isSupported() && !hlsRef.current) {
-              const hlsUrl = url.replace(/\.[a-zA-Z0-9]+$/, '.m3u8');
-              console.log('Attempting HLS fallback for VOD:', hlsUrl);
-              const hls = new Hls({ enableWorker: true });
-              hlsRef.current = hls;
-              hls.loadSource(hlsUrl);
-              if (v) hls.attachMedia(v);
-              hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                setHasError(null);
-                v?.play().catch(() => {});
-              });
-              hls.on(Hls.Events.ERROR, () => {
-                setHasError('No se pudo reproducir este título. Verifique el servidor o su conexión.');
-              });
-              return;
-            }
-            setHasError('Señal no disponible o canal temporalmente fuera de línea.');
-          }
+          if (hlsRef.current || !url || url.trim() === '') return; // hls.js informa sus propios errores
+          const err = videoRef.current?.error;
+          const ext = getExt(url);
+          setHasError(describeMediaError(err?.code, ext));
+          setErrorDetail(
+            `MediaError ${err?.code ?? '?'}${err?.message ? ' – ' + err.message : ''} · tipo=${type} · ext=${ext || '?'}`
+          );
         }}
         className={`w-full h-full transition-all duration-200 ${
           aspectRatio === 'contain'
@@ -463,17 +533,58 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       {hasError && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950/90 text-center p-6 z-20">
           <AlertCircle className="w-12 h-12 text-rose-500 mb-3" />
-          <h4 className="text-base font-bold text-white mb-1">Señal no disponible temporalmente</h4>
-          <p className="text-xs text-zinc-400 max-w-md mb-4">{hasError}</p>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              loadStream();
-            }}
-            className="tv-focusable px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-sm font-semibold flex items-center gap-2 shadow-lg cursor-pointer"
-          >
-            <RotateCcw className="w-4 h-4" /> Reintentar Señal
-          </button>
+          <h4 className="text-base font-bold text-white mb-1">
+            {type === 'live' ? 'Señal no disponible' : 'No se pudo reproducir'}
+          </h4>
+          <p className="text-xs text-zinc-300 max-w-md mb-2">{hasError}</p>
+          {errorDetail && (
+            <p className="text-[10px] font-mono text-zinc-500 max-w-md mb-4 break-all">{errorDetail}</p>
+          )}
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                loadStream();
+              }}
+              className="tv-focusable px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-sm font-semibold flex items-center gap-2 shadow-lg cursor-pointer"
+            >
+              <RotateCcw className="w-4 h-4" /> Reintentar
+            </button>
+            {canUseNativePlayer() && (nativeFailed || type === 'live') && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  nativeLaunchedFor.current = '';
+                  setNativeFailed(false);
+                  setForceNative(true);
+                  setHasError(null);
+                }}
+                className="tv-focusable px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-semibold flex items-center gap-2 cursor-pointer"
+              >
+                <Play className="w-4 h-4" /> Reproductor nativo
+              </button>
+            )}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                window.open(url, '_blank');
+              }}
+              className="tv-focusable px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-sm font-semibold flex items-center gap-2 cursor-pointer"
+              title="Abrir con otro reproductor (VLC, MX Player...)"
+            >
+              <ExternalLink className="w-4 h-4" /> Abrir en otro reproductor
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                navigator.clipboard?.writeText(url).catch(() => {});
+              }}
+              className="tv-focusable px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-sm font-semibold flex items-center gap-2 cursor-pointer"
+              title="Copiar enlace (incluye usuario y contraseña)"
+            >
+              <Copy className="w-4 h-4" /> Copiar enlace
+            </button>
+          </div>
         </div>
       )}
 
