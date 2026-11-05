@@ -57,6 +57,7 @@ jobs:
           public class MainActivity extends BridgeActivity {
               @Override
               public void onCreate(Bundle savedInstanceState) {
+                  registerPlugin(NativePlayerPlugin.class);
                   super.onCreate(savedInstanceState);
               }
           }
@@ -72,6 +73,9 @@ jobs:
           EOF
           echo "--- variables.gradle ---"
           cat android/variables.gradle
+
+      - name: 6.6. Instalar reproductor nativo (libVLC)
+        run: python3 scripts/install-native-player.py
 
       - name: 7. Configurar Android SDK API 35 y Licencias
         run: |
