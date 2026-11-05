@@ -63,6 +63,8 @@ public class PlayerActivity extends Activity {
     private boolean controlsVisible = true;
     private boolean userSeeking = false;
     private boolean resumedOnce = false;
+    private int reconnectAttempts = 0;
+    private static final int MAX_RECONNECT_ATTEMPTS = 5;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,11 +81,44 @@ public class PlayerActivity extends Activity {
         setContentView(root);
 
         ArrayList<String> args = new ArrayList<>();
-        args.add("--network-caching=2500");
+        args.add("--network-caching=6000");
         args.add("--http-reconnect");
+        args.add("--http-continuous");
+        args.add("--clock-jitter=0");
+        args.add("--drop-late-frames");
+        args.add("--skip-frames");
         libVLC = new LibVLC(this, args);
         player = new MediaPlayer(libVLC);
         player.setEventListener(listener);
+    }
+
+    private void handlePrematureDisconnect() {
+        if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS && lastTime > 3000) {
+            reconnectAttempts++;
+            final long resumeTime = lastTime;
+            setBuffering(true);
+            ui.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        player.stop();
+                        player.detachViews();
+                        player.attachViews(videoLayout, null, true, false);
+                        Media media = new Media(libVLC, Uri.parse(url));
+                        media.setHWDecoderEnabled(true, false);
+                        player.setMedia(media);
+                        media.release();
+                        startMs = resumeTime;
+                        resumedOnce = false;
+                        player.play();
+                    } catch (Exception e) {
+                        showError("Error al reconectar la transmisión.");
+                    }
+                }
+            }, 1000);
+        } else {
+            showError("La conexión con el servidor de la serie se interrumpió.\nRevisá la señal de tu proveedor de IPTV o la conexión a internet.");
+        }
     }
 
     @Override
@@ -172,6 +207,7 @@ public class PlayerActivity extends Activity {
                 setBuffering(event.getBuffering() < 100f);
                 break;
             case MediaPlayer.Event.Playing:
+                reconnectAttempts = 0;
                 setBuffering(false);
                 errorView.setVisibility(View.GONE);
                 playBtn.setText("Pausa");
@@ -198,11 +234,23 @@ public class PlayerActivity extends Activity {
                 break;
             case MediaPlayer.Event.EncounteredError:
                 setBuffering(false);
-                showError("No se pudo reproducir este contenido.\nRevisá la conexión, el usuario/contraseña o el límite de conexiones del servidor.");
+                if (lastTime > 5000 && (length == 0 || lastTime < length - 15000)) {
+                    handlePrematureDisconnect();
+                } else {
+                    showError("No se pudo reproducir este contenido.\nRevisá la conexión, el usuario/contraseña o el límite de conexiones del servidor.");
+                }
                 break;
             case MediaPlayer.Event.EndReached:
-                finish();
+                if (lastTime > 5000 && length > 30000 && lastTime < (length - 15000)) {
+                    handlePrematureDisconnect();
+                } else {
+                    finish();
+                }
                 break;
+            default:
+                break;
+        }
+    }
             default:
                 break;
         }

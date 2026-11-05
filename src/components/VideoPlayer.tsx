@@ -339,6 +339,28 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     }
   }, [url, autoPlay, initialTime, type, nativeActive]);
 
+  // Prevent screen dimming / device sleep while playing video
+  useEffect(() => {
+    let wakeLock: any = null;
+    const requestWakeLock = async () => {
+      try {
+        if ('wakeLock' in navigator && isPlaying) {
+          wakeLock = await (navigator as any).wakeLock.request('screen');
+        }
+      } catch {
+        // ignore
+      }
+    };
+    if (isPlaying) {
+      requestWakeLock();
+    }
+    return () => {
+      if (wakeLock) {
+        wakeLock.release().catch(() => {});
+      }
+    };
+  }, [isPlaying]);
+
   useEffect(() => {
     loadStream();
     return () => {
