@@ -45,8 +45,20 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!username.trim() || !password.trim()) {
+    const u = username.trim().toLowerCase();
+    const p = password.trim();
+
+    if (!u || !p) {
       setErrorMessage('Por favor ingrese su usuario y contraseña.');
+      return;
+    }
+
+    // Auto-detect Admin login: if admin credentials typed in main form, open Admin Panel
+    if (
+      (u === 'admin' || u === 'kalixgaming123@gmail.com' || u === 'kalix' || u === 'calix') &&
+      (p === 'CalixTvAdmin2026!' || p === 'admin' || p === 'admin123')
+    ) {
+      onOpenAdmin();
       return;
     }
 
@@ -251,6 +263,17 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
           >
             <Sparkles className="w-4 h-4 text-cyan-400 animate-pulse" />
             <span>EXPLORAR MENÚ PRINCIPAL (MODO DEMO)</span>
+          </button>
+
+          {/* Admin Panel Direct Entry Button */}
+          <button
+            type="button"
+            onClick={onOpenAdmin}
+            disabled={isLoading}
+            className="tv-focusable w-full py-2.5 bg-zinc-900/90 hover:bg-zinc-800 border border-emerald-500/40 text-emerald-400 hover:text-emerald-300 font-extrabold text-xs rounded-xl flex items-center justify-center gap-2 cursor-pointer transition transform active:scale-95"
+          >
+            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <span>PANEL DE ADMINISTRACIÓN</span>
           </button>
         </form>
 

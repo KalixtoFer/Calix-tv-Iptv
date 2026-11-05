@@ -506,8 +506,8 @@ class IptvApiService {
     const p = (params.password || '').trim();
 
     const isMatch =
-      (u === 'admin' || u === 'kalix' || u === 'calix' || u === 'kalixgaming123@gmail.com') &&
-      (p === 'CalixTvAdmin2026!' || p === 'admin' || p === 'admin123' || p === 'calixtv' || p === '123456');
+      (u === 'admin' || u === 'kalixgaming123@gmail.com') &&
+      (p === 'CalixTvAdmin2026!');
 
     if (isMatch) {
       this.adminToken = 'local_admin_token';
@@ -534,7 +534,7 @@ class IptvApiService {
           appUpdate: {
             latestVersion: '1.0',
             minVersion: '1.0',
-            apkDownloadUrl: 'https://github.com/KalixtoFer/calixtvapp/releases/download/untagged-e908398b63702c321218/CalixTV-v1.0.apk',
+            apkDownloadUrl: 'https://github.com/KalixtoFer/calixtvapp/releases/latest/download/CalixTV.apk',
             releaseNotes: 'Versión oficial de Calix TV v1.0',
             forceUpdate: false,
           },
@@ -544,7 +544,7 @@ class IptvApiService {
 
     return {
       success: false,
-      message: 'Usuario o contraseña de administrador incorrectos. Prueba con usuario "admin" y contraseña "CalixTvAdmin2026!" o "admin".',
+      message: 'Usuario o contraseña de administrador incorrectos.',
     };
   }
 

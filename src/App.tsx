@@ -83,6 +83,11 @@ export default function App() {
         const fetchedConfig = await iptvApi.fetchConfig();
         setConfig(fetchedConfig);
 
+        // Check if URL specifies /admin or #admin
+        if (typeof window !== 'undefined' && (window.location.pathname === '/admin' || window.location.hash === '#admin')) {
+          setIsAdminOpen(true);
+        }
+
         // Check for app updates (OTA)
         const updateCheck = await iptvApi.checkAppUpdate('1.0');
         if (updateCheck && updateCheck.hasUpdate) {
@@ -288,26 +293,30 @@ export default function App() {
     );
   }
 
-  // If no session, show Login Screen (no server URL asked!)
+  // Dedicated Standalone Admin Portal View
+  if (isAdminOpen && !session) {
+    return (
+      <div className="min-h-screen w-full bg-[#040508] flex items-center justify-center p-2 sm:p-4">
+        <AdminPanelModal
+          initialConfig={config}
+          onClose={() => setIsAdminOpen(false)}
+          onConfigSaved={(updated) => setConfig(updated)}
+        />
+      </div>
+    );
+  }
+
+  // If no session, show Login Screen
   if (!session) {
     return (
-      <>
-        <LoginScreen
-          config={config}
-          viewMode={viewMode}
-          onChangeViewMode={handleViewModeChange}
-          onLoginSuccess={handleLoginSuccess}
-          onOpenAdmin={() => setIsAdminOpen(true)}
-          onEnterGuest={handleEnterGuestMode}
-        />
-        {isAdminOpen && (
-          <AdminPanelModal
-            initialConfig={config}
-            onClose={() => setIsAdminOpen(false)}
-            onConfigSaved={(updated) => setConfig(updated)}
-          />
-        )}
-      </>
+      <LoginScreen
+        config={config}
+        viewMode={viewMode}
+        onChangeViewMode={handleViewModeChange}
+        onLoginSuccess={handleLoginSuccess}
+        onOpenAdmin={() => setIsAdminOpen(true)}
+        onEnterGuest={handleEnterGuestMode}
+      />
     );
   }
 
