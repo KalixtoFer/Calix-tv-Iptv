@@ -132,7 +132,7 @@ public class PlayerActivity extends Activity {
         setBuffering(true);
         player.attachViews(videoLayout, null, true, false);
         Media media = new Media(libVLC, Uri.parse(url));
-        media.setHWDecoderEnabled(true, false);
+        media.setHWDecoderEnabled(false, false);
         player.setMedia(media);
         media.release();
         player.play();
