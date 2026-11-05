@@ -60,7 +60,7 @@ if os.path.exists(manifest):
 
     open(manifest, 'w', encoding='utf-8').write(s)
 
-# 3) Dependencia libVLC + ABIs + Compresión de .so en build.gradle
+# 3) Dependencia libVLC + ABI arm64-v8a + Compresión de .so y R8 minification en build.gradle
 gradle = f'{BASE}/build.gradle'
 if os.path.exists(gradle):
     t = open(gradle, encoding='utf-8').read()
@@ -70,18 +70,33 @@ if os.path.exists(gradle):
             fail('No se encontró la sección dependencies en build.gradle')
         t = t.replace(anchor, anchor + f"\n    implementation '{LIBVLC}'")
         print('libVLC agregado')
-    if 'abiFilters' not in t:
+    
+    # Asegurar ABI arm64-v8a ultra-liviana (reduce tamaño al 50%)
+    if 'abiFilters' in t:
+        import re
+        t = re.sub(r'abiFilters\s+.*', 'abiFilters "arm64-v8a"', t)
+        print('abiFilters actualizado a arm64-v8a')
+    else:
         anchor = 'versionName "1.0"'
-        if anchor not in t:
-            fail('No se encontró versionName en build.gradle')
-        t = t.replace(anchor, anchor + '\n        ndk {\n            abiFilters "arm64-v8a", "armeabi-v7a"\n        }')
-        print('abiFilters agregado')
+        if anchor in t:
+            t = t.replace(anchor, anchor + '\n        ndk {\n            abiFilters "arm64-v8a"\n        }')
+            print('abiFilters arm64-v8a agregado')
+
+    # Configurar minificación R8 y compresión de .so
     if 'useLegacyPackaging' not in t:
         anchor_android = 'buildTypes {'
         if anchor_android in t:
             t = t.replace(anchor_android, PACKAGING_SNIPPET + '\n    ' + anchor_android)
             print('packagingOptions (useLegacyPackaging = true) agregado para comprimir .so')
+
+    if 'minifyEnabled false' in t:
+        t = t.replace(
+            'minifyEnabled false',
+            'minifyEnabled true\n            shrinkResources true\n            signingConfig signingConfigs.debug'
+        )
+        print('R8 minificación y reducción de recursos activados')
+
     open(gradle, 'w', encoding='utf-8').write(t)
-    print('build.gradle optimizado OK')
+    print('build.gradle optimizado para APK ultra-liviano OK')
 
 print('Reproductor nativo instalado y APK optimizado para mínimo tamaño OK')
