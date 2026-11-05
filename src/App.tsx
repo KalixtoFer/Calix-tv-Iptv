@@ -24,6 +24,7 @@ import { VideoPlayer } from './components/VideoPlayer';
 import { VirtualRemote } from './components/VirtualRemote';
 import { ApkExportGuideModal } from './components/ApkExportGuideModal';
 import { AppUpdateModal } from './components/AppUpdateModal';
+import { MobileBottomNav } from './components/MobileBottomNav';
 import { Loader2 } from 'lucide-react';
 import { ScreenOrientation } from '@capacitor/screen-orientation';
 import { App as CapacitorApp } from '@capacitor/app';
@@ -38,7 +39,7 @@ export default function App() {
   const [viewMode, setViewMode] = useState<DeviceViewMode>(() => {
     try {
       const saved = localStorage.getItem('calixtv_device_mode') as DeviceViewMode | null;
-      if (saved === 'mobile' || saved === 'tv' || saved === 'web') {
+      if (saved === 'mobile' || saved === 'tv') {
         return saved;
       }
       if (typeof window !== 'undefined') {
@@ -49,7 +50,7 @@ export default function App() {
     } catch {
       // fallback
     }
-    return 'tv';
+    return 'mobile';
   });
 
   const handleViewModeChange = (mode: DeviceViewMode) => {
@@ -273,7 +274,7 @@ export default function App() {
   };
 
   const toggleViewMode = () => {
-    handleViewModeChange(viewMode === 'tv' ? 'mobile' : viewMode === 'mobile' ? 'web' : 'tv');
+    handleViewModeChange(viewMode === 'tv' ? 'mobile' : 'tv');
   };
 
   // Loading Screen while bootstrapping
@@ -336,7 +337,7 @@ export default function App() {
       )}
 
       {/* Main View Router */}
-      <main className="flex-1 flex flex-col overflow-hidden">
+      <main className={`flex-1 flex flex-col overflow-hidden ${viewMode === 'mobile' ? 'pb-14 sm:pb-16' : ''}`}>
         {activeSection === 'home' && (
           <HomeScreen
             config={config}
@@ -386,6 +387,15 @@ export default function App() {
           />
         )}
       </main>
+
+      {/* Persistent Mobile Bottom Navigation Bar (Visible in all screens for Mobile) */}
+      {viewMode === 'mobile' && !activePlayback && (
+        <MobileBottomNav
+          activeSection={activeSection}
+          onNavigate={(sec) => setActiveSection(sec)}
+          onOpenSettings={() => setIsProfileOpen(true)}
+        />
+      )}
 
       {/* Global Fullscreen Video Player Modal */}
       {activePlayback && (

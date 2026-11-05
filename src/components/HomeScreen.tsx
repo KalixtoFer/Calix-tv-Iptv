@@ -15,6 +15,7 @@ import {
   Home,
   Film,
   Sparkles,
+  Trophy,
   LogOut,
 } from 'lucide-react';
 import { ActiveSection, CentralizedConfig, DeviceViewMode } from '../types/iptv';
@@ -56,22 +57,28 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   const [timeStr, setTimeStr] = useState<string>('13:45');
   const [dateStr, setDateStr] = useState<string>('Mié, 03 Nov. 2026');
   const [recentMovies, setRecentMovies] = useState<any[]>([]);
+  const [recentSeries, setRecentSeries] = useState<any[]>([]);
 
-  // 1. Fetch Recently Added Movies
+  // 1. Fetch Recently Added Movies & Series
   useEffect(() => {
     async function loadRecent() {
       try {
         const session = iptvApi.getSavedSession();
         if (!session) return;
         
-        const cats = await iptvApi.getCategories('vod', session.username);
-        if (cats && cats.length > 0) {
-          // Fetch from the first category (usually Recently Added or All)
-          const list = await iptvApi.getStreams('vod', session.username, cats[0].category_id);
-          setRecentMovies(list.slice(0, 10)); // Take first 10
+        const vodCats = await iptvApi.getCategories('vod', session.username);
+        if (vodCats && vodCats.length > 0) {
+          const list = await iptvApi.getStreams('vod', session.username, vodCats[0].category_id);
+          setRecentMovies(list.slice(0, 12));
+        }
+
+        const seriesCats = await iptvApi.getCategories('series', session.username);
+        if (seriesCats && seriesCats.length > 0) {
+          const sList = await iptvApi.getStreams('series', session.username, seriesCats[0].category_id);
+          setRecentSeries(sList.slice(0, 12));
         }
       } catch (e) {
-        console.warn('Failed to load recent movies for home:', e);
+        console.warn('Failed to load recent content for home:', e);
       }
     }
     loadRecent();
@@ -133,29 +140,22 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Mode Switcher Pill (3 Versiones: Móvil, TV, PC) */}
+            {/* Mode Switcher Pill (Celular y Android TV) */}
             {onChangeViewMode && (
               <div className="flex items-center bg-zinc-900 border border-zinc-700/80 rounded-xl p-0.5 text-[11px] font-bold">
                 <button
                   onClick={() => onChangeViewMode('mobile')}
-                  className="px-2 py-1 rounded-lg flex items-center gap-1 transition bg-cyan-500 text-black shadow font-black"
+                  className="px-2.5 py-1 rounded-lg flex items-center gap-1 transition bg-cyan-500 text-black shadow font-black"
                 >
                   <Smartphone className="w-3 h-3" />
-                  <span>Móvil</span>
+                  <span>Celular</span>
                 </button>
                 <button
                   onClick={() => onChangeViewMode('tv')}
-                  className="px-2 py-1 rounded-lg flex items-center gap-1 transition text-zinc-400 hover:text-white"
+                  className="px-2.5 py-1 rounded-lg flex items-center gap-1 transition text-zinc-400 hover:text-white"
                 >
                   <Tv className="w-3 h-3" />
-                  <span>TV</span>
-                </button>
-                <button
-                  onClick={() => onChangeViewMode('web')}
-                  className="px-2 py-1 rounded-lg flex items-center gap-1 transition text-zinc-400 hover:text-white"
-                >
-                  <Monitor className="w-3 h-3" />
-                  <span>PC</span>
+                  <span>Android TV</span>
                 </button>
               </div>
             )}
@@ -182,18 +182,18 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
 
 
-        {/* 5 Neon Category Touch Tiles */}
+        {/* 4 Neon Category Touch Tiles in 2x2 grid: TV EN VIVO, EVENTOS DEPORTIVOS, PELÍCULAS, SERIES */}
         <div className="space-y-1.5 my-2">
           <h3 className="text-xs font-black uppercase tracking-wider text-zinc-400 px-1">
             Secciones Principales
           </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-2 gap-2.5">
             {/* 1. TV En Vivo */}
             <button
               onClick={() => onNavigate('live')}
-              className="p-3.5 rounded-2xl bg-gradient-to-br from-blue-900/80 to-cyan-950/90 border border-cyan-400/80 shadow-[0_0_15px_rgba(6,182,212,0.3)] flex items-center gap-3 active:scale-95 transition text-left cursor-pointer"
+              className="p-3.5 rounded-2xl bg-gradient-to-br from-blue-900/80 to-cyan-950/90 border border-cyan-400/80 shadow-[0_0_15px_rgba(6,182,212,0.3)] flex items-center gap-2.5 active:scale-95 transition text-left cursor-pointer"
             >
-              <div className="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-400 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-400 flex items-center justify-center shrink-0 shadow-[0_0_10px_rgba(6,182,212,0.4)]">
                 <Tv className="w-5 h-5 text-cyan-400" />
               </div>
               <div className="min-w-0">
@@ -206,13 +206,31 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               </div>
             </button>
 
-            {/* 2. Películas */}
+            {/* 2. Eventos Deportivos (Al lado de TV en vivo) */}
+            <button
+              onClick={() => onNavigate('events')}
+              className="p-3.5 rounded-2xl bg-gradient-to-br from-amber-950/90 to-orange-950/90 border border-amber-400/80 shadow-[0_0_15px_rgba(245,158,11,0.3)] flex items-center gap-2.5 active:scale-95 transition text-left cursor-pointer"
+            >
+              <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-400 flex items-center justify-center shrink-0 shadow-[0_0_10px_rgba(245,158,11,0.4)]">
+                <Trophy className="w-5 h-5 text-amber-400" />
+              </div>
+              <div className="min-w-0">
+                <span className="font-black text-xs sm:text-sm text-white block truncate uppercase">
+                  EVENTOS
+                </span>
+                <span className="text-[10px] text-amber-300 font-semibold block truncate">
+                  Deportes en Vivo
+                </span>
+              </div>
+            </button>
+
+            {/* 3. Películas */}
             <button
               onClick={() => onNavigate('movies')}
-              className="p-3.5 rounded-2xl bg-gradient-to-br from-blue-950/90 to-indigo-950/90 border border-blue-400/80 shadow-[0_0_15px_rgba(59,130,246,0.3)] flex items-center gap-3 active:scale-95 transition text-left cursor-pointer"
+              className="p-3.5 rounded-2xl bg-gradient-to-br from-blue-950/90 to-indigo-950/90 border border-blue-400/80 shadow-[0_0_15px_rgba(59,130,246,0.3)] flex items-center gap-2.5 active:scale-95 transition text-left cursor-pointer"
             >
-              <div className="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-400 flex items-center justify-center shrink-0">
-                <Clapperboard className="w-5 h-5 text-blue-400" />
+              <div className="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-400 flex items-center justify-center shrink-0 shadow-[0_0_10px_rgba(59,130,246,0.4)]">
+                <Film className="w-5 h-5 text-blue-400" />
               </div>
               <div className="min-w-0">
                 <span className="font-black text-xs sm:text-sm text-white block truncate">
@@ -224,13 +242,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               </div>
             </button>
 
-            {/* 3. Series */}
+            {/* 4. Series */}
             <button
               onClick={() => onNavigate('series')}
-              className="p-3.5 rounded-2xl bg-gradient-to-br from-indigo-950/90 to-purple-950/90 border border-indigo-400/80 shadow-[0_0_15px_rgba(99,102,241,0.3)] flex items-center gap-3 active:scale-95 transition text-left cursor-pointer"
+              className="p-3.5 rounded-2xl bg-gradient-to-br from-indigo-950/90 to-purple-950/90 border border-indigo-400/80 shadow-[0_0_15px_rgba(99,102,241,0.3)] flex items-center gap-2.5 active:scale-95 transition text-left cursor-pointer"
             >
-              <div className="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-400 flex items-center justify-center shrink-0">
-                <Monitor className="w-5 h-5 text-indigo-400" />
+              <div className="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-400 flex items-center justify-center shrink-0 shadow-[0_0_10px_rgba(99,102,241,0.4)]">
+                <Clapperboard className="w-5 h-5 text-indigo-400" />
               </div>
               <div className="min-w-0">
                 <span className="font-black text-xs sm:text-sm text-white block truncate">
@@ -241,37 +259,19 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 </span>
               </div>
             </button>
-
-            {/* 4. Eventos Deportivos */}
-            <button
-              onClick={() => onNavigate('events')}
-              className="col-span-2 sm:col-span-1 p-3.5 rounded-2xl bg-gradient-to-br from-amber-950/90 to-orange-950/90 border border-amber-400/80 shadow-[0_0_15px_rgba(245,158,11,0.3)] flex items-center gap-3 active:scale-95 transition text-left cursor-pointer"
-            >
-              <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-400 flex items-center justify-center shrink-0">
-                <Sparkles className="w-5 h-5 text-amber-400" />
-              </div>
-              <div className="min-w-0">
-                <span className="font-black text-xs sm:text-sm text-white block truncate uppercase">
-                  EVENTOS DEPORTIVOS
-                </span>
-                <span className="text-[10px] text-amber-300 font-semibold block truncate">
-                  Agenda del Día
-                </span>
-              </div>
-            </button>
           </div>
         </div>
 
-        {/* Recently Added Movies Carousel (Horizontal swipe without distortion) */}
-        <div className="my-2 space-y-2">
+        {/* Bloque 1: Películas Recién Agregadas */}
+        <div className="my-2.5 space-y-2">
           <div className="flex items-center justify-between px-1">
-            <span className="text-xs font-black uppercase tracking-wider text-rose-500 flex items-center gap-1">
-              <Flame className="w-3.5 h-3.5 fill-rose-500" />
-              Recién Agregados
+            <span className="text-xs font-black uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+              <Film className="w-4 h-4 text-cyan-400" />
+              Películas Recién Agregadas
             </span>
             <button
               onClick={() => onNavigate('movies')}
-              className="text-[11px] font-bold text-cyan-400 flex items-center"
+              className="text-[11px] font-bold text-cyan-400 flex items-center gap-0.5 hover:text-cyan-300 transition"
             >
               <span>Ver todas</span>
               <ChevronRight className="w-3.5 h-3.5" />
@@ -291,15 +291,15 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     poster: movie.stream_icon,
                     category: movie.category_id
                   })}
-                  className="w-28 sm:w-32 shrink-0 aspect-[2/3] rounded-xl overflow-hidden border border-zinc-800 bg-zinc-900 relative shadow-md active:scale-95 transition cursor-pointer"
+                  className="w-28 sm:w-32 shrink-0 aspect-[2/3] rounded-xl overflow-hidden border border-zinc-800 bg-zinc-900 relative shadow-md active:scale-95 transition cursor-pointer group"
                 >
                   <img
                     src={movie.stream_icon}
                     alt={movie.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     loading="lazy"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent flex items-end p-1.5">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex items-end p-2">
                     <span className="text-[10px] font-bold text-white leading-tight line-clamp-2">
                       {movie.name}
                     </span>
@@ -307,7 +307,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 </div>
               ))
             ) : (
-              // Fallback skeleton or empty state
               [1, 2, 3, 4].map((i) => (
                 <div key={i} className="w-28 sm:w-32 shrink-0 aspect-[2/3] rounded-xl bg-zinc-900/50 border border-zinc-800 animate-pulse" />
               ))
@@ -315,52 +314,49 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
         </div>
 
-        {/* Fixed Mobile Bottom Navigation Bar */}
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-[#0a0d14]/95 backdrop-blur-xl border-t border-zinc-800/90 px-4 py-2 flex items-center justify-around shadow-2xl">
-          <button
-            onClick={() => onNavigate('home')}
-            className="flex flex-col items-center gap-0.5 text-cyan-400 font-bold text-[10px]"
-          >
-            <Home className="w-5 h-5" />
-            <span>Inicio</span>
-          </button>
-          <button
-            onClick={() => onNavigate('live')}
-            className="flex flex-col items-center gap-0.5 text-zinc-400 hover:text-cyan-400 font-bold text-[10px]"
-          >
-            <Tv className="w-5 h-5" />
-            <span>Canales</span>
-          </button>
-          <button
-            onClick={() => onNavigate('movies')}
-            className="flex flex-col items-center gap-0.5 text-zinc-400 hover:text-cyan-400 font-bold text-[10px]"
-          >
-            <Film className="w-5 h-5" />
-            <span>Películas</span>
-          </button>
-          <button
-            onClick={() => onNavigate('series')}
-            className="flex flex-col items-center gap-0.5 text-zinc-400 hover:text-cyan-400 font-bold text-[10px]"
-          >
-            <Clapperboard className="w-5 h-5" />
-            <span>Series</span>
-          </button>
-          <button
-            onClick={onOpenSettings}
-            className="flex flex-col items-center gap-0.5 text-zinc-400 hover:text-cyan-400 font-bold text-[10px]"
-          >
-            <Settings className="w-5 h-5" />
-            <span>Ajustes</span>
-          </button>
-          {onLogout && (
+        {/* Bloque 2: Series Recién Agregadas */}
+        <div className="my-2.5 space-y-2">
+          <div className="flex items-center justify-between px-1">
+            <span className="text-xs font-black uppercase tracking-wider text-purple-400 flex items-center gap-1.5">
+              <Clapperboard className="w-4 h-4 text-purple-400" />
+              Series Recién Agregadas
+            </span>
             <button
-              onClick={onLogout}
-              className="flex flex-col items-center gap-0.5 text-rose-400 hover:text-rose-200 font-bold text-[10px]"
+              onClick={() => onNavigate('series')}
+              className="text-[11px] font-bold text-purple-400 flex items-center gap-0.5 hover:text-purple-300 transition"
             >
-              <LogOut className="w-5 h-5" />
-              <span>Salir</span>
+              <span>Ver todas</span>
+              <ChevronRight className="w-3.5 h-3.5" />
             </button>
-          )}
+          </div>
+
+          <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none">
+            {recentSeries.length > 0 ? (
+              recentSeries.map((series) => (
+                <div
+                  key={series.series_id}
+                  onClick={() => onNavigate('series')}
+                  className="w-28 sm:w-32 shrink-0 aspect-[2/3] rounded-xl overflow-hidden border border-zinc-800 bg-zinc-900 relative shadow-md active:scale-95 transition cursor-pointer group"
+                >
+                  <img
+                    src={series.cover}
+                    alt={series.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex items-end p-2">
+                    <span className="text-[10px] font-bold text-white leading-tight line-clamp-2">
+                      {series.name}
+                    </span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              [1, 2, 3, 4].map((i) => (
+                <div key={i} className="w-28 sm:w-32 shrink-0 aspect-[2/3] rounded-xl bg-zinc-900/50 border border-zinc-800 animate-pulse" />
+              ))
+            )}
+          </div>
         </div>
       </div>
     );
@@ -408,31 +404,15 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 title="Cambiar a Modo Celular"
               >
                 <Smartphone className="w-3.5 h-3.5" />
-                <span className="hidden md:inline">Móvil</span>
+                <span className="hidden md:inline">Celular</span>
               </button>
               <button
                 onClick={() => onChangeViewMode('tv')}
-                className={`px-2.5 py-1 rounded-lg flex items-center gap-1 cursor-pointer transition ${
-                  viewMode === 'tv'
-                    ? 'bg-cyan-500 text-black font-black shadow'
-                    : 'text-zinc-400 hover:text-white'
-                }`}
+                className="px-2.5 py-1 rounded-lg flex items-center gap-1 cursor-pointer transition bg-cyan-500 text-black font-black shadow"
                 title="Modo Android TV Activo"
               >
                 <Tv className="w-3.5 h-3.5" />
-                <span className="hidden md:inline">TV</span>
-              </button>
-              <button
-                onClick={() => onChangeViewMode('web')}
-                className={`px-2.5 py-1 rounded-lg flex items-center gap-1 cursor-pointer transition ${
-                  viewMode === 'web'
-                    ? 'bg-cyan-500 text-black font-black shadow'
-                    : 'text-zinc-400 hover:text-white'
-                }`}
-                title="Modo PC / Navegador Activo"
-              >
-                <Monitor className="w-3.5 h-3.5" />
-                <span className="hidden md:inline">PC</span>
+                <span className="hidden md:inline">Android TV</span>
               </button>
             </div>
           )}

@@ -154,7 +154,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Device View Mode Toggle (Celular, TV, PC) */}
+        {/* Device View Mode Toggle (Celular y Android TV) */}
         <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-lg p-0.5 text-xs font-semibold">
           <button
             onClick={() => (onChangeViewMode ? onChangeViewMode('mobile') : onToggleViewMode && onToggleViewMode())}
@@ -178,19 +178,7 @@ export const Header: React.FC<HeaderProps> = ({
             title="Modo Android TV (Control Remoto)"
           >
             <Tv className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">TV</span>
-          </button>
-          <button
-            onClick={() => (onChangeViewMode ? onChangeViewMode('web') : onToggleViewMode && onToggleViewMode())}
-            className={`px-2 py-1 rounded-md flex items-center gap-1 transition cursor-pointer ${
-              viewMode === 'web'
-                ? 'bg-cyan-500 text-black font-bold shadow'
-                : 'text-zinc-400 hover:text-white'
-            }`}
-            title="Modo PC / Navegador"
-          >
-            <Monitor className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">PC</span>
+            <span className="hidden md:inline">Android TV</span>
           </button>
         </div>
 

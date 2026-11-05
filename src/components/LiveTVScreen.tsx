@@ -290,39 +290,6 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
             )}
           </div>
         </div>
-
-        {/* Bottom Navigation Bar (Mobile) */}
-        <div className="h-[70px] bg-[#0c0d14] border-t border-zinc-900/80 flex items-center justify-around px-4 pb-2 shrink-0 z-50">
-          <button 
-            onClick={() => onNavigate?.('home')}
-            className="flex flex-col items-center gap-1.5 text-zinc-500 active:scale-90 transition"
-          >
-            <Home className="w-6 h-6" />
-            <span className="text-[9px] font-black uppercase tracking-widest">Home</span>
-          </button>
-          
-          <button 
-            className="flex flex-col items-center gap-1.5 text-rose-600 active:scale-90 transition"
-          >
-            <Tv className="w-6 h-6" />
-            <span className="text-[9px] font-black uppercase tracking-widest">Vivo</span>
-          </button>
-          
-          <button 
-            onClick={() => onNavigate?.('movies')}
-            className="flex flex-col items-center gap-1.5 text-zinc-500 active:scale-90 transition"
-          >
-            <PlayIcon className="w-6 h-6" />
-            <span className="text-[9px] font-black uppercase tracking-widest">Eventos</span>
-          </button>
-          
-          <button 
-            className="flex flex-col items-center gap-1.5 text-zinc-500 active:scale-90 transition"
-          >
-            <UserIcon className="w-6 h-6" />
-            <span className="text-[9px] font-black uppercase tracking-widest">Perfil</span>
-          </button>
-        </div>
       </div>
     );
   }

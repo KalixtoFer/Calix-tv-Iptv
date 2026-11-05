@@ -12,6 +12,7 @@ import {
   Tv,
   Monitor,
   CheckCircle2,
+  Sparkles,
 } from 'lucide-react';
 import { CentralizedConfig, DeviceViewMode, XtreamAuthResponse } from '../types/iptv';
 import { iptvApi } from '../services/iptvApi';
@@ -92,47 +93,35 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
 
       {/* Main Glass Login Card */}
       <div className="w-full max-w-md bg-zinc-950/85 backdrop-blur-2xl border border-zinc-800/90 rounded-3xl p-6 sm:p-8 shadow-2xl relative z-10 space-y-6">
-        {/* Device Profile Switcher (3 Versiones) */}
+        {/* Device Profile Switcher (Celular y Android TV) */}
         <div className="flex flex-col items-center gap-1.5 pb-1 border-b border-zinc-800/60">
           <span className="text-[11px] font-bold tracking-wider text-zinc-400 uppercase">
             Selecciona tu dispositivo:
           </span>
-          <div className="grid grid-cols-3 gap-1.5 w-full bg-zinc-900/90 p-1 rounded-2xl border border-zinc-800">
+          <div className="grid grid-cols-2 gap-2 w-full bg-zinc-900/90 p-1 rounded-2xl border border-zinc-800">
             <button
               type="button"
               onClick={() => onChangeViewMode('mobile')}
-              className={`py-2 px-2 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 transition cursor-pointer ${
+              className={`py-2.5 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition cursor-pointer ${
                 viewMode === 'mobile'
                   ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-black shadow-lg shadow-cyan-500/30'
                   : 'text-zinc-400 hover:text-white'
               }`}
             >
-              <Smartphone className="w-3.5 h-3.5" />
+              <Smartphone className="w-4 h-4" />
               <span>Celular</span>
             </button>
             <button
               type="button"
               onClick={() => onChangeViewMode('tv')}
-              className={`py-2 px-2 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 transition cursor-pointer ${
+              className={`py-2.5 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition cursor-pointer ${
                 viewMode === 'tv'
                   ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-black shadow-lg shadow-cyan-500/30'
                   : 'text-zinc-400 hover:text-white'
               }`}
             >
-              <Tv className="w-3.5 h-3.5" />
+              <Tv className="w-4 h-4" />
               <span>Android TV</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => onChangeViewMode('web')}
-              className={`py-2 px-2 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 transition cursor-pointer ${
-                viewMode === 'web'
-                  ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-black shadow-lg shadow-cyan-500/30'
-                  : 'text-zinc-400 hover:text-white'
-              }`}
-            >
-              <Monitor className="w-3.5 h-3.5" />
-              <span>PC / Web</span>
             </button>
           </div>
         </div>
@@ -148,7 +137,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
           </div>
 
           <p className="text-[10px] text-cyan-400/60 font-bold tracking-[4px] uppercase mt-2">
-            Versión 1.0 • {viewMode === 'mobile' ? 'Móvil' : viewMode === 'tv' ? 'Android TV' : 'Web'}
+            Versión 1.0 • {viewMode === 'mobile' ? 'Móvil' : 'Android TV'}
           </p>
         </div>
 
@@ -251,6 +240,17 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                 <span>INGRESAR AL SERVICIO [OK]</span>
               </>
             )}
+          </button>
+
+          {/* Quick Demo / Explore Menu Button */}
+          <button
+            type="button"
+            onClick={onEnterGuest}
+            disabled={isLoading}
+            className="tv-focusable w-full py-3 bg-gradient-to-r from-zinc-900 to-zinc-950 hover:from-zinc-850 hover:to-zinc-900 border border-cyan-500/40 text-cyan-300 hover:text-white font-extrabold text-xs rounded-xl flex items-center justify-center gap-2 cursor-pointer transition transform active:scale-95 shadow-[0_0_15px_rgba(6,182,212,0.15)]"
+          >
+            <Sparkles className="w-4 h-4 text-cyan-400 animate-pulse" />
+            <span>EXPLORAR MENÚ PRINCIPAL (MODO DEMO)</span>
           </button>
         </form>
 
