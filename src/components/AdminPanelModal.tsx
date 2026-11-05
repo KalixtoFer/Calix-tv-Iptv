@@ -53,10 +53,10 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
     appUpdate: initialConfig.appUpdate || {
       latestVersion: '1.0',
       minVersion: '1.0',
-      apkDownloadUrl: '',
+      apkDownloadUrl: (initialConfig.appUpdate as any)?.apkDownloadUrl || 'https://github.com/KalixtoFer/calixtvapp/releases/download/untagged-e908398b63702c321218/CalixTV-v1.0.apk',
       releaseNotes: 'Versión inicial oficial de Calix TV (v1.0) con diseño fluido para Android TV y móviles.',
       forceUpdate: false,
-      publishedAt: '2026-11-03',
+      publishedAt: '2026-11-05',
     },
   });
   const [isSaving, setIsSaving] = useState<boolean>(false);
