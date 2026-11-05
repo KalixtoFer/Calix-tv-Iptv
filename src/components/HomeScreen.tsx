@@ -263,22 +263,22 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </div>
 
         {/* Bloque 1: Películas Recién Agregadas */}
-        <div className="my-2.5 space-y-2">
+        <div className="my-1.5 space-y-1.5">
           <div className="flex items-center justify-between px-1">
-            <span className="text-xs font-black uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
-              <Film className="w-4 h-4 text-cyan-400" />
+            <span className="text-[11px] font-black uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+              <Film className="w-3.5 h-3.5 text-cyan-400" />
               Películas Recién Agregadas
             </span>
             <button
               onClick={() => onNavigate('movies')}
-              className="text-[11px] font-bold text-cyan-400 flex items-center gap-0.5 hover:text-cyan-300 transition"
+              className="text-[10px] font-bold text-cyan-400 flex items-center gap-0.5 hover:text-cyan-300 transition"
             >
               <span>Ver todas</span>
-              <ChevronRight className="w-3.5 h-3.5" />
+              <ChevronRight className="w-3 h-3" />
             </button>
           </div>
 
-          <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none">
+          <div className="flex items-center gap-2.5 overflow-x-auto pb-1.5 scrollbar-none">
             {recentMovies.length > 0 ? (
               recentMovies.map((movie) => (
                 <div
@@ -291,7 +291,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     poster: movie.stream_icon,
                     category: movie.category_id
                   })}
-                  className="w-28 sm:w-32 shrink-0 aspect-[2/3] rounded-xl overflow-hidden border border-zinc-800 bg-zinc-900 relative shadow-md active:scale-95 transition cursor-pointer group"
+                  className="w-20 sm:w-22 shrink-0 aspect-[2/3] rounded-lg overflow-hidden border border-zinc-800 bg-zinc-900 relative shadow-sm active:scale-95 transition cursor-pointer group"
                 >
                   <img
                     src={movie.stream_icon}
@@ -299,44 +299,44 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     loading="lazy"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex items-end p-2">
-                    <span className="text-[10px] font-bold text-white leading-tight line-clamp-2">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex items-end p-1">
+                    <span className="text-[9px] font-bold text-white leading-tight line-clamp-2">
                       {movie.name}
                     </span>
                   </div>
                 </div>
               ))
             ) : (
-              [1, 2, 3, 4].map((i) => (
-                <div key={i} className="w-28 sm:w-32 shrink-0 aspect-[2/3] rounded-xl bg-zinc-900/50 border border-zinc-800 animate-pulse" />
+              [1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="w-20 sm:w-22 shrink-0 aspect-[2/3] rounded-lg bg-zinc-900/50 border border-zinc-800 animate-pulse" />
               ))
             )}
           </div>
         </div>
 
         {/* Bloque 2: Series Recién Agregadas */}
-        <div className="my-2.5 space-y-2">
+        <div className="my-1.5 space-y-1.5">
           <div className="flex items-center justify-between px-1">
-            <span className="text-xs font-black uppercase tracking-wider text-purple-400 flex items-center gap-1.5">
-              <Clapperboard className="w-4 h-4 text-purple-400" />
+            <span className="text-[11px] font-black uppercase tracking-wider text-purple-400 flex items-center gap-1.5">
+              <Clapperboard className="w-3.5 h-3.5 text-purple-400" />
               Series Recién Agregadas
             </span>
             <button
               onClick={() => onNavigate('series')}
-              className="text-[11px] font-bold text-purple-400 flex items-center gap-0.5 hover:text-purple-300 transition"
+              className="text-[10px] font-bold text-purple-400 flex items-center gap-0.5 hover:text-purple-300 transition"
             >
               <span>Ver todas</span>
-              <ChevronRight className="w-3.5 h-3.5" />
+              <ChevronRight className="w-3 h-3" />
             </button>
           </div>
 
-          <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none">
+          <div className="flex items-center gap-2.5 overflow-x-auto pb-1.5 scrollbar-none">
             {recentSeries.length > 0 ? (
               recentSeries.map((series) => (
                 <div
                   key={series.series_id}
                   onClick={() => onNavigate('series')}
-                  className="w-28 sm:w-32 shrink-0 aspect-[2/3] rounded-xl overflow-hidden border border-zinc-800 bg-zinc-900 relative shadow-md active:scale-95 transition cursor-pointer group"
+                  className="w-20 sm:w-22 shrink-0 aspect-[2/3] rounded-lg overflow-hidden border border-zinc-800 bg-zinc-900 relative shadow-sm active:scale-95 transition cursor-pointer group"
                 >
                   <img
                     src={series.cover}
@@ -344,16 +344,16 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     loading="lazy"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex items-end p-2">
-                    <span className="text-[10px] font-bold text-white leading-tight line-clamp-2">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex items-end p-1">
+                    <span className="text-[9px] font-bold text-white leading-tight line-clamp-2">
                       {series.name}
                     </span>
                   </div>
                 </div>
               ))
             ) : (
-              [1, 2, 3, 4].map((i) => (
-                <div key={i} className="w-28 sm:w-32 shrink-0 aspect-[2/3] rounded-xl bg-zinc-900/50 border border-zinc-800 animate-pulse" />
+              [1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="w-20 sm:w-22 shrink-0 aspect-[2/3] rounded-lg bg-zinc-900/50 border border-zinc-800 animate-pulse" />
               ))
             )}
           </div>
@@ -464,110 +464,157 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </div>
       </div>
 
-      {/* MIDDLE SECTION: RECIÉN AGREGADOS */}
-      <div className="flex-1 flex flex-col justify-between bg-zinc-950/80 border border-rose-900/50 rounded-3xl p-6 shadow-xl relative z-10 my-2 min-h-0">
-        <div className="flex items-center justify-between pb-4 border-b border-rose-900/40">
-          <div className="flex items-center gap-3 text-rose-500 font-extrabold text-lg sm:text-xl tracking-wider uppercase">
-            <Flame className="w-6 h-6 fill-rose-500" />
-            <span>PELÍCULAS RECIÉN AGREGADAS</span>
+      {/* MIDDLE SECTION: RECIÉN AGREGADOS (PELÍCULAS Y SERIES) */}
+      <div className="flex-1 flex flex-col justify-center gap-3 bg-zinc-950/80 border border-zinc-800/80 rounded-3xl p-3 sm:p-4 shadow-xl relative z-10 my-1.5 min-h-0 overflow-y-auto scrollbar-none">
+        {/* BLOQUE 1: PELÍCULAS RECIÉN AGREGADAS */}
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between pb-1.5 border-b border-rose-900/40">
+            <div className="flex items-center gap-2 text-rose-500 font-extrabold text-xs sm:text-sm tracking-wider uppercase">
+              <Flame className="w-4 h-4 fill-rose-500" />
+              <span>PELÍCULAS RECIÉN AGREGADAS</span>
+            </div>
+            <button
+              onClick={() => onNavigate('movies')}
+              className="tv-focusable px-2.5 py-1 bg-rose-950/50 text-rose-300 hover:text-white text-[11px] font-bold flex items-center gap-1 cursor-pointer rounded-lg border border-rose-800/40 transition"
+            >
+              <span>Ver Catálogo</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
           </div>
-          <button
-            onClick={() => onNavigate('movies')}
-            className="tv-focusable px-4 py-2 bg-rose-950/50 text-rose-400 hover:text-rose-200 text-sm font-bold flex items-center gap-1.5 cursor-pointer rounded-xl border border-rose-800/40 transition"
-          >
-            <span>Ver Catálogo Completo</span>
-            <ChevronRight className="w-4 h-4" />
-          </button>
+
+          <div className="flex items-center gap-2.5 overflow-x-auto pb-1 scrollbar-none">
+            {recentMovies.length > 0 ? (
+              recentMovies.slice(0, 10).map((movie) => (
+                <div
+                  key={movie.stream_id}
+                  onClick={() => onPlayStream({
+                    streamId: movie.stream_id,
+                    title: movie.name,
+                    url: iptvApi.buildStreamUrl('movie', movie.stream_id, movie.container_extension || 'mp4', username),
+                    type: 'movie',
+                    poster: movie.stream_icon,
+                    category: movie.category_id
+                  })}
+                  className="tv-focusable group relative h-28 sm:h-32 aspect-[2/3] shrink-0 rounded-xl overflow-hidden border border-zinc-800/80 hover:border-cyan-400 bg-zinc-900 transition-all duration-300 shadow-md cursor-pointer flex flex-col"
+                >
+                  <img
+                    src={movie.stream_icon}
+                    alt={movie.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity flex items-end p-1.5">
+                    <span className="text-[10px] font-black text-white leading-tight uppercase tracking-tight drop-shadow line-clamp-2">
+                      {movie.name}
+                    </span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              [1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="h-28 sm:h-32 aspect-[2/3] shrink-0 rounded-xl bg-zinc-900/50 border border-zinc-800 animate-pulse" />
+              ))
+            )}
+          </div>
         </div>
 
-        {/* 1x6 Movie Cards Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 flex-1 mt-4 min-h-0">
-          {recentMovies.length > 0 ? (
-            recentMovies.slice(0, 6).map((movie) => (
-              <div
-                key={movie.stream_id}
-                onClick={() => onPlayStream({
-                  streamId: movie.stream_id,
-                  title: movie.name,
-                  url: iptvApi.buildStreamUrl('movie', movie.stream_id, movie.container_extension || 'mp4', username),
-                  type: 'movie',
-                  poster: movie.stream_icon,
-                  category: movie.category_id
-                })}
-                className="tv-focusable group relative rounded-2xl overflow-hidden border border-zinc-800/80 hover:border-rose-500 bg-zinc-900 transition-all duration-300 shadow-lg cursor-pointer flex flex-col"
-              >
-                <img
-                  src={movie.stream_icon}
-                  alt={movie.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity flex items-end p-3">
-                  <span className="text-xs sm:text-sm font-black text-white leading-tight uppercase tracking-tight drop-shadow line-clamp-2">
-                    {movie.name}
-                  </span>
+        {/* BLOQUE 2: SERIES RECIÉN AGREGADAS */}
+        <div className="space-y-1.5 pt-1">
+          <div className="flex items-center justify-between pb-1.5 border-b border-purple-900/40">
+            <div className="flex items-center gap-2 text-purple-400 font-extrabold text-xs sm:text-sm tracking-wider uppercase">
+              <Clapperboard className="w-4 h-4 text-purple-400" />
+              <span>SERIES RECIÉN AGREGADAS</span>
+            </div>
+            <button
+              onClick={() => onNavigate('series')}
+              className="tv-focusable px-2.5 py-1 bg-purple-950/50 text-purple-300 hover:text-white text-[11px] font-bold flex items-center gap-1 cursor-pointer rounded-lg border border-purple-800/40 transition"
+            >
+              <span>Ver Catálogo</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2.5 overflow-x-auto pb-1 scrollbar-none">
+            {recentSeries.length > 0 ? (
+              recentSeries.slice(0, 10).map((series) => (
+                <div
+                  key={series.series_id}
+                  onClick={() => onNavigate('series')}
+                  className="tv-focusable group relative h-28 sm:h-32 aspect-[2/3] shrink-0 rounded-xl overflow-hidden border border-zinc-800/80 hover:border-purple-400 bg-zinc-900 transition-all duration-300 shadow-md cursor-pointer flex flex-col"
+                >
+                  <img
+                    src={series.cover}
+                    alt={series.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity flex items-end p-1.5">
+                    <span className="text-[10px] font-black text-white leading-tight uppercase tracking-tight drop-shadow line-clamp-2">
+                      {series.name}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))
-          ) : (
-            [1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="rounded-2xl bg-zinc-900/50 border border-zinc-800 animate-pulse" />
-            ))
-          )}
+              ))
+            ) : (
+              [1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="h-28 sm:h-32 aspect-[2/3] shrink-0 rounded-xl bg-zinc-900/50 border border-zinc-800 animate-pulse" />
+              ))
+            )}
+          </div>
         </div>
       </div>
 
-      {/* BOTTOM NAVIGATION: 5 Big High-Contrast Neon-Glow Rounded Rectangles */}
-      <div className="grid grid-cols-5 gap-3 sm:gap-4 z-20 pt-2">
+      {/* BOTTOM NAVIGATION: Centered 4 High-Contrast Neon-Glow Buttons (TV EN VIVO, EVENTOS DEPORTIVOS, PELÍCULAS, SERIES) */}
+      <div className="flex justify-center items-center gap-3 sm:gap-5 max-w-5xl mx-auto w-full z-20 pt-2">
         {/* 1. TV EN VIVO */}
         <button
           onClick={() => onNavigate('live')}
-          className="tv-focusable group relative flex flex-col items-center justify-center py-3.5 sm:py-5 px-2 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-blue-600 via-blue-700 to-cyan-700 border-2 border-cyan-400 shadow-[0_0_25px_rgba(6,182,212,0.6)] hover:shadow-[0_0_35px_rgba(6,182,212,0.9)] hover:scale-105 transition-all duration-300 cursor-pointer active:scale-95"
+          className="tv-focusable flex-1 max-w-[220px] group relative flex flex-col items-center justify-center py-3.5 sm:py-4 px-3 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-blue-600 via-blue-700 to-cyan-700 border-2 border-cyan-400 shadow-[0_0_25px_rgba(6,182,212,0.6)] hover:shadow-[0_0_35px_rgba(6,182,212,0.9)] hover:scale-105 transition-all duration-300 cursor-pointer active:scale-95"
         >
           <div className="w-10 h-8 sm:w-12 sm:h-10 rounded-xl bg-blue-950/80 border border-cyan-300 flex items-center justify-center mb-1.5 shadow-inner group-hover:bg-cyan-900">
             <Tv className="w-5 h-5 sm:w-6 sm:h-6 text-white stroke-[2.5]" />
           </div>
-          <span className="font-black text-xs sm:text-sm md:text-base text-white tracking-wider uppercase drop-shadow">
+          <span className="font-black text-xs sm:text-sm md:text-base text-white tracking-wider uppercase drop-shadow text-center">
             TV EN VIVO
           </span>
         </button>
 
-        {/* 2. PELÍCULAS */}
+        {/* 2. EVENTOS DEPORTIVOS */}
+        <button
+          onClick={() => onNavigate('events')}
+          className="tv-focusable flex-1 max-w-[220px] group relative flex flex-col items-center justify-center py-3.5 sm:py-4 px-3 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-amber-600 via-orange-700 to-amber-900 border-2 border-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.4)] hover:shadow-[0_0_35px_rgba(245,158,11,0.8)] hover:scale-105 transition-all duration-300 cursor-pointer active:scale-95"
+        >
+          <div className="w-10 h-8 sm:w-12 sm:h-10 rounded-xl bg-amber-950/80 border border-amber-300 flex items-center justify-center mb-1.5 shadow-inner group-hover:bg-amber-900">
+            <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-amber-300 stroke-[2.5]" />
+          </div>
+          <span className="font-black text-xs sm:text-sm md:text-base text-white tracking-wider uppercase drop-shadow text-center leading-tight">
+            EVENTOS DEPORTIVOS
+          </span>
+        </button>
+
+        {/* 3. PELÍCULAS */}
         <button
           onClick={() => onNavigate('movies')}
-          className="tv-focusable group relative flex flex-col items-center justify-center py-3.5 sm:py-5 px-2 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-blue-700 via-blue-800 to-blue-950 border border-blue-400/80 shadow-[0_0_20px_rgba(59,130,246,0.35)] hover:border-cyan-400 hover:shadow-[0_0_30px_rgba(6,182,212,0.7)] hover:scale-105 transition-all duration-300 cursor-pointer active:scale-95"
+          className="tv-focusable flex-1 max-w-[220px] group relative flex flex-col items-center justify-center py-3.5 sm:py-4 px-3 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-blue-700 via-blue-800 to-blue-950 border border-blue-400/80 shadow-[0_0_20px_rgba(59,130,246,0.35)] hover:border-cyan-400 hover:shadow-[0_0_30px_rgba(6,182,212,0.7)] hover:scale-105 transition-all duration-300 cursor-pointer active:scale-95"
         >
           <div className="w-10 h-8 sm:w-12 sm:h-10 rounded-xl bg-blue-950/80 border border-blue-300/80 flex items-center justify-center mb-1.5 shadow-inner group-hover:bg-blue-900">
-            <Clapperboard className="w-5 h-5 sm:w-6 sm:h-6 text-white stroke-[2.2]" />
+            <Film className="w-5 h-5 sm:w-6 sm:h-6 text-white stroke-[2.2]" />
           </div>
-          <span className="font-black text-xs sm:text-sm md:text-base text-white tracking-wider uppercase drop-shadow">
+          <span className="font-black text-xs sm:text-sm md:text-base text-white tracking-wider uppercase drop-shadow text-center">
             PELÍCULAS
           </span>
         </button>
 
-        {/* 3. SERIES */}
+        {/* 4. SERIES */}
         <button
           onClick={() => onNavigate('series')}
-          className="tv-focusable group relative flex flex-col items-center justify-center py-3.5 sm:py-5 px-2 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-blue-700 via-blue-800 to-blue-950 border border-blue-400/80 shadow-[0_0_20px_rgba(59,130,246,0.35)] hover:border-cyan-400 hover:shadow-[0_0_30px_rgba(6,182,212,0.7)] hover:scale-105 transition-all duration-300 cursor-pointer active:scale-95"
+          className="tv-focusable flex-1 max-w-[220px] group relative flex flex-col items-center justify-center py-3.5 sm:py-4 px-3 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-purple-800 via-indigo-900 to-purple-950 border border-purple-400/80 shadow-[0_0_20px_rgba(168,85,247,0.35)] hover:border-purple-300 hover:shadow-[0_0_30px_rgba(168,85,247,0.7)] hover:scale-105 transition-all duration-300 cursor-pointer active:scale-95"
         >
-          <div className="w-10 h-8 sm:w-12 sm:h-10 rounded-xl bg-blue-950/80 border border-blue-300/80 flex items-center justify-center mb-1.5 shadow-inner group-hover:bg-blue-900">
-            <Monitor className="w-5 h-5 sm:w-6 sm:h-6 text-white stroke-[2.2]" />
+          <div className="w-10 h-8 sm:w-12 sm:h-10 rounded-xl bg-purple-950/80 border border-purple-300/80 flex items-center justify-center mb-1.5 shadow-inner group-hover:bg-purple-900">
+            <Clapperboard className="w-5 h-5 sm:w-6 sm:h-6 text-white stroke-[2.2]" />
           </div>
-          <span className="font-black text-xs sm:text-sm md:text-base text-white tracking-wider uppercase drop-shadow">
+          <span className="font-black text-xs sm:text-sm md:text-base text-white tracking-wider uppercase drop-shadow text-center">
             SERIES
-          </span>
-        </button>
-
-        {/* 4. EVENTOS */}
-        <button
-          onClick={() => onNavigate('events')}
-          className="tv-focusable group relative flex flex-col items-center justify-center py-3.5 sm:py-5 px-2 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-blue-700 via-blue-800 to-blue-950 border border-blue-400/80 shadow-[0_0_20px_rgba(59,130,246,0.35)] hover:border-rose-400 hover:shadow-[0_0_30px_rgba(225,29,72,0.7)] hover:scale-105 transition-all duration-300 cursor-pointer active:scale-95"
-        >
-          <div className="w-10 h-8 sm:w-12 sm:h-10 rounded-xl overflow-hidden mb-1.5 flex items-center justify-center bg-blue-950 border border-blue-400/60 group-hover:border-rose-400">
-            <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-rose-400 stroke-[2.5]" />
-          </div>
-          <span className="font-black text-xs sm:text-sm md:text-base text-white tracking-wider uppercase drop-shadow">
-            EVENTOS DEPORTIVOS
           </span>
         </button>
       </div>

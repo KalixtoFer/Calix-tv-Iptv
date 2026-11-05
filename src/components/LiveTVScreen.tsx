@@ -406,9 +406,9 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
         </div>
 
         {/* Column 3: Preview & Details */}
-        <div className="flex flex-col overflow-hidden space-y-6">
-          {/* Player Container */}
-          <div className="relative aspect-video bg-black rounded-[40px] overflow-hidden border border-zinc-800/50 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.7)] group">
+        <div className="flex flex-col overflow-hidden gap-3 h-full">
+          {/* Player Container - Enlarged to flex-1 to occupy maximum available height */}
+          <div className="flex-1 relative bg-black rounded-[28px] overflow-hidden border border-zinc-800/60 shadow-[0_20px_50px_rgba(0,0,0,0.8)] group min-h-0">
             {selectedStream ? (
               <VideoPlayer
                 url={iptvApi.buildStreamUrl('live', selectedStream.stream_id, 'm3u8', username)}
@@ -429,52 +429,52 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
             )}
           </div>
 
-          {/* Info Card */}
-          <div className="flex-1 bg-[#0c0e18]/40 rounded-[40px] border border-zinc-800/30 p-10 flex flex-col justify-between">
-            <div className="space-y-4">
-              <h1 className="text-6xl font-black text-white tracking-tighter leading-none">
-                {adjustTime(selectedStream?.name) || 'Calix TV'}
-              </h1>
-              <div className="flex items-center gap-4 text-zinc-500 font-bold">
-                <span className="px-3 py-1 bg-zinc-800/80 rounded-lg border border-zinc-700/50 text-[11px] tracking-[2px] text-white">4K UHD</span>
-                <span className="px-3 py-1 bg-zinc-800/80 rounded-lg border border-zinc-700/50 text-[11px] tracking-[2px] text-white">60 FPS</span>
-                <div className="flex items-center gap-2 text-xs ml-2">
-                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span>Estable • 12ms</span>
+          {/* Info Card - Reduced to half size/height */}
+          <div className="shrink-0 bg-[#0c0e18]/90 rounded-[24px] border border-zinc-800/40 p-4 sm:p-5 flex flex-col gap-3">
+            <div className="flex items-center justify-between gap-4">
+              <div className="overflow-hidden">
+                <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight truncate leading-tight">
+                  {adjustTime(selectedStream?.name) || 'Calix TV'}
+                </h1>
+                <div className="flex items-center gap-2.5 text-zinc-400 font-bold mt-1">
+                  <span className="px-2.5 py-0.5 bg-zinc-800/80 rounded-md border border-zinc-700/50 text-[10px] tracking-[1px] text-zinc-200">4K UHD</span>
+                  <span className="px-2.5 py-0.5 bg-zinc-800/80 rounded-md border border-zinc-700/50 text-[10px] tracking-[1px] text-zinc-200">60 FPS</span>
+                  <div className="flex items-center gap-1.5 text-[11px] ml-1">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="text-zinc-400">Estable • 12ms</span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="space-y-8">
-              <div className="p-6 bg-indigo-600/5 border-l-4 border-indigo-500 rounded-r-2xl max-w-2xl">
-                <p className="text-zinc-400 text-lg font-medium leading-relaxed">
-                  <span className="text-white font-black">OK</span> abre pantalla completa. Mantenga <span className="text-white font-black">OK</span> en la lista para agregar a favoritos o ver guía avanzada.
-                </p>
-              </div>
+            <div className="p-3 bg-indigo-600/10 border-l-4 border-indigo-500 rounded-r-xl">
+              <p className="text-zinc-300 text-xs sm:text-sm font-medium leading-normal">
+                <span className="text-white font-black">OK</span> abre pantalla completa. Mantenga <span className="text-white font-black">OK</span> en la lista para agregar a favoritos o ver guía avanzada.
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-3 pt-1">
+              <button 
+                onClick={handleOpenFullscreen}
+                className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-sm rounded-xl shadow-lg shadow-indigo-600/30 transition-all transform active:scale-95 flex items-center gap-2 cursor-pointer"
+              >
+                <Maximize2 className="w-4 h-4" />
+                PANTALLA COMPLETA
+              </button>
+              <button 
+                onClick={(e) => selectedStream && handleToggleFavorite(e, selectedStream)}
+                className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-400 hover:text-amber-400 transition-all shadow-md hover:border-amber-500/50 group cursor-pointer"
+                title="Favoritos"
+              >
+                <Star className={`w-5 h-5 transition-transform group-hover:scale-110 ${selectedStream && favoritesList.includes(String(selectedStream.stream_id)) ? 'fill-amber-400 text-amber-400' : ''}`} />
+              </button>
               
-              <div className="flex items-center gap-5">
-                <button 
-                  onClick={handleOpenFullscreen}
-                  className="px-10 py-5 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-lg rounded-[24px] shadow-2xl shadow-indigo-600/40 transition-all transform active:scale-95 flex items-center gap-3"
-                >
-                  <Maximize2 className="w-6 h-6" />
-                  PANTALLA COMPLETA
-                </button>
-                <button 
-                  onClick={(e) => selectedStream && handleToggleFavorite(e, selectedStream)}
-                  className="p-5 bg-zinc-900 border border-zinc-800 rounded-[24px] text-zinc-400 hover:text-amber-400 transition-all shadow-xl hover:border-amber-500/50 group"
-                  title="Favoritos"
-                >
-                  <Star className={`w-8 h-8 transition-transform group-hover:scale-110 ${selectedStream && favoritesList.includes(String(selectedStream.stream_id)) ? 'fill-amber-400 text-amber-400' : ''}`} />
-                </button>
-                
-                <button 
-                  onClick={onBack}
-                  className="px-8 py-5 bg-zinc-900 border border-zinc-800 text-zinc-400 font-black rounded-[24px] hover:text-white transition-all ml-auto"
-                >
-                  SALIR SECCIÓN
-                </button>
-              </div>
+              <button 
+                onClick={onBack}
+                className="px-5 py-3 bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white font-black text-sm rounded-xl transition-all ml-auto cursor-pointer"
+              >
+                SALIR SECCIÓN
+              </button>
             </div>
           </div>
         </div>
