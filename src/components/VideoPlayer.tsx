@@ -120,6 +120,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const [zapFeedback, setZapFeedback] = useState<'next' | 'prev' | null>(null);
   const [errorDetail, setErrorDetail] = useState<string>('');
   const retryCountRef = useRef<number>(0);
+  const fallbackAttemptedRef = useRef<boolean>(false);
 
   // Reproductor nativo (libVLC): películas y series por defecto; canales en vivo solo si se pide
   const [nativeFailed, setNativeFailed] = useState<boolean>(false);
@@ -201,6 +202,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     setHasError(null);
     setErrorDetail('');
     retryCountRef.current = 0;
+    fallbackAttemptedRef.current = false;
 
     // Clean up previous HLS instance safely
     if (hlsRef.current) {
@@ -223,14 +225,19 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     if (isHlsStream && Hls.isSupported()) {
       const hls = new Hls({
         enableWorker: true,
-        lowLatencyMode: true,
-        backBufferLength: 60,
+        lowLatencyMode: false,
+        backBufferLength: 30,
         maxBufferLength: 30,
         maxMaxBufferLength: 60,
-        capLevelToPlayerSize: true,
-        initialLiveManifestSize: 1,
-        manifestLoadingMaxRetry: 3,
-        levelLoadingMaxRetry: 3,
+        liveSyncDurationCount: 3,
+        liveMaxLatencyDurationCount: 10,
+        manifestLoadingTimeOut: 15000,
+        manifestLoadingMaxRetry: 5,
+        levelLoadingTimeOut: 15000,
+        levelLoadingMaxRetry: 5,
+        fragLoadingTimeOut: 20000,
+        fragLoadingMaxRetry: 6,
+        startLevel: -1,
       });
       hlsRef.current = hls;
 
@@ -241,10 +248,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         setIsLoading(false);
         setHasError(null);
         if (data.levels && data.levels.length > 0) {
-          // Default to a medium level for faster initial buffer if available
-          const startLevel = Math.floor(data.levels.length / 2);
-          hls.startLevel = startLevel;
-          
           const maxLevel = data.levels[data.levels.length - 1];
           if (maxLevel.height) {
             setQualityText(maxLevel.height >= 1080 ? 'FHD 1080p' : `${maxLevel.height}p`);
@@ -252,7 +255,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         }
         if (autoPlay) {
           video.play().catch(() => {
-            // Autoplay policies require user interaction or muted playback
+            // Autoplay policies require muted playback
             video.muted = true;
             setIsMuted(true);
             video.play().catch(() => {});
@@ -263,19 +266,31 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       hls.on(Hls.Events.ERROR, (_event, data) => {
         if (!data.fatal) return;
         const httpCode: number | undefined = (data as any).response?.code;
-        // Reintentos limitados: antes se reintentaba para siempre y quedaba el spinner infinito
-        if (data.type === Hls.ErrorTypes.NETWORK_ERROR && retryCountRef.current < 3) {
+        if (data.type === Hls.ErrorTypes.NETWORK_ERROR && retryCountRef.current < 4) {
           retryCountRef.current += 1;
           console.warn('HLS Network Error, retry', retryCountRef.current);
           hls.startLoad();
           return;
         }
-        if (data.type === Hls.ErrorTypes.MEDIA_ERROR && retryCountRef.current < 3) {
+        if (data.type === Hls.ErrorTypes.MEDIA_ERROR && retryCountRef.current < 4) {
           retryCountRef.current += 1;
           console.warn('HLS Media Error, recovering', retryCountRef.current);
           hls.recoverMediaError();
           return;
         }
+
+        // Fallback nativo: Si Hls.js falla, intentamos reproducir con el elemento HTML5 nativo del WebView
+        if (video && !fallbackAttemptedRef.current) {
+          fallbackAttemptedRef.current = true;
+          console.warn('HLS.js fatal error, switching to native video element playback');
+          hls.destroy();
+          hlsRef.current = null;
+          video.src = url;
+          video.load();
+          video.play().catch(() => {});
+          return;
+        }
+
         hls.destroy();
         hlsRef.current = null;
         setIsLoading(false);
@@ -284,8 +299,19 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           `hls.js: ${data.type} / ${data.details}${httpCode !== undefined ? ` / HTTP ${httpCode}` : ''}`
         );
       });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      // HLS nativo soportado por el navegador/WebView
+      video.src = url;
+      video.load();
+      if (autoPlay) {
+        video.play().catch(() => {
+          video.muted = true;
+          setIsMuted(true);
+          video.play().catch(() => {});
+        });
+      }
     } else {
-      // VOD directo (mp4 / mkv / etc.) o HLS nativo (Safari): el <video> lo maneja con src
+      // Stream directo (.mp4, .ts, etc.)
       video.src = url;
       video.load();
       if (autoPlay) {

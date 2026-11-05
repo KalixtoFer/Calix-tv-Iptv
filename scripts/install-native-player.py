@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Instala el reproductor nativo (libVLC) en el proyecto Android generado por Capacitor.
+"""Instala el reproductor nativo (libVLC) en el proyecto Android generado por Capacitor
+y optimiza el tamaño del APK al máximo (compresión de librerías nativas .so y filtrado de ABIs).
 Es idempotente: se puede ejecutar en cada build."""
 import os
 import shutil
@@ -18,6 +19,14 @@ ACTIVITY_XML = '''
             android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />
 '''
 
+PACKAGING_SNIPPET = '''
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
+'''
+
 
 def fail(msg):
     print('ERROR:', msg)
@@ -33,32 +42,46 @@ for name in ('NativePlayerPlugin.java', 'PlayerActivity.java'):
     shutil.copy(src, f'{PKG_DIR}/{name}')
     print('Copiado', name)
 
-# 2) Declarar la Activity en el manifest
+# 2) Declarar la Activity y extractNativeLibs en el manifest
 manifest = f'{BASE}/src/main/AndroidManifest.xml'
-s = open(manifest, encoding='utf-8').read()
-if '.PlayerActivity' not in s:
-    if '</application>' not in s:
-        fail('AndroidManifest.xml sin </application>')
-    s = s.replace('</application>', ACTIVITY_XML + '    </application>')
-    open(manifest, 'w', encoding='utf-8').write(s)
-    print('Manifest actualizado')
-else:
-    print('Manifest ya tenía PlayerActivity')
+if os.path.exists(manifest):
+    s = open(manifest, encoding='utf-8').read()
+    if '.PlayerActivity' not in s:
+        if '</application>' not in s:
+            fail('AndroidManifest.xml sin </application>')
+        s = s.replace('</application>', ACTIVITY_XML + '    </application>')
+        print('Manifest actualizado con PlayerActivity')
+    else:
+        print('Manifest ya tenía PlayerActivity')
 
-# 3) Dependencia libVLC + ABIs
+    if 'android:extractNativeLibs' not in s:
+        s = s.replace('<application', '<application android:extractNativeLibs="true"')
+        print('Manifest actualizado con extractNativeLibs="true"')
+
+    open(manifest, 'w', encoding='utf-8').write(s)
+
+# 3) Dependencia libVLC + ABIs + Compresión de .so en build.gradle
 gradle = f'{BASE}/build.gradle'
-t = open(gradle, encoding='utf-8').read()
-if 'libvlc-all' not in t:
-    anchor = "implementation project(':capacitor-android')"
-    if anchor not in t:
-        fail('No se encontró la sección dependencies en build.gradle')
-    t = t.replace(anchor, anchor + f"\n    implementation '{LIBVLC}'")
-    print('libVLC agregado')
-if 'abiFilters' not in t:
-    anchor = 'versionName "1.0"'
-    if anchor not in t:
-        fail('No se encontró versionName en build.gradle')
-    t = t.replace(anchor, anchor + '\n        ndk {\n            abiFilters "arm64-v8a", "armeabi-v7a"\n        }')
-    print('abiFilters agregado')
-open(gradle, 'w', encoding='utf-8').write(t)
-print('Reproductor nativo instalado OK')
+if os.path.exists(gradle):
+    t = open(gradle, encoding='utf-8').read()
+    if 'libvlc-all' not in t:
+        anchor = "implementation project(':capacitor-android')"
+        if anchor not in t:
+            fail('No se encontró la sección dependencies en build.gradle')
+        t = t.replace(anchor, anchor + f"\n    implementation '{LIBVLC}'")
+        print('libVLC agregado')
+    if 'abiFilters' not in t:
+        anchor = 'versionName "1.0"'
+        if anchor not in t:
+            fail('No se encontró versionName en build.gradle')
+        t = t.replace(anchor, anchor + '\n        ndk {\n            abiFilters "arm64-v8a", "armeabi-v7a"\n        }')
+        print('abiFilters agregado')
+    if 'useLegacyPackaging' not in t:
+        anchor_android = 'buildTypes {'
+        if anchor_android in t:
+            t = t.replace(anchor_android, PACKAGING_SNIPPET + '\n    ' + anchor_android)
+            print('packagingOptions (useLegacyPackaging = true) agregado para comprimir .so')
+    open(gradle, 'w', encoding='utf-8').write(t)
+    print('build.gradle optimizado OK')
+
+print('Reproductor nativo instalado y APK optimizado para mínimo tamaño OK')

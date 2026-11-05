@@ -43,6 +43,10 @@ jobs:
             npx cap sync android
           fi
 
+      - name: 6.1. Optimizar splash screens y assets (<1.5MB)
+        run: |
+          node scripts/optimize-assets.js
+
       - name: 6.5. Asegurar estructura de paquete, colores y SDK 35
         run: |
           sed -i 's/compileSdkVersion = [0-9]*/compileSdkVersion = 35/' android/variables.gradle
