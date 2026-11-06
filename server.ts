@@ -522,6 +522,127 @@ app.post('/api/iptv/admin/upload-apk', (req, res) => {
   });
 });
 
+// Chunked APK Upload endpoint to prevent 413 Payload Too Large errors
+app.post('/api/iptv/admin/upload-apk-chunk', (req, res) => {
+  const headerToken = req.headers['x-admin-token'] as string;
+  const queryToken = req.query.token as string;
+  const authToken = headerToken || queryToken;
+
+  const isAuthorized = authToken && activeAdminTokens.has(authToken);
+  if (!isAuthorized) {
+    return res.status(401).json({ success: false, message: 'Sesión no autorizada o expirada.' });
+  }
+
+  const uploadId = (req.query.uploadId as string) || 'default';
+  const chunkIndex = parseInt((req.query.chunkIndex as string) || '0', 10);
+  const chunksDir = path.join(DATA_DIR, 'chunks_' + uploadId);
+
+  if (!fs.existsSync(chunksDir)) {
+    fs.mkdirSync(chunksDir, { recursive: true });
+  }
+
+  const chunkPath = path.join(chunksDir, `chunk_${String(chunkIndex).padStart(5, '0')}`);
+  const writeStream = fs.createWriteStream(chunkPath);
+
+  req.pipe(writeStream);
+
+  writeStream.on('finish', () => {
+    res.json({ success: true, chunkIndex });
+  });
+
+  writeStream.on('error', (err) => {
+    res.status(500).json({ success: false, message: err.message });
+  });
+});
+
+// Finalize Chunked APK Upload session
+app.post('/api/iptv/admin/upload-apk-finalize', (req, res) => {
+  const headerToken = req.headers['x-admin-token'] as string;
+  const bodyToken = req.body?.token;
+  const queryToken = req.query.token as string;
+  const authToken = headerToken || bodyToken || queryToken;
+
+  const isAuthorized = authToken && activeAdminTokens.has(authToken);
+  if (!isAuthorized) {
+    return res.status(401).json({ success: false, message: 'Sesión no autorizada o expirada.' });
+  }
+
+  const uploadId = (req.query.uploadId as string) || 'default';
+  const version = ((req.query.version as string) || '1.1').trim();
+  const notes = ((req.query.notes as string) || `Actualización oficial Calix TV v${version}.`).trim();
+  const forceUpdate = req.query.forceUpdate === 'true';
+  const originalFilename = ((req.query.filename as string) || `CalixTV-v${version}.apk`).trim();
+
+  const chunksDir = path.join(DATA_DIR, 'chunks_' + uploadId);
+  if (!fs.existsSync(chunksDir)) {
+    return res.status(400).json({ success: false, message: 'No se encontraron los fragmentos del archivo subido.' });
+  }
+
+  const targetPath = path.join(DATA_DIR, 'CalixTV-latest.apk');
+  const versionedPath = path.join(DATA_DIR, `CalixTV-v${version}.apk`);
+
+  try {
+    const chunkFiles = fs.readdirSync(chunksDir).sort();
+    const finalWriteStream = fs.createWriteStream(targetPath);
+    const hash = crypto.createHash('sha256');
+    let totalBytes = 0;
+
+    for (const file of chunkFiles) {
+      const chunkFilePath = path.join(chunksDir, file);
+      const data = fs.readFileSync(chunkFilePath);
+      totalBytes += data.length;
+      hash.update(data);
+      finalWriteStream.write(data);
+    }
+    finalWriteStream.end();
+
+    // Clean up chunks
+    try {
+      for (const file of chunkFiles) {
+        fs.unlinkSync(path.join(chunksDir, file));
+      }
+      fs.rmdirSync(chunksDir);
+    } catch {}
+
+    const sha256 = hash.digest('hex');
+
+    try {
+      fs.copyFileSync(targetPath, versionedPath);
+    } catch (e) {
+      console.warn('Could not save versioned copy:', e);
+    }
+
+    currentConfig.appUpdate = {
+      latestVersion: version,
+      minVersion: currentConfig.appUpdate?.minVersion || '1.0',
+      apkDownloadUrl: '/api/iptv/download-apk',
+      releaseNotes: notes,
+      forceUpdate: forceUpdate,
+      publishedAt: new Date().toISOString().split('T')[0],
+    };
+    saveConfig(currentConfig);
+
+    console.log(`[OTA Update] Chunked APK v${version} finalized (${(totalBytes / (1024 * 1024)).toFixed(2)} MB, SHA256: ${sha256.substring(0, 8)}...)`);
+
+    res.json({
+      success: true,
+      message: `¡APK Calix TV v${version} subido y listo para descarga! Tus usuarios recibirán la notificación de actualización al instante.`,
+      fileInfo: {
+        filename: originalFilename,
+        sizeBytes: totalBytes,
+        sizeFormatted: `${(totalBytes / (1024 * 1024)).toFixed(2)} MB`,
+        sha256,
+        version,
+        downloadUrl: '/api/iptv/download-apk',
+      },
+      config: currentConfig,
+    });
+  } catch (err: any) {
+    console.error('Error finalizing chunked upload:', err);
+    res.status(500).json({ success: false, message: 'Error al unir los fragmentos del APK: ' + err.message });
+  }
+});
+
 // Check if an APK file is currently uploaded and hosted on the server
 app.get('/api/iptv/admin/apk-status', (_req, res) => {
   const latestUploaded = path.join(DATA_DIR, 'CalixTV-latest.apk');

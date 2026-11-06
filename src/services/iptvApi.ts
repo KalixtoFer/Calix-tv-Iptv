@@ -601,50 +601,73 @@ class IptvApiService {
     };
     config?: CentralizedConfig;
   }> {
-    return new Promise((resolve) => {
-      const xhr = new XMLHttpRequest();
-      const url = `/api/iptv/admin/upload-apk?version=${encodeURIComponent(params.version)}&notes=${encodeURIComponent(params.notes)}&forceUpdate=${params.forceUpdate}&filename=${encodeURIComponent(params.file.name)}`;
+    const CHUNK_SIZE = 500 * 1024; // 500KB per chunk to safely avoid 413 Entity Too Large proxy limits
+    const totalChunks = Math.ceil(params.file.size / CHUNK_SIZE);
+    const uploadId = 'up_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
 
-      xhr.open('POST', url, true);
-      if (this.adminToken) {
-        xhr.setRequestHeader('x-admin-token', this.adminToken);
-      }
-      xhr.setRequestHeader('Content-Type', 'application/vnd.android.package-archive');
+    for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+      const start = chunkIndex * CHUNK_SIZE;
+      const end = Math.min(params.file.size, start + CHUNK_SIZE);
+      const chunk = params.file.slice(start, end);
 
-      if (xhr.upload && params.onProgress) {
-        xhr.upload.onprogress = (e) => {
-          if (e.lengthComputable) {
-            const pct = Math.round((e.loaded / e.total) * 100);
-            params.onProgress?.(pct);
+      const success = await new Promise<boolean>((resolve) => {
+        const xhr = new XMLHttpRequest();
+        const url = `/api/iptv/admin/upload-apk-chunk?uploadId=${uploadId}&chunkIndex=${chunkIndex}&totalChunks=${totalChunks}&version=${encodeURIComponent(params.version)}&notes=${encodeURIComponent(params.notes)}&forceUpdate=${params.forceUpdate}&filename=${encodeURIComponent(params.file.name)}`;
+
+        xhr.open('POST', url, true);
+        if (this.adminToken) {
+          xhr.setRequestHeader('x-admin-token', this.adminToken);
+        }
+        xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(true);
+          } else {
+            console.error(`Chunk ${chunkIndex + 1}/${totalChunks} failed with status ${xhr.status}:`, xhr.responseText);
+            resolve(false);
           }
+        };
+
+        xhr.onerror = () => resolve(false);
+
+        xhr.send(chunk);
+      });
+
+      if (!success) {
+        return {
+          success: false,
+          message: `Error al subir el fragmento ${chunkIndex + 1} de ${totalChunks}. Inténtalo de nuevo.`,
         };
       }
 
-      xhr.onload = () => {
-        try {
-          const text = xhr.responseText;
-          if (!text || !text.trim().startsWith('{')) {
-            console.error('Non-JSON server response:', text);
-            resolve({ success: false, message: `Servidor devolvió respuesta no válida (${xhr.status}): ${text.substring(0, 100)}` });
-            return;
-          }
-          const res = JSON.parse(text);
-          if (res.config) {
-            this.activeConfig = res.config;
-          }
-          resolve(res);
-        } catch (err: any) {
-          console.error('JSON parse error:', err, 'Response:', xhr.responseText);
-          resolve({ success: false, message: 'Respuesta inválida del servidor al subir APK: ' + (xhr.responseText ? xhr.responseText.substring(0, 80) : 'vacía') });
-        }
-      };
+      if (params.onProgress) {
+        const pct = Math.round(((chunkIndex + 1) / totalChunks) * 100);
+        params.onProgress(pct);
+      }
+    }
 
-      xhr.onerror = () => {
-        resolve({ success: false, message: 'Error de conexión de red al subir archivo APK.' });
+    // Finalize chunked upload session
+    try {
+      const res = await fetch(`/api/iptv/admin/upload-apk-finalize?uploadId=${uploadId}&version=${encodeURIComponent(params.version)}&notes=${encodeURIComponent(params.notes)}&forceUpdate=${params.forceUpdate}&filename=${encodeURIComponent(params.file.name)}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(this.adminToken ? { 'x-admin-token': this.adminToken } : {}),
+        },
+        body: JSON.stringify({ token: this.adminToken }),
+      });
+      const data = await res.json();
+      if (data.config) {
+        this.activeConfig = data.config;
+      }
+      return data;
+    } catch (err: any) {
+      return {
+        success: false,
+        message: 'Error al finalizar la unión del APK: ' + (err.message || 'Error desconocido'),
       };
-
-      xhr.send(params.file);
-    });
+    }
   }
 
   async getApkStatus(): Promise<{
