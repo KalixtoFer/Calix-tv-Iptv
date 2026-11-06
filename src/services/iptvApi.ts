@@ -622,13 +622,20 @@ class IptvApiService {
 
       xhr.onload = () => {
         try {
-          const res = JSON.parse(xhr.responseText);
+          const text = xhr.responseText;
+          if (!text || !text.trim().startsWith('{')) {
+            console.error('Non-JSON server response:', text);
+            resolve({ success: false, message: `Servidor devolvió respuesta no válida (${xhr.status}): ${text.substring(0, 100)}` });
+            return;
+          }
+          const res = JSON.parse(text);
           if (res.config) {
             this.activeConfig = res.config;
           }
           resolve(res);
-        } catch {
-          resolve({ success: false, message: 'Respuesta inválida del servidor al subir APK.' });
+        } catch (err: any) {
+          console.error('JSON parse error:', err, 'Response:', xhr.responseText);
+          resolve({ success: false, message: 'Respuesta inválida del servidor al subir APK: ' + (xhr.responseText ? xhr.responseText.substring(0, 80) : 'vacía') });
         }
       };
 
