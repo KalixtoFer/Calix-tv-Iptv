@@ -81,6 +81,74 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
   const [credMessage, setCredMessage] = useState<string | null>(null);
   const [isUpdatingCreds, setIsUpdatingCreds] = useState<boolean>(false);
 
+  // Direct APK Upload & OTA Distribution state
+  const [selectedApkFile, setSelectedApkFile] = useState<File | null>(null);
+  const [apkVersion, setApkVersion] = useState<string>(config.appUpdate?.latestVersion || '1.1');
+  const [apkNotes, setApkNotes] = useState<string>(
+    config.appUpdate?.releaseNotes || 'Mejoras de rendimiento en reproducción 4K/FHD, estabilidad y soporte para Android TV.'
+  );
+  const [apkForceUpdate, setApkForceUpdate] = useState<boolean>(config.appUpdate?.forceUpdate || false);
+  const [isUploadingApk, setIsUploadingApk] = useState<boolean>(false);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
+  const [uploadedFileInfo, setUploadedFileInfo] = useState<{
+    filename: string;
+    sizeFormatted: string;
+    version: string;
+    sha256: string;
+    downloadUrl?: string;
+  } | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.name.toLowerCase().endsWith('.apk')) {
+        alert('Por favor selecciona un archivo con extensión .apk');
+        return;
+      }
+      setSelectedApkFile(file);
+      // Try to auto-detect version from file name
+      const match = file.name.match(/v?(\d+\.\d+(\.\d+)?)/i);
+      if (match && match[1]) {
+        setApkVersion(match[1]);
+      }
+    }
+  };
+
+  const handleUploadApk = async () => {
+    if (!selectedApkFile) {
+      alert('Por favor selecciona primero un archivo APK desde tu celular o computadora.');
+      return;
+    }
+    setIsUploadingApk(true);
+    setUploadProgress(0);
+    setUploadSuccess(null);
+
+    const res = await iptvApi.uploadApk({
+      file: selectedApkFile,
+      version: apkVersion || '1.1',
+      notes: apkNotes,
+      forceUpdate: apkForceUpdate,
+      onProgress: (pct) => setUploadProgress(pct),
+    });
+
+    setIsUploadingApk(false);
+
+    if (res.success) {
+      setUploadSuccess(res.message);
+      if (res.fileInfo) {
+        setUploadedFileInfo(res.fileInfo);
+      }
+      if (res.config) {
+        setConfig(res.config);
+        onConfigSaved(res.config);
+      }
+      setTimeout(() => setUploadSuccess(null), 8000);
+    } else {
+      alert('Error al subir APK: ' + res.message);
+    }
+  };
+
   // Handle Admin Login (Strict User & Password)
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -493,29 +561,187 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
               )}
 
               {/* ----------------------------------------------------
-                  TAB 2: Actualizaciones Remotas de la App (OTA)
+                  TAB 2: Actualizaciones Remotas de la App (OTA) & Subida de APK
                  ---------------------------------------------------- */}
               {activeTab === 'update' && (
-                <div className="space-y-4">
-                  <div className="p-4 bg-zinc-900/60 border border-zinc-800 rounded-2xl space-y-3">
+                <div className="space-y-5">
+                  {/* Mensaje de Éxito de Subida */}
+                  {uploadSuccess && (
+                    <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-emerald-400 text-xs space-y-1 animate-in fade-in">
+                      <div className="flex items-center gap-2 font-bold text-sm">
+                        <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-400" />
+                        <span>¡Actualización Distribuida Exitosamente!</span>
+                      </div>
+                      <p className="text-zinc-300 text-xs">
+                        {uploadSuccess}
+                      </p>
+                      {uploadedFileInfo && (
+                        <div className="mt-2 pt-2 border-t border-emerald-500/20 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono text-zinc-300">
+                          <div><span className="text-zinc-500">Archivo:</span> {uploadedFileInfo.filename}</div>
+                          <div><span className="text-zinc-500">Tamaño:</span> {uploadedFileInfo.sizeFormatted}</div>
+                          <div><span className="text-zinc-500">Versión:</span> v{uploadedFileInfo.version}</div>
+                          <div><span className="text-zinc-500">Firma SHA256:</span> {uploadedFileInfo.sha256?.substring(0, 12)}...</div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* BLOQUE 1: SUBIR APK DIRECTAMENTE DESDE EL PANEL */}
+                  <div className="p-5 bg-gradient-to-br from-zinc-900/90 to-zinc-950 border border-cyan-500/30 rounded-3xl space-y-4 shadow-xl shadow-cyan-950/10">
                     <div className="flex items-center justify-between">
-                      <h4 className="font-bold text-white text-sm flex items-center gap-2">
-                        <Smartphone className="w-4 h-4 text-cyan-400" />
-                        <span>Gestor de Actualizaciones Remotas (OTA)</span>
-                      </h4>
-                      <span className="text-[10px] bg-cyan-950 text-cyan-400 px-2 py-0.5 rounded font-mono font-bold border border-cyan-800">
-                        Versión Actual Instalada: v1.0
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400">
+                          <Upload className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-white text-sm">
+                            Subir Archivo APK Directamente
+                          </h4>
+                          <p className="text-[11px] text-zinc-400">
+                            Carga el archivo .apk desde tu celular o PC y envíalo automáticamente a todos los usuarios
+                          </p>
+                        </div>
+                      </div>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-950 text-cyan-400 border border-cyan-800">
+                        OTA Automático
                       </span>
                     </div>
 
-                    <p className="text-xs text-zinc-400">
-                      Cuando compiles un nuevo APK o quieras actualizar la app de tus clientes, sólo cambia el número de versión y pon aquí el enlace. Tus clientes en su televisor o celular verán un aviso para actualizar al instante con 1 clic.
-                    </p>
+                    {/* Selector / Dropzone de Archivo APK */}
+                    <div className="relative border-2 border-dashed border-zinc-700 hover:border-cyan-500/60 rounded-2xl p-5 text-center transition bg-zinc-950/50 group">
+                      <input
+                        type="file"
+                        accept=".apk,application/vnd.android.package-archive"
+                        onChange={handleFileChange}
+                        disabled={isUploadingApk}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                      />
+                      <div className="flex flex-col items-center justify-center space-y-2 pointer-events-none">
+                        <div className="w-12 h-12 rounded-2xl bg-zinc-900 group-hover:bg-cyan-500/10 flex items-center justify-center text-zinc-400 group-hover:text-cyan-400 transition border border-zinc-800 group-hover:border-cyan-500/30">
+                          <Download className="w-6 h-6 rotate-180" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-zinc-200 group-hover:text-cyan-300">
+                            {selectedApkFile ? selectedApkFile.name : 'Toca aquí o arrastra tu archivo APK'}
+                          </p>
+                          <p className="text-[11px] text-zinc-500">
+                            {selectedApkFile
+                              ? `${(selectedApkFile.size / (1024 * 1024)).toFixed(2)} MB listos para subir`
+                              : 'Formatos soportados: .apk (sin límite de tamaño)'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-2">
-                      <div className="sm:col-span-6 space-y-1">
+                    {/* Formulario de Detalles de la Versión para Subida */}
+                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-1">
+                      <div className="sm:col-span-4 space-y-1">
                         <label className="text-xs text-zinc-300 font-semibold">
-                          Última Versión Disponible
+                          Versión a Distribuir
+                        </label>
+                        <input
+                          type="text"
+                          value={apkVersion}
+                          onChange={(e) => setApkVersion(e.target.value)}
+                          placeholder="1.2"
+                          disabled={isUploadingApk}
+                          className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white text-xs font-mono focus:border-cyan-500 focus:outline-none"
+                        />
+                      </div>
+
+                      <div className="sm:col-span-8 space-y-1">
+                        <label className="text-xs text-zinc-300 font-semibold">
+                          Notas de la Actualización para el Usuario
+                        </label>
+                        <input
+                          type="text"
+                          value={apkNotes}
+                          onChange={(e) => setApkNotes(e.target.value)}
+                          placeholder="Nuevas mejoras de reproducción y canales..."
+                          disabled={isUploadingApk}
+                          className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white text-xs focus:border-cyan-500 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-1">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={apkForceUpdate}
+                          onChange={(e) => setApkForceUpdate(e.target.checked)}
+                          disabled={isUploadingApk}
+                          className="w-4 h-4 rounded text-cyan-500 focus:ring-0 bg-zinc-900 border-zinc-700"
+                        />
+                        <span className="text-xs text-zinc-300 font-medium">
+                          Actualización obligatoria (bloquea la app anterior hasta que instalen esta)
+                        </span>
+                      </label>
+                    </div>
+
+                    {/* Barra de Progreso de Subida */}
+                    {isUploadingApk && (
+                      <div className="space-y-1.5 pt-2">
+                        <div className="flex justify-between text-xs font-mono text-zinc-300">
+                          <span className="flex items-center gap-1.5">
+                            <Loader2 className="w-3.5 h-3.5 animate-spin text-cyan-400" />
+                            <span>Subiendo archivo al servidor central...</span>
+                          </span>
+                          <span className="font-bold text-cyan-400">{uploadProgress}%</span>
+                        </div>
+                        <div className="w-full h-2.5 bg-zinc-900 rounded-full overflow-hidden border border-zinc-800">
+                          <div
+                            className="h-full bg-gradient-to-r from-cyan-500 to-blue-600 transition-all duration-150 rounded-full"
+                            style={{ width: `${uploadProgress}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Botón de Acción Principal de Subida */}
+                    <div className="pt-2 flex flex-wrap items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={handleUploadApk}
+                        disabled={!selectedApkFile || isUploadingApk}
+                        className="tv-focusable px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-extrabold rounded-xl text-xs transition flex items-center gap-2 shadow-lg shadow-cyan-500/20 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        {isUploadingApk ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span>Enviando APK ({uploadProgress}%)...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="w-4 h-4" />
+                            <span>Subir y Distribuir Actualización a los Usuarios</span>
+                          </>
+                        )}
+                      </button>
+
+                      <a
+                        href="/api/iptv/download-apk"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="tv-focusable px-3.5 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 border border-zinc-800 transition cursor-pointer"
+                      >
+                        <Download className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>Descargar APK Actual de Prueba</span>
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* BLOQUE 2: CONFIGURACIÓN MANUAL Y ESTADO DE DISTRIBUCIÓN */}
+                  <div className="p-4 bg-zinc-900/60 border border-zinc-800 rounded-2xl space-y-3">
+                    <h4 className="font-bold text-white text-sm flex items-center gap-2">
+                      <Smartphone className="w-4 h-4 text-cyan-400" />
+                      <span>Estado Actual de Distribución OTA</span>
+                    </h4>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-1">
+                      <div className="sm:col-span-4 space-y-1">
+                        <label className="text-xs text-zinc-300 font-semibold">
+                          Versión Registrada en el Servidor
                         </label>
                         <input
                           type="text"
@@ -539,13 +765,13 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                         />
                       </div>
 
-                      <div className="sm:col-span-6 space-y-1">
+                      <div className="sm:col-span-8 space-y-1">
                         <label className="text-xs text-zinc-300 font-semibold">
-                          Enlace de Descarga Directa del APK
+                          Enlace de Descarga Activo
                         </label>
                         <input
                           type="text"
-                          value={config.appUpdate?.apkDownloadUrl || ''}
+                          value={config.appUpdate?.apkDownloadUrl || '/api/iptv/download-apk'}
                           onChange={(e) =>
                             setConfig({
                               ...config,
@@ -560,62 +786,36 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                               },
                             })
                           }
-                          placeholder="https://tudominio.com/CalixTV-v1.1.apk (o dejar vacío para usar el servidor local)"
+                          placeholder="/api/iptv/download-apk o URL externa"
                           className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white text-xs font-mono focus:border-cyan-500 focus:outline-none"
                         />
                       </div>
                     </div>
 
-                    <div className="space-y-1">
-                      <label className="text-xs text-zinc-300 font-semibold">
-                        Novedades de la Versión (Notas de Lanzamiento)
-                      </label>
-                      <textarea
-                        rows={3}
-                        value={config.appUpdate?.releaseNotes || ''}
-                        onChange={(e) =>
-                          setConfig({
-                            ...config,
-                            appUpdate: {
-                              ...(config.appUpdate || {
-                                latestVersion: '1.0',
-                                minVersion: '1.0',
-                                apkDownloadUrl: '',
-                                forceUpdate: false,
-                              }),
-                              releaseNotes: e.target.value,
-                            },
-                          })
-                        }
-                        placeholder="Mejoras en velocidad de carga, nuevos canales y soporte para Android 15..."
-                        className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white text-xs focus:border-cyan-500 focus:outline-none"
-                      />
-                    </div>
-
-                    <div className="flex items-center gap-2 pt-2">
-                      <input
-                        type="checkbox"
-                        id="forceUpdate"
-                        checked={config.appUpdate?.forceUpdate || false}
-                        onChange={(e) =>
-                          setConfig({
-                            ...config,
-                            appUpdate: {
-                              ...(config.appUpdate || {
-                                latestVersion: '1.0',
-                                minVersion: '1.0',
-                                apkDownloadUrl: '',
-                                releaseNotes: '',
-                              }),
-                              forceUpdate: e.target.checked,
-                            },
-                          })
-                        }
-                        className="w-4 h-4 rounded text-cyan-500 focus:ring-0 bg-zinc-900 border-zinc-700"
-                      />
-                      <label htmlFor="forceUpdate" className="text-xs text-zinc-300 font-semibold">
-                        Actualización Obligatoria (Obliga a actualizar para poder usar la app)
-                      </label>
+                    {/* Explicación de Permisos de Android */}
+                    <div className="p-3 bg-zinc-950 rounded-xl border border-zinc-800/80 space-y-2 mt-2">
+                      <div className="flex items-center gap-2 text-xs font-bold text-cyan-400">
+                        <ShieldCheck className="w-4 h-4 text-cyan-400" />
+                        <span>Permisos de Android Configurados en la App:</span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-zinc-400">
+                        <div className="flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                          <span><strong>POST_NOTIFICATIONS:</strong> Alerta al usuario en segundo plano cuando hay nueva versión.</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                          <span><strong>REQUEST_INSTALL_PACKAGES:</strong> Abre el instalador nativo directamente tras la descarga.</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                          <span><strong>DownloadManager:</strong> Descarga con barra de progreso en notificaciones del sistema.</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                          <span><strong>FileProvider:</strong> Compatibilidad total con Android 7 hasta Android 15.</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

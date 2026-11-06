@@ -1,6 +1,7 @@
 import React from 'react';
-import { Download, Sparkles, X, AlertTriangle, ArrowRight } from 'lucide-react';
+import { Download, Sparkles, X, AlertTriangle, ArrowRight, Loader2, CheckCircle2 } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
+import { NativePlayer, canUseNativePlayer } from '../services/nativePlayer';
 
 interface AppUpdateModalProps {
   updateInfo: {
@@ -14,13 +15,45 @@ interface AppUpdateModalProps {
 }
 
 export const AppUpdateModal: React.FC<AppUpdateModalProps> = ({ updateInfo, onClose }) => {
-  const handleDownload = () => {
-    const url = updateInfo.apkDownloadUrl || '/api/iptv/download-apk';
-    if (Capacitor.isNativePlatform()) {
-      window.open(url, '_system') || (window.location.href = url);
-    } else {
-      window.open(url, '_blank');
+  const [isProcessing, setIsProcessing] = React.useState(false);
+  const [statusMessage, setStatusMessage] = React.useState<string | null>(null);
+
+  const handleDownload = async () => {
+    setIsProcessing(true);
+    setStatusMessage('Iniciando descarga de la actualización...');
+
+    const rawUrl = updateInfo.apkDownloadUrl || '/api/iptv/download-apk';
+    const downloadUrl = rawUrl.startsWith('http') ? rawUrl : window.location.origin + rawUrl;
+    const filename = `CalixTV-v${updateInfo.latestVersion}.apk`;
+
+    // 1. Check if running inside native Android app with NativePlayer plugin
+    if (canUseNativePlayer() && NativePlayer.installApk) {
+      try {
+        setStatusMessage('Descargando en segundo plano vía Android DownloadManager...');
+        await NativePlayer.installApk({
+          url: downloadUrl,
+          filename,
+        });
+        setStatusMessage('¡Descarga en progreso! Revisa la barra de notificaciones para abrir el instalador.');
+        setIsProcessing(false);
+        return;
+      } catch (err) {
+        console.warn('Native install error, trying fallback:', err);
+      }
     }
+
+    // 2. Fallback to system browser or direct download
+    try {
+      if (Capacitor.isNativePlatform()) {
+        window.open(downloadUrl, '_system') || (window.location.href = downloadUrl);
+      } else {
+        window.open(downloadUrl, '_blank');
+      }
+      setStatusMessage('Descarga iniciada en tu navegador/descargas.');
+    } catch {
+      window.location.href = downloadUrl;
+    }
+    setIsProcessing(false);
   };
 
   return (
@@ -70,6 +103,17 @@ export const AppUpdateModal: React.FC<AppUpdateModalProps> = ({ updateInfo, onCl
           <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-400 text-xs flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span>Esta actualización es obligatoria para continuar disfrutando del servicio.</span>
+          </div>
+        )}
+
+        {statusMessage && (
+          <div className="p-3 bg-cyan-950/60 border border-cyan-800 rounded-xl text-cyan-300 text-xs flex items-center gap-2">
+            {isProcessing ? (
+              <Loader2 className="w-4 h-4 shrink-0 animate-spin text-cyan-400" />
+            ) : (
+              <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+            )}
+            <span>{statusMessage}</span>
           </div>
         )}
 

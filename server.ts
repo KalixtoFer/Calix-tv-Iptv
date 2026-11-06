@@ -442,6 +442,83 @@ app.post('/api/iptv/admin/update-credentials', (req, res) => {
   });
 });
 
+// Admin Direct APK Upload & OTA Distribution Endpoint
+app.post('/api/iptv/admin/upload-apk', (req, res) => {
+  const headerToken = req.headers['x-admin-token'] as string;
+  const queryToken = req.query.token as string;
+  const authToken = headerToken || queryToken;
+
+  const isAuthorized = authToken && activeAdminTokens.has(authToken);
+  if (!isAuthorized) {
+    return res.status(401).json({ success: false, message: 'Sesión no autorizada o expirada. Inicie sesión nuevamente en el panel.' });
+  }
+
+  const version = ((req.query.version as string) || (req.headers['x-apk-version'] as string) || '1.1').trim();
+  const notes = ((req.query.notes as string) || (req.headers['x-apk-notes'] as string) || `Actualización oficial Calix TV v${version}.`).trim();
+  const forceUpdate = req.query.forceUpdate === 'true' || req.headers['x-apk-force'] === 'true';
+  const originalFilename = ((req.query.filename as string) || (req.headers['x-apk-filename'] as string) || `CalixTV-v${version}.apk`).trim();
+
+  const targetPath = path.join(DATA_DIR, 'CalixTV-latest.apk');
+  const versionedPath = path.join(DATA_DIR, `CalixTV-v${version}.apk`);
+
+  const writeStream = fs.createWriteStream(targetPath);
+  const hash = crypto.createHash('sha256');
+  let totalBytes = 0;
+
+  req.on('data', (chunk) => {
+    totalBytes += chunk.length;
+    hash.update(chunk);
+  });
+
+  req.pipe(writeStream);
+
+  writeStream.on('finish', () => {
+    const sha256 = hash.digest('hex');
+
+    // Create a versioned copy in DATA_DIR
+    try {
+      fs.copyFileSync(targetPath, versionedPath);
+    } catch (e) {
+      console.warn('Could not save versioned copy:', e);
+    }
+
+    // Update central configuration so all connected devices immediately detect the update
+    currentConfig.appUpdate = {
+      latestVersion: version,
+      minVersion: currentConfig.appUpdate?.minVersion || '1.0',
+      apkDownloadUrl: '/api/iptv/download-apk',
+      releaseNotes: notes,
+      forceUpdate: forceUpdate,
+      publishedAt: new Date().toISOString().split('T')[0],
+    };
+    saveConfig(currentConfig);
+
+    console.log(`[OTA Update] New APK v${version} uploaded (${(totalBytes / (1024 * 1024)).toFixed(2)} MB, SHA256: ${sha256.substring(0, 8)}...)`);
+
+    res.json({
+      success: true,
+      message: `¡APK Calix TV v${version} subido y listo para descarga! Tus usuarios recibirán la notificación de actualización al instante.`,
+      fileInfo: {
+        filename: originalFilename,
+        sizeBytes: totalBytes,
+        sizeFormatted: `${(totalBytes / (1024 * 1024)).toFixed(2)} MB`,
+        sha256,
+        version,
+        downloadUrl: '/api/iptv/download-apk',
+      },
+      config: currentConfig,
+    });
+  });
+
+  writeStream.on('error', (err) => {
+    console.error('Error writing APK file:', err);
+    res.status(500).json({
+      success: false,
+      message: `Error al almacenar el archivo APK en el servidor: ${err.message}`,
+    });
+  });
+});
+
 // Admin Security Verification / Audit
 app.get('/api/iptv/admin/security-audit', (_req, res) => {
   const checks = [
@@ -531,24 +608,37 @@ app.get('/api/iptv/check-update', (req, res) => {
   });
 });
 
-// Direct APK Download endpoint
+// Direct APK Download endpoint with multi-source fallback
 app.get('/api/iptv/download-apk', (_req, res) => {
+  const latestUploaded = path.join(DATA_DIR, 'CalixTV-latest.apk');
+  const version = currentConfig.appUpdate?.latestVersion || '1.1';
+  const downloadFilename = `CalixTV-v${version}.apk`;
+
   const candidateFiles = [
+    latestUploaded,
+    path.join(DATA_DIR, downloadFilename),
     path.resolve(__dirname, 'CalixTV-v1.0.apk'),
     path.resolve(__dirname, 'NexusIPTVPro-v2.5.4.apk'),
     path.resolve(__dirname, 'android', 'app', 'build', 'outputs', 'apk', 'debug', 'app-debug.apk'),
+    path.resolve(__dirname, 'android', 'app', 'build', 'outputs', 'apk', 'release', 'app-release-unsigned.apk'),
   ];
 
   for (const file of candidateFiles) {
     if (fs.existsSync(file)) {
-      return res.download(file, 'CalixTV-v1.0.apk');
+      res.setHeader('Content-Type', 'application/vnd.android.package-archive');
+      res.setHeader('Content-Disposition', `attachment; filename="${downloadFilename}"`);
+      return res.sendFile(file);
     }
   }
 
-  res.status(404).json({
-    success: false,
-    message: 'El archivo APK aún se está compilando o no se ha generado en esta instancia.',
-  });
+  // Graceful fallback to GitHub release or configured external URL
+  const remoteUrl =
+    currentConfig.appUpdate?.apkDownloadUrl &&
+    currentConfig.appUpdate.apkDownloadUrl !== '/api/iptv/download-apk'
+      ? currentConfig.appUpdate.apkDownloadUrl
+      : 'https://github.com/KalixtoFer/calixtvapp/releases/latest/download/CalixTV.apk';
+
+  return res.redirect(302, remoteUrl);
 });
 
 // Test connection to Xtream server

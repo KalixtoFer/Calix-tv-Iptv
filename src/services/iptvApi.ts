@@ -581,6 +581,65 @@ class IptvApiService {
     return await res.json();
   }
 
+  // Upload APK file directly from Admin Panel with real-time percentage progress
+  async uploadApk(params: {
+    file: File;
+    version: string;
+    notes: string;
+    forceUpdate: boolean;
+    onProgress?: (percent: number) => void;
+  }): Promise<{
+    success: boolean;
+    message: string;
+    fileInfo?: {
+      filename: string;
+      sizeBytes: number;
+      sizeFormatted: string;
+      sha256: string;
+      version: string;
+      downloadUrl: string;
+    };
+    config?: CentralizedConfig;
+  }> {
+    return new Promise((resolve) => {
+      const xhr = new XMLHttpRequest();
+      const url = `/api/iptv/admin/upload-apk?version=${encodeURIComponent(params.version)}&notes=${encodeURIComponent(params.notes)}&forceUpdate=${params.forceUpdate}&filename=${encodeURIComponent(params.file.name)}`;
+
+      xhr.open('POST', url, true);
+      if (this.adminToken) {
+        xhr.setRequestHeader('x-admin-token', this.adminToken);
+      }
+      xhr.setRequestHeader('Content-Type', 'application/vnd.android.package-archive');
+
+      if (xhr.upload && params.onProgress) {
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) {
+            const pct = Math.round((e.loaded / e.total) * 100);
+            params.onProgress?.(pct);
+          }
+        };
+      }
+
+      xhr.onload = () => {
+        try {
+          const res = JSON.parse(xhr.responseText);
+          if (res.config) {
+            this.activeConfig = res.config;
+          }
+          resolve(res);
+        } catch {
+          resolve({ success: false, message: 'Respuesta inválida del servidor al subir APK.' });
+        }
+      };
+
+      xhr.onerror = () => {
+        resolve({ success: false, message: 'Error de conexión de red al subir archivo APK.' });
+      };
+
+      xhr.send(params.file);
+    });
+  }
+
   async getSecurityAudit(): Promise<{
     success: boolean;
     score: number;
