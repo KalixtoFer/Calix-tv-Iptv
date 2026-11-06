@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Instala el reproductor nativo (libVLC) en el proyecto Android generado por Capacitor
+"""Instala el reproductor nativo (Media3 ExoPlayer + NextLib FFmpeg) en el proyecto Android
 y optimiza el tamaño del APK al máximo (compresión de librerías nativas .so y filtrado de ABIs).
 Es idempotente: se puede ejecutar en cada build."""
 import os
@@ -8,7 +8,6 @@ import sys
 
 BASE = 'android/app'
 PKG_DIR = f'{BASE}/src/main/java/com/calixtv/app'
-LIBVLC = "org.videolan.android:libvlc-all:3.6.0"
 
 ACTIVITY_XML = '''
         <activity
@@ -60,43 +59,30 @@ if os.path.exists(manifest):
 
     open(manifest, 'w', encoding='utf-8').write(s)
 
-# 3) Dependencia libVLC + ABI arm64-v8a + Compresión de .so y R8 minification en build.gradle
+# 3) Dependencias Media3 + ABI arm64-v8a / armeabi-v7a + Compresión de .so y R8 minification en build.gradle
 gradle = f'{BASE}/build.gradle'
 if os.path.exists(gradle):
     t = open(gradle, encoding='utf-8').read()
-    if 'libvlc-all' not in t:
+    if 'media3-exoplayer' not in t:
         anchor = "implementation project(':capacitor-android')"
         if anchor not in t:
             fail('No se encontró la sección dependencies en build.gradle')
-        t = t.replace(anchor, anchor + f"\n    implementation '{LIBVLC}'")
-        print('libVLC agregado')
+        media3_deps = '''
+    def media3_version = "1.4.1"
+    implementation "androidx.media3:media3-exoplayer:$media3_version"
+    implementation "androidx.media3:media3-exoplayer-hls:$media3_version"
+    implementation "androidx.media3:media3-ui:$media3_version"
+    implementation "io.github.anilbeesetti:nextlib-media3ext:0.7.0"
+'''
+        t = t.replace(anchor, anchor + media3_deps)
+        print('Media3 ExoPlayer y NextLib agregados')
     
-    # Asegurar ABI arm64-v8a ultra-liviana (reduce tamaño al 50%)
     if 'abiFilters' in t:
         import re
-        t = re.sub(r'abiFilters\s+.*', 'abiFilters "arm64-v8a"', t)
-        print('abiFilters actualizado a arm64-v8a')
-    else:
-        anchor = 'versionName "1.0"'
-        if anchor in t:
-            t = t.replace(anchor, anchor + '\n        ndk {\n            abiFilters "arm64-v8a"\n        }')
-            print('abiFilters arm64-v8a agregado')
-
-    # Configurar minificación R8 y compresión de .so
-    if 'useLegacyPackaging' not in t:
-        anchor_android = 'buildTypes {'
-        if anchor_android in t:
-            t = t.replace(anchor_android, PACKAGING_SNIPPET + '\n    ' + anchor_android)
-            print('packagingOptions (useLegacyPackaging = true) agregado para comprimir .so')
-
-    if 'minifyEnabled false' in t:
-        t = t.replace(
-            'minifyEnabled false',
-            'minifyEnabled true\n            shrinkResources true\n            signingConfig signingConfigs.debug'
-        )
-        print('R8 minificación y reducción de recursos activados')
+        t = re.sub(r'abiFilters\s+.*', 'abiFilters "arm64-v8a", "armeabi-v7a"', t)
+        print('abiFilters actualizado a arm64-v8a, armeabi-v7a')
 
     open(gradle, 'w', encoding='utf-8').write(t)
-    print('build.gradle optimizado para APK ultra-liviano OK')
+    print('build.gradle optimizado OK')
 
-print('Reproductor nativo instalado y APK optimizado para mínimo tamaño OK')
+print('Reproductor nativo ExoPlayer instalado OK')

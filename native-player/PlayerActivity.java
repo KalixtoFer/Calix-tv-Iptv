@@ -19,23 +19,35 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.videolan.libvlc.LibVLC;
-import org.videolan.libvlc.Media;
-import org.videolan.libvlc.MediaPlayer;
-import org.videolan.libvlc.util.VLCVideoLayout;
+import androidx.media3.common.C;
+import androidx.media3.common.Format;
+import androidx.media3.common.MediaItem;
+import androidx.media3.common.PlaybackException;
+import androidx.media3.common.Player;
+import androidx.media3.common.TrackGroup;
+import androidx.media3.common.TrackSelectionOverride;
+import androidx.media3.common.TrackSelectionParameters;
+import androidx.media3.common.Tracks;
+import androidx.media3.datasource.DefaultHttpDataSource;
+import androidx.media3.exoplayer.DefaultLoadControl;
+import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
+import androidx.media3.ui.PlayerView;
+
+import io.github.anilbeesetti.nextlib.media3ext.ffdec.NextRenderersFactory;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 /**
- * Reproductor nativo a pantalla completa basado en libVLC.
- * Reproduce MKV, MP4, HEVC, AC3/EAC3/DTS, etc. Sin CORS ni contenido mixto.
+ * Reproductor nativo a pantalla completa basado en Media3 ExoPlayer + NextLib FFmpeg.
+ * Soporta MKV, MP4, HLS (.m3u8), TS, HEVC, AC3/EAC3/DTS (vía FFmpeg fallback).
  */
 public class PlayerActivity extends Activity {
 
-    private LibVLC libVLC;
-    private MediaPlayer player;
-    private VLCVideoLayout videoLayout;
+    private ExoPlayer player;
+    private PlayerView playerView;
 
     private FrameLayout root;
     private LinearLayout topBar;
@@ -66,6 +78,28 @@ public class PlayerActivity extends Activity {
     private int reconnectAttempts = 0;
     private static final int MAX_RECONNECT_ATTEMPTS = 5;
 
+    private final Runnable updateProgressRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (player != null) {
+                lastTime = Math.max(0, player.getCurrentPosition());
+                long dur = player.getDuration();
+                if (dur > 0 && dur != C.TIME_UNSET) {
+                    length = dur;
+                    seekBar.setMax((int) (length / 1000));
+                    durationView.setText(fmt(length));
+                }
+                if (!userSeeking) {
+                    seekBar.setProgress((int) (lastTime / 1000));
+                    timeView.setText(fmt(lastTime));
+                }
+            }
+            if (player != null && player.isPlaying()) {
+                ui.postDelayed(this, 500);
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,47 +113,56 @@ public class PlayerActivity extends Activity {
 
         buildUi();
         setContentView(root);
+    }
 
-        ArrayList<String> args = new ArrayList<>();
-        args.add("--network-caching=6000");
-        args.add("--file-caching=3000");
-        args.add("--http-reconnect");
-        args.add("--avcodec-hw=any");
-        args.add("--avcodec-threads=0");
-        libVLC = new LibVLC(this, args);
-        player = new MediaPlayer(libVLC);
-        try {
-            player.setRate(1.0f);
-        } catch (Exception ignored) {}
-        player.setEventListener(listener);
+    private void initPlayer() {
+        if (player != null) return;
+
+        NextRenderersFactory renderersFactory = new NextRenderersFactory(this);
+        renderersFactory.setEnableDecoderFallback(true);
+        renderersFactory.setExtensionRendererMode(NextRenderersFactory.EXTENSION_RENDERER_MODE_ON);
+
+        DefaultHttpDataSource.Factory httpDataSourceFactory = new DefaultHttpDataSource.Factory()
+                .setAllowCrossProtocolRedirects(true)
+                .setConnectTimeoutMs(15000)
+                .setReadTimeoutMs(15000);
+
+        DefaultMediaSourceFactory mediaSourceFactory = new DefaultMediaSourceFactory(httpDataSourceFactory);
+
+        DefaultLoadControl loadControl = new DefaultLoadControl.Builder()
+                .setBufferDurationsMs(30000, 60000, 2500, 5000)
+                .build();
+
+        player = new ExoPlayer.Builder(this, renderersFactory)
+                .setMediaSourceFactory(mediaSourceFactory)
+                .setLoadControl(loadControl)
+                .build();
+
+        playerView.setPlayer(player);
+        player.addListener(playerListener);
     }
 
     private void handlePrematureDisconnect() {
-        if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS && lastTime > 3000) {
+        if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
             reconnectAttempts++;
-            final long resumeTime = lastTime;
+            final long resumeTime = lastTime > 0 ? lastTime : (player != null ? player.getCurrentPosition() : startMs);
             setBuffering(true);
             ui.postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        player.stop();
-                        player.detachViews();
-                        player.attachViews(videoLayout, null, true, false);
-                        Media media = new Media(libVLC, Uri.parse(url));
-                        media.setHWDecoderEnabled(true, false);
-                        player.setMedia(media);
-                        media.release();
-                        startMs = resumeTime;
-                        resumedOnce = false;
-                        player.play();
+                        if (player != null) {
+                            player.seekTo(resumeTime);
+                            player.prepare();
+                            player.play();
+                        }
                     } catch (Exception e) {
                         showError("Error al reconectar la transmisión.");
                     }
                 }
             }, 1000);
         } else {
-            showError("La conexión con el servidor de la serie se interrumpió.\nRevisá la señal de tu proveedor de IPTV o la conexión a internet.");
+            showError("La conexión con el servidor se interrumpió.\nRevisá la señal de tu proveedor de IPTV o la conexión a internet.");
         }
     }
 
@@ -130,28 +173,32 @@ public class PlayerActivity extends Activity {
             showError("Falta la URL del contenido.");
             return;
         }
+        initPlayer();
         resumedOnce = false;
         setBuffering(true);
-        player.attachViews(videoLayout, null, true, false);
-        Media media = new Media(libVLC, Uri.parse(url));
-        media.setHWDecoderEnabled(true, false);
-        player.setMedia(media);
-        media.release();
-        try {
-            player.setRate(1.0f);
-        } catch (Exception ignored) {}
+
+        MediaItem mediaItem = MediaItem.fromUri(Uri.parse(url));
+        player.setMediaItem(mediaItem);
+        if (startMs > 0) {
+            player.seekTo(startMs);
+        }
+        player.prepare();
         player.play();
+        startProgressUpdates();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        try {
-            lastTime = player.getTime();
+        stopProgressUpdates();
+        if (player != null) {
+            lastTime = player.getCurrentPosition();
+            long dur = player.getDuration();
+            if (dur > 0 && dur != C.TIME_UNSET) length = dur;
             startMs = lastTime;
             player.stop();
-            player.detachViews();
-        } catch (Exception ignored) {
+            player.release();
+            player = null;
         }
     }
 
@@ -159,10 +206,10 @@ public class PlayerActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         ui.removeCallbacksAndMessages(null);
-        try {
+        stopProgressUpdates();
+        if (player != null) {
             player.release();
-            libVLC.release();
-        } catch (Exception ignored) {
+            player = null;
         }
     }
 
@@ -189,72 +236,75 @@ public class PlayerActivity extends Activity {
         }
     }
 
-    // ---------------------------------------------------------------- eventos de VLC
+    // ---------------------------------------------------------------- eventos de ExoPlayer
 
-    private final MediaPlayer.EventListener listener = new MediaPlayer.EventListener() {
+    private final Player.Listener playerListener = new Player.Listener() {
         @Override
-        public void onEvent(final MediaPlayer.Event event) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    handleEvent(event);
-                }
-            });
+        public void onPlaybackStateChanged(int playbackState) {
+            switch (playbackState) {
+                case Player.STATE_BUFFERING:
+                    setBuffering(true);
+                    break;
+                case Player.STATE_READY:
+                    reconnectAttempts = 0;
+                    setBuffering(false);
+                    errorView.setVisibility(View.GONE);
+                    playBtn.setText(player != null && player.isPlaying() ? "Pausa" : "Play");
+                    if (player != null) {
+                        long dur = player.getDuration();
+                        if (dur > 0 && dur != C.TIME_UNSET) {
+                            length = dur;
+                            seekBar.setMax((int) (length / 1000));
+                            durationView.setText(fmt(length));
+                        }
+                    }
+                    if (!resumedOnce) {
+                        resumedOnce = true;
+                        scheduleHide();
+                    }
+                    startProgressUpdates();
+                    break;
+                case Player.STATE_ENDED:
+                    if (lastTime > 5000 && length > 30000 && lastTime < (length - 15000)) {
+                        handlePrematureDisconnect();
+                    } else {
+                        finish();
+                    }
+                    break;
+                case Player.STATE_IDLE:
+                    break;
+            }
+        }
+
+        @Override
+        public void onIsPlayingChanged(boolean isPlaying) {
+            playBtn.setText(isPlaying ? "Pausa" : "Play");
+            if (isPlaying) {
+                setBuffering(false);
+                startProgressUpdates();
+            } else {
+                stopProgressUpdates();
+            }
+        }
+
+        @Override
+        public void onPlayerError(PlaybackException error) {
+            setBuffering(false);
+            if (lastTime > 5000 && (length == 0 || lastTime < length - 15000)) {
+                handlePrematureDisconnect();
+            } else {
+                showError("No se pudo reproducir este contenido.\nRevisá la conexión, el usuario/contraseña o el límite de conexiones del servidor.");
+            }
         }
     };
 
-    private void handleEvent(MediaPlayer.Event event) {
-        switch (event.type) {
-            case MediaPlayer.Event.Opening:
-                setBuffering(true);
-                break;
-            case MediaPlayer.Event.Buffering:
-                setBuffering(event.getBuffering() < 100f);
-                break;
-            case MediaPlayer.Event.Playing:
-                reconnectAttempts = 0;
-                setBuffering(false);
-                errorView.setVisibility(View.GONE);
-                playBtn.setText("Pausa");
-                if (!resumedOnce) {
-                    resumedOnce = true;
-                    if (startMs > 0) player.setTime(startMs);
-                    scheduleHide();
-                }
-                break;
-            case MediaPlayer.Event.Paused:
-                playBtn.setText("Play");
-                break;
-            case MediaPlayer.Event.LengthChanged:
-                length = event.getLengthChanged();
-                seekBar.setMax((int) (length / 1000));
-                durationView.setText(fmt(length));
-                break;
-            case MediaPlayer.Event.TimeChanged:
-                lastTime = event.getTimeChanged();
-                if (!userSeeking) {
-                    seekBar.setProgress((int) (lastTime / 1000));
-                    timeView.setText(fmt(lastTime));
-                }
-                break;
-            case MediaPlayer.Event.EncounteredError:
-                setBuffering(false);
-                if (lastTime > 5000 && (length == 0 || lastTime < length - 15000)) {
-                    handlePrematureDisconnect();
-                } else {
-                    showError("No se pudo reproducir este contenido.\nRevisá la conexión, el usuario/contraseña o el límite de conexiones del servidor.");
-                }
-                break;
-            case MediaPlayer.Event.EndReached:
-                if (lastTime > 5000 && length > 30000 && lastTime < (length - 15000)) {
-                    handlePrematureDisconnect();
-                } else {
-                    finish();
-                }
-                break;
-            default:
-                break;
-        }
+    private void startProgressUpdates() {
+        stopProgressUpdates();
+        ui.post(updateProgressRunnable);
+    }
+
+    private void stopProgressUpdates() {
+        ui.removeCallbacks(updateProgressRunnable);
     }
 
     // ---------------------------------------------------------------- UI
@@ -291,8 +341,9 @@ public class PlayerActivity extends Activity {
         root = new FrameLayout(this);
         root.setBackgroundColor(Color.BLACK);
 
-        videoLayout = new VLCVideoLayout(this);
-        root.addView(videoLayout, new FrameLayout.LayoutParams(
+        playerView = new PlayerView(this);
+        playerView.setUseController(false);
+        root.addView(playerView, new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
 
         View.OnClickListener toggle = new View.OnClickListener() {
@@ -302,7 +353,7 @@ public class PlayerActivity extends Activity {
             }
         };
         root.setOnClickListener(toggle);
-        videoLayout.setOnClickListener(toggle);
+        playerView.setOnClickListener(toggle);
 
         spinner = new ProgressBar(this);
         FrameLayout.LayoutParams spLp = new FrameLayout.LayoutParams(dp(56), dp(56), Gravity.CENTER);
@@ -385,7 +436,9 @@ public class PlayerActivity extends Activity {
             public void onProgressChanged(SeekBar sb, int progress, boolean fromUser) {
                 if (!fromUser) return;
                 timeView.setText(fmt(progress * 1000L));
-                if (!userSeeking) player.setTime(progress * 1000L); // cambio con control remoto
+                if (!userSeeking && player != null) {
+                    player.seekTo(progress * 1000L);
+                }
                 scheduleHide();
             }
 
@@ -398,7 +451,9 @@ public class PlayerActivity extends Activity {
             @Override
             public void onStopTrackingTouch(SeekBar sb) {
                 userSeeking = false;
-                player.setTime(sb.getProgress() * 1000L);
+                if (player != null) {
+                    player.seekTo(sb.getProgress() * 1000L);
+                }
                 scheduleHide();
             }
         });
@@ -475,54 +530,134 @@ public class PlayerActivity extends Activity {
     // ---------------------------------------------------------------- acciones
 
     private void togglePlay() {
-        if (player.isPlaying()) player.pause();
-        else player.play();
+        if (player == null) return;
+        if (player.isPlaying()) {
+            player.pause();
+        } else {
+            player.play();
+        }
         scheduleHide();
     }
 
     private void seekBy(long deltaMs) {
-        long target = Math.max(0, player.getTime() + deltaMs);
+        if (player == null) return;
+        long target = Math.max(0, player.getCurrentPosition() + deltaMs);
         if (length > 0) target = Math.min(length, target);
-        player.setTime(target);
+        player.seekTo(target);
+        lastTime = target;
         scheduleHide();
     }
 
+    private static class TrackOption {
+        final TrackGroup trackGroup;
+        final int trackIndex;
+        final String label;
+        final boolean selected;
+
+        TrackOption(TrackGroup trackGroup, int trackIndex, String label, boolean selected) {
+            this.trackGroup = trackGroup;
+            this.trackIndex = trackIndex;
+            this.label = label;
+            this.selected = selected;
+        }
+    }
+
     private void cycleAudio() {
-        MediaPlayer.TrackDescription[] tracks = player.getAudioTracks();
-        if (tracks == null || tracks.length == 0) {
+        if (player == null) return;
+        Tracks tracks = player.getCurrentTracks();
+        List<TrackOption> audioOptions = new ArrayList<>();
+
+        for (Tracks.Group group : tracks.getGroups()) {
+            if (group.getType() == C.TRACK_TYPE_AUDIO) {
+                TrackGroup trackGroup = group.getMediaTrackGroup();
+                for (int i = 0; i < trackGroup.length; i++) {
+                    Format format = trackGroup.getFormat(i);
+                    boolean selected = group.isTrackSelected(i);
+                    String label = format.label != null && !format.label.isEmpty() ? format.label :
+                            (format.language != null && !format.language.isEmpty() ? format.language : "Audio " + (audioOptions.size() + 1));
+                    audioOptions.add(new TrackOption(trackGroup, i, label, selected));
+                }
+            }
+        }
+
+        if (audioOptions.isEmpty()) {
             Toast.makeText(this, "Sin pistas de audio", Toast.LENGTH_SHORT).show();
             return;
         }
-        int cur = player.getAudioTrack();
-        int idx = -1;
-        for (int i = 0; i < tracks.length; i++) {
-            if (tracks[i].id == cur) idx = i;
-        }
-        for (int k = 1; k <= tracks.length; k++) {
-            MediaPlayer.TrackDescription next = tracks[(idx + k + tracks.length) % tracks.length];
-            if (next.id != -1) { // -1 = desactivado
-                player.setAudioTrack(next.id);
-                Toast.makeText(this, "Audio: " + next.name, Toast.LENGTH_SHORT).show();
+
+        int selectedIdx = -1;
+        for (int i = 0; i < audioOptions.size(); i++) {
+            if (audioOptions.get(i).selected) {
+                selectedIdx = i;
                 break;
             }
         }
+
+        int nextIdx = (selectedIdx + 1) % audioOptions.size();
+        TrackOption target = audioOptions.get(nextIdx);
+
+        TrackSelectionParameters newParams = player.getTrackSelectionParameters()
+                .buildUpon()
+                .setOverrideForType(new TrackSelectionOverride(target.trackGroup, target.trackIndex))
+                .build();
+        player.setTrackSelectionParameters(newParams);
+
+        Toast.makeText(this, "Audio: " + target.label, Toast.LENGTH_SHORT).show();
         scheduleHide();
     }
 
     private void cycleSubs() {
-        MediaPlayer.TrackDescription[] tracks = player.getSpuTracks();
-        if (tracks == null || tracks.length == 0) {
+        if (player == null) return;
+        Tracks tracks = player.getCurrentTracks();
+        List<TrackOption> subOptions = new ArrayList<>();
+
+        for (Tracks.Group group : tracks.getGroups()) {
+            if (group.getType() == C.TRACK_TYPE_TEXT) {
+                TrackGroup trackGroup = group.getMediaTrackGroup();
+                for (int i = 0; i < trackGroup.length; i++) {
+                    Format format = trackGroup.getFormat(i);
+                    boolean selected = group.isTrackSelected(i);
+                    String label = format.label != null && !format.label.isEmpty() ? format.label :
+                            (format.language != null && !format.language.isEmpty() ? format.language : "Sub " + (subOptions.size() + 1));
+                    subOptions.add(new TrackOption(trackGroup, i, label, selected));
+                }
+            }
+        }
+
+        if (subOptions.isEmpty()) {
             Toast.makeText(this, "Sin subtítulos", Toast.LENGTH_SHORT).show();
             return;
         }
-        int cur = player.getSpuTrack();
-        int idx = -1;
-        for (int i = 0; i < tracks.length; i++) {
-            if (tracks[i].id == cur) idx = i;
+
+        boolean isTextDisabled = player.getTrackSelectionParameters().disabledTrackTypes.contains(C.TRACK_TYPE_TEXT);
+        int selectedIdx = -1;
+        if (!isTextDisabled) {
+            for (int i = 0; i < subOptions.size(); i++) {
+                if (subOptions.get(i).selected) {
+                    selectedIdx = i;
+                    break;
+                }
+            }
         }
-        MediaPlayer.TrackDescription next = tracks[(idx + 1 + tracks.length) % tracks.length];
-        player.setSpuTrack(next.id);
-        Toast.makeText(this, "Subtítulos: " + next.name, Toast.LENGTH_SHORT).show();
+
+        int nextIdx = selectedIdx + 1;
+        if (nextIdx >= subOptions.size()) {
+            TrackSelectionParameters newParams = player.getTrackSelectionParameters()
+                    .buildUpon()
+                    .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true)
+                    .build();
+            player.setTrackSelectionParameters(newParams);
+            Toast.makeText(this, "Subtítulos: Desactivado", Toast.LENGTH_SHORT).show();
+        } else {
+            TrackOption target = subOptions.get(nextIdx);
+            TrackSelectionParameters newParams = player.getTrackSelectionParameters()
+                    .buildUpon()
+                    .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false)
+                    .setOverrideForType(new TrackSelectionOverride(target.trackGroup, target.trackIndex))
+                    .build();
+            player.setTrackSelectionParameters(newParams);
+            Toast.makeText(this, "Subtítulos: " + target.label, Toast.LENGTH_SHORT).show();
+        }
         scheduleHide();
     }
 
