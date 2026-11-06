@@ -519,6 +519,30 @@ app.post('/api/iptv/admin/upload-apk', (req, res) => {
   });
 });
 
+// Check if an APK file is currently uploaded and hosted on the server
+app.get('/api/iptv/admin/apk-status', (_req, res) => {
+  const latestUploaded = path.join(DATA_DIR, 'CalixTV-latest.apk');
+  const exists = fs.existsSync(latestUploaded);
+  let sizeFormatted = '0 MB';
+  let mtime = null;
+
+  if (exists) {
+    const stat = fs.statSync(latestUploaded);
+    sizeFormatted = `${(stat.size / (1024 * 1024)).toFixed(2)} MB`;
+    mtime = stat.mtime;
+  }
+
+  res.json({
+    hasUploadedApk: exists,
+    sizeFormatted,
+    mtime,
+    latestVersion: currentConfig.appUpdate?.latestVersion || '1.1',
+    apkDownloadUrl: currentConfig.appUpdate?.apkDownloadUrl || '/api/iptv/download-apk',
+    releaseNotes: currentConfig.appUpdate?.releaseNotes || '',
+    forceUpdate: currentConfig.appUpdate?.forceUpdate || false,
+  });
+});
+
 // Admin Security Verification / Audit
 app.get('/api/iptv/admin/security-audit', (_req, res) => {
   const checks = [

@@ -640,6 +640,30 @@ class IptvApiService {
     });
   }
 
+  async getApkStatus(): Promise<{
+    hasUploadedApk: boolean;
+    sizeFormatted: string;
+    mtime: string | null;
+    latestVersion: string;
+    apkDownloadUrl: string;
+    releaseNotes: string;
+    forceUpdate: boolean;
+  }> {
+    try {
+      const res = await fetch('/api/iptv/admin/apk-status');
+      if (res.ok) return await res.json();
+    } catch {}
+    return {
+      hasUploadedApk: false,
+      sizeFormatted: '0 MB',
+      mtime: null,
+      latestVersion: '1.1',
+      apkDownloadUrl: '/api/iptv/download-apk',
+      releaseNotes: '',
+      forceUpdate: false,
+    };
+  }
+
   async getSecurityAudit(): Promise<{
     success: boolean;
     score: number;

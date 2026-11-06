@@ -12,6 +12,7 @@ import {
   RotateCcw,
   CheckCircle2,
   AlertCircle,
+  AlertTriangle,
   Loader2,
   Plus,
   Trash2,
@@ -99,6 +100,26 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
     downloadUrl?: string;
   } | null>(null);
 
+  const [serverApkStatus, setServerApkStatus] = useState<{
+    hasUploadedApk: boolean;
+    sizeFormatted: string;
+    latestVersion: string;
+    apkDownloadUrl: string;
+  } | null>(null);
+
+  const checkServerApkStatus = async () => {
+    try {
+      const status = await iptvApi.getApkStatus();
+      setServerApkStatus(status);
+    } catch {}
+  };
+
+  useEffect(() => {
+    if (activeTab === 'update') {
+      checkServerApkStatus();
+    }
+  }, [activeTab]);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -143,6 +164,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
         setConfig(res.config);
         onConfigSaved(res.config);
       }
+      checkServerApkStatus();
       setTimeout(() => setUploadSuccess(null), 8000);
     } else {
       alert('Error al subir APK: ' + res.message);
@@ -583,6 +605,35 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           <div><span className="text-zinc-500">Firma SHA256:</span> {uploadedFileInfo.sha256?.substring(0, 12)}...</div>
                         </div>
                       )}
+                    </div>
+                  )}
+
+                  {/* Estado en Vivo del Archivo APK en el Servidor */}
+                  {serverApkStatus && (
+                    <div
+                      className={`p-4 rounded-2xl border text-xs flex items-start gap-3 transition-all ${
+                        serverApkStatus.hasUploadedApk
+                          ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300'
+                          : 'bg-amber-950/40 border-amber-500/40 text-amber-300'
+                      }`}
+                    >
+                      {serverApkStatus.hasUploadedApk ? (
+                        <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                      ) : (
+                        <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                      )}
+                      <div className="space-y-1">
+                        <div className="font-bold text-sm text-white">
+                          {serverApkStatus.hasUploadedApk
+                            ? `APK Alojado en el Servidor (${serverApkStatus.sizeFormatted})`
+                            : 'Estado: No se detecta archivo .apk subido al servidor'}
+                        </div>
+                        <p className="text-zinc-300 leading-relaxed">
+                          {serverApkStatus.hasUploadedApk
+                            ? `El archivo APK está activo y disponible en /api/iptv/download-apk en versión v${serverApkStatus.latestVersion}.`
+                            : 'Guardaste los datos de la versión 1.1 en la configuración, pero el archivo APK no se ha subido aún. Para que los usuarios lo descarguen directamente, selecciona el archivo .apk abajo y haz clic en "Subir y Distribuir Actualización a los Usuarios".'}
+                        </p>
+                      </div>
                     </div>
                   )}
 
