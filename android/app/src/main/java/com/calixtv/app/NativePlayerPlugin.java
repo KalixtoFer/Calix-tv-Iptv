@@ -152,20 +152,23 @@ public class NativePlayerPlugin extends Plugin {
     private void launchApkInstall(Context context, DownloadManager dm, long downloadId, String fileName) {
         try {
             Uri apkUri = null;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                File file = new File(
-                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                    fileName
-                );
-                if (file.exists()) {
+            File file = new File(
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                fileName
+            );
+
+            if (file.exists() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                try {
                     apkUri = FileProvider.getUriForFile(
                         context,
                         context.getPackageName() + ".fileprovider",
                         file
                     );
-                } else {
-                    apkUri = dm.getUriForDownloadedFile(downloadId);
+                } catch (Exception e) {
+                    apkUri = Uri.fromFile(file);
                 }
+            } else if (file.exists()) {
+                apkUri = Uri.fromFile(file);
             } else {
                 apkUri = dm.getUriForDownloadedFile(downloadId);
             }
@@ -175,10 +178,21 @@ public class NativePlayerPlugin extends Plugin {
                 install.setDataAndType(apkUri, "application/vnd.android.package-archive");
                 install.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                context.startActivity(install);
+                try {
+                    context.startActivity(install);
+                } catch (Exception tvEx) {
+                    Intent tvInstall = new Intent(Intent.ACTION_INSTALL_PACKAGE);
+                    tvInstall.setData(apkUri);
+                    tvInstall.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    tvInstall.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    context.startActivity(tvInstall);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
+            try {
+                openExternalUrl(context, "file://" + new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), fileName).getAbsolutePath());
+            } catch (Exception ignored) {}
         }
     }
 
