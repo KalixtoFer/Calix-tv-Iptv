@@ -81,19 +81,10 @@ public class PlayerActivity extends Activity {
         setContentView(root);
 
         ArrayList<String> args = new ArrayList<>();
-        // Cache optimizado para streaming fluido sin microcortes
-        args.add("--network-caching=3000");
-        args.add("--file-caching=2000");
-        args.add("--live-caching=2000");
+        args.add("--network-caching=6000");
+        args.add("--file-caching=3000");
         args.add("--http-reconnect");
-        args.add("--http-continuous");
-        // Aceleración por hardware completa de Android (MediaCodec NDK & JNI)
         args.add("--avcodec-hw=any");
-        args.add("--codec=mediacodec_ndk,mediacodec_jni,all");
-        // Sincronización estricta de tiempo de reproducción (1.0x velocidad normal)
-        args.add("--clock-synchro=1");
-        args.add("--clock-jitter=0");
-        // Decodificación multihilo automática con todos los núcleos de la CPU
         args.add("--avcodec-threads=0");
         libVLC = new LibVLC(this, args);
         player = new MediaPlayer(libVLC);
@@ -225,9 +216,6 @@ public class PlayerActivity extends Activity {
                 setBuffering(false);
                 errorView.setVisibility(View.GONE);
                 playBtn.setText("Pausa");
-                try {
-                    player.setRate(1.0f);
-                } catch (Exception ignored) {}
                 if (!resumedOnce) {
                     resumedOnce = true;
                     if (startMs > 0) player.setTime(startMs);
