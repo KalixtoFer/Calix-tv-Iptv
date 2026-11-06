@@ -11,7 +11,9 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
-app.use(express.json());
+app.use(express.json({ limit: '100mb' }));
+app.use(express.raw({ type: 'application/vnd.android.package-archive', limit: '100mb' }));
+app.use(express.raw({ type: 'application/octet-stream', limit: '100mb' }));
 
 // Security Headers Middleware
 app.use((_req, res, next) => {
