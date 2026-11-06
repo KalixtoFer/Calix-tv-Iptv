@@ -73,6 +73,9 @@ configurations.all {
 }
 
 repositories {
+    google()
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
     flatDir{
         dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
     }
@@ -90,7 +93,7 @@ dependencies {
     implementation "androidx.media3:media3-exoplayer:$media3_version"
     implementation "androidx.media3:media3-exoplayer-hls:$media3_version"
     implementation "androidx.media3:media3-ui:$media3_version"
-    implementation "io.github.anilbeesetti:nextlib-media3ext:0.7.0"
+    implementation "io.github.anilbeesetti:nextlib-media3ext:$media3_version"
 
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"

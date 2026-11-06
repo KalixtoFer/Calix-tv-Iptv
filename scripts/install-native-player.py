@@ -72,7 +72,7 @@ if os.path.exists(gradle):
     implementation "androidx.media3:media3-exoplayer:$media3_version"
     implementation "androidx.media3:media3-exoplayer-hls:$media3_version"
     implementation "androidx.media3:media3-ui:$media3_version"
-    implementation "io.github.anilbeesetti:nextlib-media3ext:0.7.0"
+    implementation "io.github.anilbeesetti:nextlib-media3ext:$media3_version"
 '''
         t = t.replace(anchor, anchor + media3_deps)
         print('Media3 ExoPlayer y NextLib agregados')
