@@ -18,6 +18,12 @@ export const AppUpdateModal: React.FC<AppUpdateModalProps> = ({ updateInfo, onCl
   const [isProcessing, setIsProcessing] = React.useState(false);
   const [statusMessage, setStatusMessage] = React.useState<string | null>(null);
 
+  React.useEffect(() => {
+    if (canUseNativePlayer() && NativePlayer.requestNotificationPermission) {
+      NativePlayer.requestNotificationPermission().catch(() => {});
+    }
+  }, []);
+
   const handleDownload = async () => {
     setIsProcessing(true);
     setStatusMessage('Iniciando descarga de la actualización...');

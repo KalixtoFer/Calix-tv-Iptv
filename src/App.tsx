@@ -6,9 +6,11 @@ import {
   PlaybackState,
   XtreamAuthResponse,
   XtreamUserInfo,
+  SeriesItem,
 } from './types/iptv';
 import { iptvApi, StoredSession } from './services/iptvApi';
 import { useRemoteControl, RemoteKey } from './hooks/useRemoteControl';
+import { NativePlayer, canUseNativePlayer } from './services/nativePlayer';
 
 // Components
 import { Header } from './components/Header';
@@ -33,6 +35,7 @@ export default function App() {
   const [config, setConfig] = useState<CentralizedConfig | null>(null);
   const [session, setSession] = useState<StoredSession | null>(null);
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
+  const [targetSeriesDetail, setTargetSeriesDetail] = useState<SeriesItem | null>(null);
 
   // Navigation State
   const [activeSection, setActiveSection] = useState<ActiveSection>('home');
@@ -92,6 +95,16 @@ export default function App() {
         const updateCheck = await iptvApi.checkAppUpdate('1.0');
         if (updateCheck && updateCheck.hasUpdate) {
           setAvailableUpdate(updateCheck);
+
+          // Prompt for notification permission and post Android system notification
+          if (canUseNativePlayer()) {
+            NativePlayer.requestNotificationPermission?.().catch(() => {});
+            NativePlayer.showNotification?.({
+              title: `Nueva Versión Calix TV v${updateCheck.latestVersion}`,
+              message: updateCheck.releaseNotes || 'Hay una nueva actualización lista para descargar e instalar.',
+              url: updateCheck.apkDownloadUrl || '/api/iptv/download-apk',
+            }).catch(() => {});
+          }
         }
 
         const savedSession = iptvApi.getSavedSession();
@@ -306,17 +319,25 @@ export default function App() {
     );
   }
 
-  // If no session, show Login Screen
+  // If no session, show Login Screen (with OTA Update modal if available)
   if (!session) {
     return (
-      <LoginScreen
-        config={config}
-        viewMode={viewMode}
-        onChangeViewMode={handleViewModeChange}
-        onLoginSuccess={handleLoginSuccess}
-        onOpenAdmin={() => setIsAdminOpen(true)}
-        onEnterGuest={handleEnterGuestMode}
-      />
+      <div className="relative min-h-screen">
+        <LoginScreen
+          config={config}
+          viewMode={viewMode}
+          onChangeViewMode={handleViewModeChange}
+          onLoginSuccess={handleLoginSuccess}
+          onOpenAdmin={() => setIsAdminOpen(true)}
+          onEnterGuest={handleEnterGuestMode}
+        />
+        {availableUpdate && (
+          <AppUpdateModal
+            updateInfo={availableUpdate}
+            onClose={() => setAvailableUpdate(null)}
+          />
+        )}
+      </div>
     );
   }
 
@@ -355,6 +376,10 @@ export default function App() {
             onChangeViewMode={handleViewModeChange}
             onNavigate={(sec) => setActiveSection(sec)}
             onPlayStream={handlePlayStream}
+            onOpenSeriesDetail={(series) => {
+              setTargetSeriesDetail(series);
+              setActiveSection('series');
+            }}
             onOpenSettings={() => setIsProfileOpen(true)}
             onOpenSpeedTest={() => setIsProfileOpen(true)}
             onOpenFavorites={() => setActiveSection('live')}
@@ -383,7 +408,12 @@ export default function App() {
         {activeSection === 'series' && (
           <SeriesScreen
             username={session.username}
-            onBack={() => setActiveSection('home')}
+            initialSeries={targetSeriesDetail}
+            onClearInitialSeries={() => setTargetSeriesDetail(null)}
+            onBack={() => {
+              setTargetSeriesDetail(null);
+              setActiveSection('home');
+            }}
             onPlayStream={handlePlayStream}
           />
         )}

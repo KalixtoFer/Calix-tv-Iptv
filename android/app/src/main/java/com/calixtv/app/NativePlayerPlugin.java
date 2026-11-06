@@ -189,4 +189,62 @@ public class NativePlayerPlugin extends Plugin {
             context.startActivity(browserIntent);
         } catch (Exception ignored) {}
     }
+
+    @PluginMethod
+    public void requestNotificationPermission(PluginCall call) {
+        Context ctx = getContext();
+        boolean granted = true;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            granted = ctx.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) == android.content.pm.PackageManager.PERMISSION_GRANTED;
+            if (!granted && getActivity() != null) {
+                getActivity().requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 101);
+            }
+        }
+        JSObject ret = new JSObject();
+        ret.put("granted", granted);
+        call.resolve(ret);
+    }
+
+    @PluginMethod
+    public void showNotification(PluginCall call) {
+        String title = call.getString("title", "Actualización Calix TV");
+        String message = call.getString("message", "Nueva versión disponible para instalar.");
+        String downloadUrl = call.getString("url", "");
+
+        Context ctx = getContext();
+        try {
+            android.app.NotificationManager nm = (android.app.NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (nm != null) {
+                android.app.Notification.Builder builder;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    builder = new android.app.Notification.Builder(ctx, "calix_tv_updates");
+                } else {
+                    builder = new android.app.Notification.Builder(ctx);
+                }
+
+                builder.setContentTitle(title)
+                       .setContentText(message)
+                       .setSmallIcon(android.R.drawable.stat_sys_download_done)
+                       .setAutoCancel(true);
+
+                if (downloadUrl != null && !downloadUrl.isEmpty()) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl));
+                    android.app.PendingIntent pi = android.app.PendingIntent.getActivity(
+                        ctx,
+                        0,
+                        intent,
+                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? android.app.PendingIntent.FLAG_IMMUTABLE : 0
+                    );
+                    builder.setContentIntent(pi);
+                }
+
+                nm.notify(1001, builder.build());
+            }
+            JSObject ret = new JSObject();
+            ret.put("success", true);
+            call.resolve(ret);
+        } catch (Exception e) {
+            call.reject("Error mostrando notificación: " + e.getMessage());
+        }
+    }
 }

@@ -18,6 +18,8 @@ import { iptvApi } from '../services/iptvApi';
 
 interface SeriesScreenProps {
   username: string;
+  initialSeries?: SeriesItem | null;
+  onClearInitialSeries?: () => void;
   onBack: () => void;
   onPlayStream: (stream: {
     streamId: string | number;
@@ -31,6 +33,8 @@ interface SeriesScreenProps {
 
 export const SeriesScreen: React.FC<SeriesScreenProps> = ({
   username,
+  initialSeries,
+  onClearInitialSeries,
   onBack,
   onPlayStream,
 }) => {
@@ -107,6 +111,13 @@ export const SeriesScreen: React.FC<SeriesScreenProps> = ({
       setIsLoadingDetails(false);
     }
   };
+
+  // If a specific series was selected from the main Home menu, open its detail modal immediately
+  useEffect(() => {
+    if (initialSeries) {
+      handleOpenSeries(initialSeries);
+    }
+  }, [initialSeries]);
 
   const filteredSeries = useMemo(() => {
     return seriesList.filter((s) => {
@@ -335,7 +346,11 @@ export const SeriesScreen: React.FC<SeriesScreenProps> = ({
               </div>
 
               <button
-                onClick={() => setSelectedSeries(null)}
+                onClick={() => {
+                  setSelectedSeries(null);
+                  setSeriesDetails(null);
+                  onClearInitialSeries?.();
+                }}
                 className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-zinc-300 hover:text-white transition cursor-pointer"
               >
                 <X className="w-5 h-5" />

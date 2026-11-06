@@ -39,6 +39,7 @@ interface HomeScreenProps {
   onOpenSettings?: () => void;
   onOpenSpeedTest?: () => void;
   onOpenFavorites?: () => void;
+  onOpenSeriesDetail?: (series: any) => void;
   onLogout?: () => void;
 }
 
@@ -52,6 +53,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onOpenSettings,
   onOpenSpeedTest,
   onOpenFavorites,
+  onOpenSeriesDetail,
   onLogout,
 }) => {
   const [timeStr, setTimeStr] = useState<string>('13:45');
@@ -335,7 +337,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               recentSeries.map((series) => (
                 <div
                   key={series.series_id}
-                  onClick={() => onNavigate('series')}
+                  onClick={() => (onOpenSeriesDetail ? onOpenSeriesDetail(series) : onNavigate('series'))}
                   className="w-20 sm:w-22 shrink-0 aspect-[2/3] rounded-lg overflow-hidden border border-zinc-800 bg-zinc-900 relative shadow-sm active:scale-95 transition cursor-pointer group"
                 >
                   <img
@@ -539,7 +541,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               recentSeries.slice(0, 10).map((series) => (
                 <div
                   key={series.series_id}
-                  onClick={() => onNavigate('series')}
+                  onClick={() => (onOpenSeriesDetail ? onOpenSeriesDetail(series) : onNavigate('series'))}
                   className="tv-focusable group relative h-28 sm:h-32 aspect-[2/3] shrink-0 rounded-xl overflow-hidden border border-zinc-800/80 hover:border-purple-400 bg-zinc-900 transition-all duration-300 shadow-md cursor-pointer flex flex-col"
                 >
                   <img

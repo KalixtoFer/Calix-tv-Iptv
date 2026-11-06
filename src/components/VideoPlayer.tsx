@@ -254,10 +254,12 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           }
         }
         if (autoPlay) {
+          video.playbackRate = 1.0;
           video.play().catch(() => {
             // Autoplay policies require muted playback
             video.muted = true;
             setIsMuted(true);
+            video.playbackRate = 1.0;
             video.play().catch(() => {});
           });
         }
@@ -314,10 +316,12 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       // Stream directo (.mp4, .ts, etc.)
       video.src = url;
       video.load();
+      video.playbackRate = 1.0;
       if (autoPlay) {
         video.play().catch(() => {
           video.muted = true;
           setIsMuted(true);
+          video.playbackRate = 1.0;
           video.play().catch(() => {});
         });
       }

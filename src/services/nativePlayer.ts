@@ -17,6 +17,8 @@ export interface NativePlayResult {
 export interface NativePlayerPlugin {
   play(options: NativePlayOptions): Promise<NativePlayResult>;
   installApk?(options: { url: string; filename?: string }): Promise<{ success: boolean; downloadId?: number; message?: string }>;
+  requestNotificationPermission?(): Promise<{ granted: boolean }>;
+  showNotification?(options: { title: string; message: string; url?: string }): Promise<{ success: boolean }>;
 }
 
 export const NativePlayer = registerPlugin<NativePlayerPlugin>('NativePlayer');
