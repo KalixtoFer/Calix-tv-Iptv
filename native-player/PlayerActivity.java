@@ -81,12 +81,20 @@ public class PlayerActivity extends Activity {
         setContentView(root);
 
         ArrayList<String> args = new ArrayList<>();
-        args.add("--network-caching=6000");
+        // Cache optimizado para películas y series pesadas (4K y FHD)
+        args.add("--network-caching=5000");
+        args.add("--file-caching=3000");
+        args.add("--live-caching=3000");
         args.add("--http-reconnect");
         args.add("--http-continuous");
-        args.add("--clock-jitter=0");
-        args.add("--drop-late-frames");
-        args.add("--skip-frames");
+        // Aceleración por hardware completa de Android (MediaCodec NDK & JNI)
+        args.add("--avcodec-hw=any");
+        args.add("--codec=mediacodec_ndk,mediacodec_jni,all");
+        // Decodificación multihilo automática con todos los núcleos de la CPU
+        args.add("--avcodec-threads=0");
+        // Evitar descarte forzado de frames para eliminar tirones y congelamientos
+        args.add("--no-drop-late-frames");
+        args.add("--no-skip-frames");
         libVLC = new LibVLC(this, args);
         player = new MediaPlayer(libVLC);
         player.setEventListener(listener);
@@ -132,7 +140,7 @@ public class PlayerActivity extends Activity {
         setBuffering(true);
         player.attachViews(videoLayout, null, true, false);
         Media media = new Media(libVLC, Uri.parse(url));
-        media.setHWDecoderEnabled(false, false);
+        media.setHWDecoderEnabled(true, false);
         player.setMedia(media);
         media.release();
         player.play();
@@ -330,8 +338,26 @@ public class PlayerActivity extends Activity {
         titleView.setTextColor(Color.WHITE);
         titleView.setTextSize(16);
         titleView.setSingleLine(true);
-        titleView.setPadding(dp(12), 0, 0, 0);
+        titleView.setPadding(dp(12), 0, dp(12), 0);
+        LinearLayout.LayoutParams titleLp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f);
+        titleView.setLayoutParams(titleLp);
         topBar.addView(titleView);
+
+        TextView extBtn = makeButton("Reproductor externo", new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setDataAndType(Uri.parse(url), "video/*");
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(Intent.createChooser(intent, "Abrir con reproductor de video..."));
+                } catch (Exception ex) {
+                    Toast.makeText(PlayerActivity.this, "No se encontró otro reproductor externo", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        topBar.addView(extBtn);
+
         root.addView(topBar, new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.TOP));
 
