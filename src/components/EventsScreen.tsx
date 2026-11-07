@@ -1,15 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Sparkles,
-  Search,
-  ArrowLeft,
-  Tv,
-  Clapperboard,
-  Play,
-  Flame,
-} from 'lucide-react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { ArrowLeft, Search, Star, Tv, Play, X, RefreshCw, BarChart3 } from 'lucide-react';
 import { LiveStream, SeriesItem } from '../types/iptv';
 import { iptvApi } from '../services/iptvApi';
+import {
+  SportEvent,
+  SportTeam,
+  StatRow,
+  LEAGUES,
+  fetchAllEvents,
+  fetchStats,
+  buildChannelIndex,
+  findChannels,
+  norm,
+} from '../services/sportsApi';
 
 interface EventsScreenProps {
   username: string;
@@ -24,260 +27,458 @@ interface EventsScreenProps {
   }) => void;
 }
 
-// Utility to adjust event schedules from Ecuador (UTC-5) to Argentina (UTC-3) [+2 hours]
+// Ajusta horarios escritos en nombres de canales (Ecuador UTC-5 -> Argentina UTC-3, +2 h)
 const adjustTime = (text: string | undefined): string => {
   if (!text) return '';
-  
-  // 1. Match HH:MM, HH.MM, or HHhMM (e.g. 18:30, 18.30, 18h30, 08:15)
   let result = text.replace(/\b([0-1]?\d|2[0-3])[:.hH]([0-5]\d)\b/g, (match, hh, mm) => {
-    let h = parseInt(hh, 10);
-    h = (h + 2) % 24;
+    const h = (parseInt(hh, 10) + 2) % 24;
     const sep = match.includes(':') ? ':' : match.includes('.') ? '.' : 'h';
     return `${h.toString().padStart(2, '0')}${sep}${mm}`;
   });
-
-  // 2. Match isolated hours followed by hs / hrs / h (e.g. 18hs, 18 hs, 18hrs)
-  result = result.replace(/\b([0-1]?\d|2[0-3])\s*(hs|hrs|h)\b/gi, (match, hh, unit) => {
-    let h = parseInt(hh, 10);
-    h = (h + 2) % 24;
+  result = result.replace(/\b([0-1]?\d|2[0-3])\s*(hs|hrs|h)\b/gi, (_m, hh, unit) => {
+    const h = (parseInt(hh, 10) + 2) % 24;
     return `${h.toString().padStart(2, '0')} ${unit}`;
   });
-
   return result;
 };
 
-export const EventsScreen: React.FC<EventsScreenProps> = ({
-  username,
-  onBack,
-  onPlayStream,
-}) => {
-  const [activeTab, setActiveTab] = useState<'live' | 'series'>('live');
-  const [eventsLiveStreams, setEventsLiveStreams] = useState<LiveStream[]>([]);
-  const [eventsVod, setEventsVod] = useState<SeriesItem[]>([]);
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+const FAV_KEY = 'calixtv_fav_teams';
+const loadFavs = (): string[] => {
+  try {
+    return JSON.parse(localStorage.getItem(FAV_KEY) || '[]');
+  } catch {
+    return [];
+  }
+};
 
+const timeLabel = (ts: number) => {
+  if (!ts) return '';
+  const d = new Date(ts);
+  const hm = d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
+  const same = d.toDateString() === new Date().toDateString();
+  return same ? hm : `${d.toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric' })} ${hm}`;
+};
+
+type Tab = 'live' | 'today' | 'mine' | 'channels';
+
+/* ------------------------------ Tarjeta de partido ------------------------------ */
+interface CardProps {
+  ev: SportEvent;
+  channels: any[];
+  hero?: boolean;
+  favs: string[];
+  onFav: (t: SportTeam, sport: string) => void;
+  onPlayChannel: (ch: any) => void;
+  onStats: (ev: SportEvent) => void;
+  onFind: (ev: SportEvent) => void;
+}
+
+const TeamRow: React.FC<{ t: SportTeam; ev: SportEvent; big?: boolean; fav: boolean; onFav: () => void }> = ({ t, ev, big, fav, onFav }) => (
+  <div className="flex items-center gap-3">
+    {t.logo ? (
+      <img src={t.logo} alt="" loading="lazy" className={big ? 'w-9 h-9 object-contain' : 'w-7 h-7 object-contain'} />
+    ) : (
+      <span className={`${big ? 'w-9 h-9' : 'w-7 h-7'} rounded-full bg-[#1c2128]`} />
+    )}
+    <span className={`flex-1 min-w-0 truncate font-bold ${big ? 'text-lg' : 'text-[15px]'} text-[#f2f5f9]`}>{t.name}</span>
+    {t.record && ev.sport === 'soccer' && <span className="text-[11px] font-mono text-[#8a94a3]">{t.record}</span>}
+    <button
+      type="button"
+      aria-label={fav ? 'Dejar de seguir' : 'Seguir equipo'}
+      onClick={(e) => {
+        e.stopPropagation();
+        onFav();
+      }}
+      className="tv-focusable p-1 rounded-lg cursor-pointer"
+    >
+      <Star className={`w-4 h-4 ${fav ? 'fill-[#00c2e0] text-[#00c2e0]' : 'text-[#4a5568]'}`} />
+    </button>
+    {ev.state !== 'pre' && <span className={`${big ? 'text-3xl' : 'text-2xl'} font-extrabold tabular-nums w-8 text-right text-[#f2f5f9]`}>{t.score}</span>}
+  </div>
+);
+
+const EventCard: React.FC<CardProps> = ({ ev, channels, hero, favs, onFav, onPlayChannel, onStats, onFind }) => {
+  const live = ev.state === 'in';
+  const isFav = (t: SportTeam) => favs.includes(`${ev.sport}:${t.id}`);
+  return (
+    <div
+      onClick={() => (channels[0] ? onPlayChannel(channels[0]) : onFind(ev))}
+      className={`tv-focusable rounded-2xl border p-3.5 space-y-3 cursor-pointer transition active:scale-[0.99] ${
+        hero
+          ? 'bg-gradient-to-br from-[#00c2e0]/30 via-[#1f5fff]/25 to-[#0b0d11] border-[#00c2e0]/40 shadow-[0_0_30px_rgba(0,194,224,0.15)]'
+          : `bg-[#111418] border-[#1c2128] ${live ? 'border-l-4 border-l-[#00c2e0]' : ''}`
+      }`}
+    >
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-semibold text-[#8a94a3] uppercase tracking-wide">{ev.leagueName}</span>
+        {live ? (
+          <span className="flex items-center gap-2">
+            <span className="px-2 py-0.5 rounded-md bg-[#ef4444] text-white text-[11px] font-extrabold">EN VIVO</span>
+            <span className="text-sm font-bold text-[#f2f5f9]">{ev.statusText}</span>
+          </span>
+        ) : ev.state === 'post' ? (
+          <span className="text-xs font-bold text-[#8a94a3] uppercase">Final</span>
+        ) : (
+          <span className="text-sm font-bold text-[#00c2e0]">{ev.statusText || timeLabel(ev.start)}</span>
+        )}
+      </div>
+
+      <div className="space-y-2.5">
+        <TeamRow t={ev.home} ev={ev} big={hero} fav={isFav(ev.home)} onFav={() => onFav(ev.home, ev.sport)} />
+        <TeamRow t={ev.away} ev={ev} big={hero} fav={isFav(ev.away)} onFav={() => onFav(ev.away, ev.sport)} />
+      </div>
+
+      <div className="flex items-center justify-between gap-3 pt-1">
+        <div className="flex-1 min-w-0 flex flex-wrap items-center gap-1.5">
+          {channels.length > 0 ? (
+            channels.map((ch) => (
+              <button
+                key={ch.stream_id}
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onPlayChannel(ch);
+                }}
+                className="tv-focusable flex items-center gap-1.5 max-w-full px-2.5 py-1 rounded-lg bg-[#00c2e0]/10 border border-[#00c2e0]/30 text-[#7fe3f2] text-xs font-semibold cursor-pointer"
+              >
+                <Tv className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">{adjustTime(ch.name)}</span>
+              </button>
+            ))
+          ) : (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onFind(ev);
+              }}
+              className="tv-focusable flex items-center gap-1.5 text-xs text-[#8a94a3] cursor-pointer"
+            >
+              <Search className="w-3.5 h-3.5" />
+              <span>Sin canal asignado · buscar</span>
+            </button>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onStats(ev);
+          }}
+          className="tv-focusable shrink-0 text-xs font-bold text-[#00c2e0] cursor-pointer"
+        >
+          Estadísticas
+        </button>
+      </div>
+    </div>
+  );
+};
+
+/* --------------------------------- Pantalla --------------------------------- */
+export const EventsScreen: React.FC<EventsScreenProps> = ({ username, onBack, onPlayStream }) => {
+  const [tab, setTab] = useState<Tab>('live');
+  const [events, setEvents] = useState<SportEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [allFailed, setAllFailed] = useState(false);
+  const [updated, setUpdated] = useState(0);
+  const [favs, setFavs] = useState<string[]>(loadFavs);
+  const [allLive, setAllLive] = useState<LiveStream[]>([]);
+  const [sportsLive, setSportsLive] = useState<LiveStream[]>([]);
+  const [replays, setReplays] = useState<SeriesItem[]>([]);
+  const [query, setQuery] = useState('');
+  const [statsEv, setStatsEv] = useState<SportEvent | null>(null);
+  const [stats, setStats] = useState<StatRow[] | null>(null);
+
+  const loadScores = useCallback(async () => {
+    const r = await fetchAllEvents();
+    setEvents(r.events);
+    setAllFailed(r.failed === LEAGUES.length);
+    setUpdated(Date.now());
+  }, []);
+
+  // Marcadores: carga inicial + actualización cada 60 s
   useEffect(() => {
-    let isMounted = true;
-    async function loadEventsData() {
-      setIsLoading(true);
+    let alive = true;
+    loadScores().finally(() => alive && setLoading(false));
+    const t = setInterval(loadScores, 60000);
+    return () => {
+      alive = false;
+      clearInterval(t);
+    };
+  }, [loadScores]);
+
+  // Canales del servidor (para relacionar partidos) + lista de canales/repeticiones de eventos
+  useEffect(() => {
+    let alive = true;
+    (async () => {
       try {
-        const [liveCats, seriesCats] = await Promise.all([
+        const [liveCats, seriesCats, all] = await Promise.all([
           iptvApi.getCategories('live', username),
           iptvApi.getCategories('series', username),
+          iptvApi.getStreams('live', username),
         ]);
-
-        const keywords = ['deporte', 'event', 'fútbol', 'conmebol', 'liga', 'champions', 'boxing', 'ufc', 'f1', 'motogp', 'soccer', 'sports'];
-        
-        const eventLiveCat = liveCats.find((c) => 
-          keywords.some(k => c.category_name.toLowerCase().includes(k))
-        ) || liveCats[0];
-        
-        const eventSeriesCat = seriesCats.find((c) => 
-          keywords.some(k => c.category_name.toLowerCase().includes(k))
-        ) || seriesCats[0];
-
-        const [liveList, seriesList] = await Promise.all([
-          eventLiveCat ? iptvApi.getStreams('live', username, eventLiveCat.category_id) : Promise.resolve([]),
-          eventSeriesCat ? iptvApi.getStreams('series', username, eventSeriesCat.category_id) : Promise.resolve([]),
+        const kw = ['deporte', 'event', 'fútbol', 'futbol', 'conmebol', 'liga', 'champions', 'boxing', 'ufc', 'f1', 'motogp', 'soccer', 'sports'];
+        const has = (c: any) => kw.some((k) => String(c.category_name).toLowerCase().includes(k));
+        const lc = liveCats.find(has) || liveCats[0];
+        const sc = seriesCats.find(has) || seriesCats[0];
+        const [live, rep] = await Promise.all([
+          lc ? iptvApi.getStreams('live', username, lc.category_id) : Promise.resolve([]),
+          sc ? iptvApi.getStreams('series', username, sc.category_id) : Promise.resolve([]),
         ]);
-
-        if (isMounted) {
-          setEventsLiveStreams(liveList);
-          setEventsVod(seriesList);
+        if (alive) {
+          setAllLive(all);
+          setSportsLive(live);
+          setReplays(rep);
         }
-      } catch (err) {
-        console.error('Error loading Events:', err);
-      } finally {
-        if (isMounted) setIsLoading(false);
+      } catch (e) {
+        console.warn('Eventos: no se pudieron cargar los canales', e);
       }
-    }
-
-    loadEventsData();
+    })();
     return () => {
-      isMounted = false;
+      alive = false;
     };
   }, [username]);
 
-  const filteredLive = eventsLiveStreams.filter(
-    (s) => !searchQuery || s.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const index = useMemo(() => buildChannelIndex(allLive.length ? allLive : sportsLive), [allLive, sportsLive]);
+  const channelsFor = useMemo(() => {
+    const m: Record<string, any[]> = {};
+    if (index.length) for (const e of events) if (e.state !== 'post') m[e.id] = findChannels(e, index);
+    return m;
+  }, [events, index]);
+
+  const toggleFav = (t: SportTeam, sport: string) => {
+    const key = `${sport}:${t.id}`;
+    setFavs((prev) => {
+      const next = prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key];
+      try {
+        localStorage.setItem(FAV_KEY, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  };
+
+  const playChannel = (ch: any) =>
+    onPlayStream({
+      streamId: ch.stream_id,
+      title: adjustTime(ch.name),
+      url: ch.stream_url || iptvApi.buildStreamUrl('live', ch.stream_id, 'm3u8', username),
+      type: 'live',
+      poster: ch.stream_icon,
+      category: 'Eventos',
+    });
+
+  const openStats = (ev: SportEvent) => {
+    setStatsEv(ev);
+    setStats(null);
+    fetchStats(ev).then(setStats).catch(() => setStats([]));
+  };
+
+  const findChannel = (ev: SportEvent) => {
+    setQuery(ev.home.short || ev.home.name);
+    setTab('channels');
+  };
+
+  const liveEvents = events.filter((e) => e.state === 'in');
+  const mineEvents = events.filter((e) => favs.includes(`${e.sport}:${e.home.id}`) || favs.includes(`${e.sport}:${e.away.id}`));
+  const card = (ev: SportEvent, hero = false) => (
+    <EventCard key={ev.id} ev={ev} hero={hero} channels={channelsFor[ev.id] || []} favs={favs} onFav={toggleFav} onPlayChannel={playChannel} onStats={openStats} onFind={findChannel} />
   );
 
-  const filteredVod = eventsVod.filter(
-    (s) => !searchQuery || s.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const q = norm(query);
+  const channelResults = q ? allLive.filter((s) => norm(s.name).includes(q)).slice(0, 60) : sportsLive;
+  const replayResults = q ? replays.filter((s) => norm(s.name).includes(q)) : replays;
+
+  const tabs: { id: Tab; label: string; count?: number }[] = [
+    { id: 'live', label: 'En vivo ahora', count: liveEvents.length },
+    { id: 'today', label: 'Hoy' },
+    { id: 'mine', label: 'Mis equipos' },
+    { id: 'channels', label: 'Canales' },
+  ];
+
+  const empty = (text: string) => <p className="text-center text-sm text-[#8a94a3] py-16">{text}</p>;
+  const grid = 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3';
 
   return (
-    <div className="flex-1 flex flex-col h-[calc(100vh-65px)] overflow-hidden bg-[#08090d] text-zinc-100 select-none">
-      {/* Top Header */}
-      <div className="px-4 py-2.5 bg-zinc-950/90 border-b border-zinc-800 flex flex-wrap items-center justify-between gap-3">
+    <div className="flex-1 flex flex-col h-[calc(100vh-65px)] overflow-hidden bg-[#07090c] text-[#f2f5f9] select-none">
+      <div className="px-4 pt-3 pb-0 border-b border-[#1c2128]">
         <div className="flex items-center gap-3">
-          <button
-            onClick={onBack}
-            className="tv-focusable p-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white rounded-xl border border-zinc-800 transition flex items-center gap-1.5 text-xs font-semibold cursor-pointer"
-          >
+          <button onClick={onBack} className="tv-focusable hidden md:flex p-2 rounded-xl bg-[#111418] border border-[#1c2128] text-[#8a94a3] cursor-pointer">
             <ArrowLeft className="w-4 h-4" />
-            <span>Volver</span>
           </button>
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 bg-rose-500/20 text-rose-400 rounded-lg">
-              <Sparkles className="w-4 h-4" />
-            </div>
-            <h2 className="text-sm sm:text-base font-extrabold tracking-wide uppercase">
-              Eventos Deportivos del Día
-            </h2>
-            <span className="text-xs font-mono text-rose-400 font-bold bg-rose-950 px-2 py-0.5 rounded border border-rose-800">
-              AGENDA VIP
-            </span>
-          </div>
+          <h2 className="text-2xl font-extrabold">Deportes</h2>
+          <button
+            onClick={() => loadScores()}
+            aria-label="Actualizar"
+            className="tv-focusable ml-auto p-2 rounded-xl bg-[#111418] border border-[#1c2128] text-[#8a94a3] cursor-pointer"
+          >
+            <RefreshCw className="w-4 h-4" />
+          </button>
         </div>
-
-        {/* Tab Switcher & Search */}
-        <div className="flex items-center gap-3 flex-1 max-w-md justify-end">
-          <div className="flex items-center p-1 bg-zinc-900 border border-zinc-800 rounded-xl">
+        <div className="flex gap-5 overflow-x-auto mt-2">
+          {tabs.map((t) => (
             <button
-              onClick={() => setActiveTab('live')}
-              className={`tv-focusable px-3 py-1 text-xs font-bold rounded-lg transition cursor-pointer ${
-                activeTab === 'live'
-                  ? 'bg-rose-600 text-white shadow-md'
-                  : 'text-zinc-400 hover:text-white'
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              className={`tv-focusable shrink-0 pb-2.5 text-[15px] font-bold border-b-[3px] cursor-pointer transition ${
+                tab === t.id ? 'text-[#f2f5f9] border-[#00c2e0]' : 'text-[#8a94a3] border-transparent'
               }`}
             >
-              En Vivo
+              {t.label}
+              {t.count ? <span className="ml-1.5 text-[#ef4444]">{t.count}</span> : null}
             </button>
-            <button
-              onClick={() => setActiveTab('series')}
-              className={`tv-focusable px-3 py-1 text-xs font-bold rounded-lg transition cursor-pointer ${
-                activeTab === 'series'
-                  ? 'bg-rose-600 text-white shadow-md'
-                  : 'text-zinc-400 hover:text-white'
-              }`}
-            >
-              Grabaciones / Replays
-            </button>
-          </div>
-
-          <div className="relative">
-            <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Buscar evento..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-36 sm:w-48 bg-zinc-900 border border-zinc-700 text-xs pl-9 pr-3 py-1.5 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-rose-400 transition"
-            />
-          </div>
+          ))}
         </div>
       </div>
 
-      {/* Events Content Area */}
-      <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center h-64 text-zinc-400 text-sm">
-            <div className="w-10 h-10 border-2 border-rose-500 border-t-transparent rounded-full animate-spin mb-3" />
-            <span>Sincronizando agenda deportiva...</span>
-          </div>
-        ) : activeTab === 'live' ? (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-rose-400 uppercase tracking-wider flex items-center gap-2">
-                <Tv className="w-4 h-4" /> Partidos y Eventos En Directo
-              </h3>
-            </div>
+      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3">
+        {updated > 0 && tab !== 'channels' && (
+          <p className="text-[11px] text-[#8a94a3] px-1">
+            Marcadores actualizados {new Date(updated).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false })} · se refrescan solos cada minuto
+          </p>
+        )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filteredLive.map((stream) => (
-                <div
-                  key={stream.stream_id}
-                  onClick={() =>
-                    onPlayStream({
-                      streamId: stream.stream_id,
-                      title: adjustTime(stream.name),
-                      url:
-                        stream.stream_url ||
-                        iptvApi.buildStreamUrl('live', stream.stream_id, 'm3u8', username),
-                      type: 'live',
-                      poster: stream.stream_icon,
-                    })
-                  }
-                  className="tv-focusable group bg-zinc-900/70 border border-zinc-800 rounded-2xl overflow-hidden hover:border-rose-500 transition cursor-pointer shadow-lg p-3 space-y-3"
-                >
-                  <div className="aspect-video w-full rounded-xl bg-zinc-950 overflow-hidden relative border border-zinc-800/50">
-                    <img
-                      src={stream.stream_icon}
-                      alt={stream.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                    />
-                    <div className="absolute top-2 left-2 px-2 py-0.5 bg-rose-600 text-white font-mono text-[10px] font-extrabold rounded shadow-lg">
-                      LIVE VIP
-                    </div>
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <div className="p-3 bg-rose-600 text-white rounded-full shadow-xl">
-                        <Play className="w-6 h-6 fill-current ml-0.5" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="text-sm font-black text-white truncate group-hover:text-rose-400 transition-colors">
-                      {adjustTime(stream.name)}
-                    </h4>
-                    <p className="text-[11px] text-zinc-400 font-bold truncate mt-0.5 flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      {adjustTime(stream.current_program) || 'Señal deportiva estable'}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
+        {loading && tab !== 'channels' ? (
+          <div className="flex flex-col items-center py-20 text-[#8a94a3] text-sm">
+            <div className="w-9 h-9 border-2 border-[#00c2e0] border-t-transparent rounded-full animate-spin mb-3" />
+            Cargando partidos…
           </div>
+        ) : allFailed && tab !== 'channels' ? (
+          empty('No se pudo cargar la agenda deportiva. Revisá tu conexión y tocá actualizar.')
+        ) : tab === 'live' ? (
+          liveEvents.length === 0 ? (
+            empty('No hay partidos en vivo en este momento. Mirá la pestaña Hoy.')
+          ) : (
+            <>
+              {card(liveEvents.find((e) => (channelsFor[e.id] || []).length) || liveEvents[0], true)}
+              <div className="flex items-center gap-2 pt-1 text-sm font-bold">
+                <span className="w-2 h-2 rounded-full bg-[#ef4444]" /> En vivo ahora
+              </div>
+              <div className={grid}>{liveEvents.map((e) => card(e))}</div>
+            </>
+          )
+        ) : tab === 'today' ? (
+          events.length === 0 ? (
+            empty('No hay partidos cargados para hoy.')
+          ) : (
+            (['in', 'pre', 'post'] as const).map((s) => {
+              const list = events.filter((e) => e.state === s);
+              if (!list.length) return null;
+              return (
+                <section key={s} className="space-y-2">
+                  <h3 className="text-sm font-bold text-[#8a94a3] uppercase tracking-wide pt-1">{s === 'in' ? 'En vivo' : s === 'pre' ? 'Próximos' : 'Finalizados'}</h3>
+                  <div className={grid}>{list.map((e) => card(e))}</div>
+                </section>
+              );
+            })
+          )
+        ) : tab === 'mine' ? (
+          favs.length === 0 ? (
+            empty('Tocá la estrella al lado de un equipo para seguirlo. Sus partidos aparecen acá.')
+          ) : mineEvents.length === 0 ? (
+            empty('Tus equipos no juegan hoy.')
+          ) : (
+            <div className={grid}>{mineEvents.map((e) => card(e))}</div>
+          )
         ) : (
-          <div className="space-y-4">
-            <h3 className="text-sm font-bold text-rose-400 uppercase tracking-wider flex items-center gap-2">
-              <Clapperboard className="w-4 h-4" /> Repeticiones y Resúmenes
-            </h3>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {filteredVod.map((series) => (
-                <div
-                  key={series.series_id}
-                  onClick={() =>
-                    onPlayStream({
-                      streamId: series.series_id,
-                      title: `${series.name}`,
-                      url: iptvApi.buildStreamUrl('episode', series.series_id, 'mp4', username),
-                      type: 'episode',
-                      poster: series.cover,
-                    })
-                  }
-                  className="tv-focusable group bg-zinc-900/70 border border-zinc-800 rounded-2xl overflow-hidden hover:border-rose-500 transition cursor-pointer shadow-lg"
-                >
-                  <div className="aspect-[2/3] w-full bg-zinc-950 overflow-hidden relative">
-                    <img
-                      src={series.cover}
-                      alt={series.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                    />
-                    <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-black/80 text-rose-400 font-mono text-[11px] font-bold rounded flex items-center gap-0.5 border border-rose-500/40">
-                      <Flame className="w-3 h-3 fill-rose-500" />
-                      HD
-                    </div>
-                  </div>
-
-                  <div className="p-3">
-                    <h4 className="text-xs sm:text-sm font-black text-white truncate group-hover:text-rose-400 transition-colors">
-                      {series.name}
-                    </h4>
-                    <p className="text-[10px] text-zinc-500 font-bold truncate mt-0.5">
-                      {series.genre || 'Fútbol, Sports'}
-                    </p>
-                  </div>
-                </div>
-              ))}
+          <>
+            <div className="relative">
+              <Search className="w-4 h-4 text-[#8a94a3] absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Buscar canal o evento…"
+                className="w-full bg-[#111418] border border-[#1c2128] rounded-xl pl-9 pr-9 py-2.5 text-sm placeholder-[#4a5568] focus:outline-none focus:border-[#00c2e0]"
+              />
+              {query && (
+                <button onClick={() => setQuery('')} className="tv-focusable absolute right-2 top-1/2 -translate-y-1/2 p-1 cursor-pointer" aria-label="Borrar">
+                  <X className="w-4 h-4 text-[#8a94a3]" />
+                </button>
+              )}
             </div>
-          </div>
+            {channelResults.length === 0 ? (
+              empty('No se encontraron canales.')
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2.5">
+                {channelResults.map((s) => (
+                  <button
+                    key={s.stream_id}
+                    onClick={() => playChannel(s)}
+                    className="tv-focusable flex items-center gap-3 p-2.5 rounded-xl bg-[#111418] border border-[#1c2128] text-left cursor-pointer hover:border-[#00c2e0]"
+                  >
+                    {s.stream_icon ? <img src={s.stream_icon} alt="" loading="lazy" className="w-10 h-10 object-contain rounded-lg bg-black" /> : <span className="w-10 h-10 rounded-lg bg-[#1c2128]" />}
+                    <span className="flex-1 min-w-0 text-sm font-semibold line-clamp-2">{adjustTime(s.name)}</span>
+                    <Play className="w-4 h-4 text-[#00c2e0] shrink-0" />
+                  </button>
+                ))}
+              </div>
+            )}
+            {replayResults.length > 0 && (
+              <>
+                <h3 className="text-sm font-bold text-[#8a94a3] uppercase tracking-wide pt-3">Repeticiones y resúmenes</h3>
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 xl:grid-cols-7 gap-2">
+                  {replayResults.map((r) => (
+                    <button
+                      key={r.series_id}
+                      onClick={() =>
+                        onPlayStream({
+                          streamId: r.series_id,
+                          title: `${r.name}`,
+                          url: iptvApi.buildStreamUrl('episode', r.series_id, 'mp4', username),
+                          type: 'episode',
+                          poster: r.cover,
+                        })
+                      }
+                      className="tv-focusable rounded-xl overflow-hidden bg-[#111418] border border-[#1c2128] text-left cursor-pointer hover:border-[#00c2e0]"
+                    >
+                      <div className="aspect-[2/3] bg-black">{r.cover && <img src={r.cover} alt={r.name} loading="lazy" className="w-full h-full object-cover" />}</div>
+                      <p className="p-1.5 text-[11px] leading-tight font-bold line-clamp-2">{r.name}</p>
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </>
         )}
       </div>
+
+      {statsEv && (
+        <div className="fixed inset-0 z-40 bg-black/70 flex items-end md:items-center justify-center" onClick={() => setStatsEv(null)}>
+          <div className="w-full md:max-w-md bg-[#111418] border border-[#1c2128] rounded-t-3xl md:rounded-3xl p-5 max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <span className="flex items-center gap-2 text-sm font-bold text-[#00c2e0]">
+                <BarChart3 className="w-4 h-4" /> Estadísticas
+              </span>
+              <button onClick={() => setStatsEv(null)} className="tv-focusable p-1 cursor-pointer" aria-label="Cerrar">
+                <X className="w-5 h-5 text-[#8a94a3]" />
+              </button>
+            </div>
+            <div className="flex items-center justify-between gap-2 mb-1 text-center">
+              <span className="flex-1 font-bold text-sm">{statsEv.home.name}</span>
+              <span className="text-2xl font-extrabold tabular-nums">{statsEv.state === 'pre' ? 'vs' : `${statsEv.home.score} - ${statsEv.away.score}`}</span>
+              <span className="flex-1 font-bold text-sm">{statsEv.away.name}</span>
+            </div>
+            <p className="text-center text-xs text-[#8a94a3] mb-4">
+              {statsEv.leagueName} · {statsEv.state === 'in' ? statsEv.statusText : statsEv.state === 'post' ? 'Final' : timeLabel(statsEv.start)}
+              {statsEv.venue ? ` · ${statsEv.venue}` : ''}
+            </p>
+            {stats === null ? (
+              <p className="text-center text-sm text-[#8a94a3] py-6">Cargando…</p>
+            ) : stats.length === 0 ? (
+              <p className="text-center text-sm text-[#8a94a3] py-6">Todavía no hay estadísticas para este partido.</p>
+            ) : (
+              <div className="space-y-2.5">
+                {stats.map((s) => (
+                  <div key={s.label} className="flex items-center justify-between text-sm">
+                    <span className="w-16 font-bold tabular-nums">{s.home}</span>
+                    <span className="flex-1 text-center text-xs text-[#8a94a3]">{s.label}</span>
+                    <span className="w-16 text-right font-bold tabular-nums">{s.away}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
