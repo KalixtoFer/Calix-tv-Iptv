@@ -309,18 +309,21 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
   // ANDROID TV & PC / WEB VIEW (Diseño cinematográfico 3-columnas)
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#05060a] text-zinc-100 select-none">
-      {/* Main Layout Grid - 3 Columns */}
-      <div className="flex-1 grid grid-cols-[300px_380px_1fr] overflow-hidden p-4 gap-4">
+      {/* Main Layout Grid - 3 Columns (Proporcionado para 1080p y 720p en Android TV) */}
+      <div className="flex-1 grid grid-cols-[230px_310px_1fr] overflow-hidden p-2.5 sm:p-3 gap-2.5 sm:gap-3">
         
         {/* Column 1: CATEGORIAS */}
-        <div className="flex flex-col overflow-hidden bg-[#0c0e18]/80 rounded-[32px] border border-zinc-800/40 shadow-2xl">
-          <div className="p-6 pb-4">
-            <h2 className="text-sm font-black text-indigo-400 uppercase tracking-[3px] opacity-80">
-              CATEGORIAS
+        <div className="flex flex-col overflow-hidden bg-[#0c0e18]/90 rounded-2xl border border-zinc-800/50 shadow-xl">
+          <div className="px-3.5 py-2.5 border-b border-zinc-800/40 flex items-center justify-between">
+            <h2 className="text-[11px] font-black text-indigo-400 uppercase tracking-widest">
+              CATEGORÍAS
             </h2>
+            <span className="text-[10px] text-zinc-500 font-mono font-bold">
+              {categories.length}
+            </span>
           </div>
           
-          <div className="flex-1 overflow-y-auto px-3 pb-6 space-y-2 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-2 space-y-1.5 custom-scrollbar">
             {categories.map((cat) => {
               const isSelected = selectedCategoryId === cat.category_id;
               const isArgentina = cat.category_name.toLowerCase().includes('argentina');
@@ -331,21 +334,21 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
                 <button
                   key={cat.category_id}
                   onClick={() => handleSelectCategory(cat.category_id)}
-                  className={`group w-full text-left px-5 py-4 rounded-2xl transition-all flex items-center justify-between border ${
+                  className={`tv-focusable group w-full text-left px-3 py-2.5 rounded-xl transition-all flex items-center justify-between border cursor-pointer ${
                     isSelected
-                      ? 'bg-indigo-600/20 border-indigo-500 text-white shadow-[0_0_20px_rgba(99,102,241,0.15)]'
+                      ? 'bg-indigo-600/25 border-indigo-500 text-white shadow-md'
                       : 'bg-zinc-900/30 border-transparent text-zinc-400 hover:bg-zinc-800/60 hover:text-white'
                   }`}
                 >
-                  <div className="flex items-center gap-3 overflow-hidden">
-                    <span className="text-xl shrink-0">
+                  <div className="flex items-center gap-2 overflow-hidden">
+                    <span className="text-base shrink-0">
                       {isArgentina ? '🇦🇷' : isDeportes ? '⚽' : isInfantiles ? '🦖' : '📺'}
                     </span>
-                    <span className="text-xs font-black truncate uppercase tracking-wider">
+                    <span className="text-[11px] font-extrabold truncate uppercase tracking-tight">
                       {cat.category_name}
                     </span>
                   </div>
-                  <span className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold font-mono ${
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-bold font-mono shrink-0 ml-1 ${
                     isSelected ? 'bg-indigo-500 text-white' : 'bg-zinc-800/80 text-zinc-500'
                   }`}>
                     {Math.floor(Math.random() * 80) + 15}
@@ -357,58 +360,78 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
         </div>
 
         {/* Column 2: Canales */}
-        <div className="flex flex-col overflow-hidden bg-[#0c0e18]/80 rounded-[32px] border border-zinc-800/40 shadow-2xl">
-          <div className="p-6 pb-4">
-            <div className="text-[11px] font-black text-zinc-500 uppercase tracking-widest mb-1 opacity-60">
-              Vence: {expiryDate}
+        <div className="flex flex-col overflow-hidden bg-[#0c0e18]/90 rounded-2xl border border-zinc-800/50 shadow-xl">
+          <div className="px-3.5 py-2.5 border-b border-zinc-800/40 flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-black text-white tracking-tight">
+                Canales
+              </h2>
+              <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider block">
+                {filteredStreams.length} disponibles • Vence: {expiryDate}
+              </span>
             </div>
-            <h2 className="text-xl font-black text-white tracking-tight">
-              Canales
-            </h2>
+            {selectedStream && (
+              <button
+                onClick={handleOpenFullscreen}
+                className="tv-focusable px-2 py-1 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-[10px] font-black text-white flex items-center gap-1 cursor-pointer transition shadow"
+                title="Ver a Pantalla Completa"
+              >
+                <Maximize2 className="w-3 h-3" />
+                <span>EXPANDIR</span>
+              </button>
+            )}
           </div>
           
-          <div className="flex-1 overflow-y-auto px-3 pb-6 space-y-2.5 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-2 space-y-1.5 custom-scrollbar">
             {isLoading ? (
-              <div className="flex flex-col items-center justify-center h-40 gap-3">
-                <div className="w-8 h-8 border-[3px] border-indigo-500 border-t-transparent rounded-full animate-spin" />
-                <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Cargando señales...</span>
+              <div className="flex flex-col items-center justify-center h-40 gap-2">
+                <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Cargando señales...</span>
               </div>
+            ) : filteredStreams.length === 0 ? (
+              <div className="text-center py-10 text-xs text-zinc-500 italic">No hay canales en esta categoría</div>
             ) : filteredStreams.map((stream, idx) => {
               const isSelected = selectedStream?.stream_id === stream.stream_id;
               return (
                 <button
                   key={stream.stream_id}
                   onClick={() => setSelectedStream(stream)}
-                  className={`w-full text-left p-4 rounded-2xl transition-all flex items-center justify-between border ${
+                  className={`tv-focusable w-full text-left p-2.5 rounded-xl transition-all flex items-center justify-between border cursor-pointer ${
                     isSelected
-                      ? 'bg-indigo-600/10 border-indigo-500 shadow-[0_0_25px_rgba(99,102,241,0.2)]'
-                      : 'bg-zinc-900/30 border-transparent hover:bg-zinc-800/40'
+                      ? 'bg-indigo-600/20 border-indigo-500 shadow-md text-white'
+                      : 'bg-zinc-900/30 border-transparent hover:bg-zinc-800/40 text-zinc-300'
                   }`}
                 >
-                  <div className="flex items-center gap-4 overflow-hidden flex-1">
-                    <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center overflow-hidden shrink-0 border border-zinc-800/40 shadow-md">
+                  <div className="flex items-center gap-2.5 overflow-hidden flex-1">
+                    <div className="w-9 h-9 rounded-lg bg-white flex items-center justify-center overflow-hidden shrink-0 border border-zinc-700/50 shadow-sm">
                       {stream.stream_icon ? (
-                        <img src={stream.stream_icon} className="w-full h-full object-contain p-1" alt="" />
+                        <img
+                          src={stream.stream_icon}
+                          className="w-full h-full object-contain p-0.5"
+                          alt=""
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
                       ) : (
-                        <Tv className="w-6 h-6 text-zinc-300" />
+                        <Tv className="w-4 h-4 text-zinc-600" />
                       )}
                     </div>
                     <div className="overflow-hidden flex-1">
-                      <div className="text-[15px] font-black text-white truncate flex items-center gap-2">
-                        <span className="text-zinc-500 font-mono text-sm">{idx + 1}.</span>
-                        {adjustTime(stream.name)}
+                      <div className="text-xs font-black truncate flex items-center gap-1.5 leading-snug">
+                        <span className="text-zinc-500 font-mono text-[11px] shrink-0">{idx + 1}.</span>
+                        <span className="truncate">{adjustTime(stream.name)}</span>
                       </div>
-                      {isSelected && (
-                        <div className="text-[10px] text-zinc-500 font-bold flex items-center gap-1.5 mt-1">
-                          <Maximize2 className="w-3 h-3" /> [ ] Pantalla grande
-                        </div>
-                      )}
+                      <div className="text-[10px] text-zinc-500 font-semibold truncate mt-0.5">
+                        {stream.current_program ? adjustTime(stream.current_program) : 'En emisión en vivo'}
+                      </div>
                     </div>
                   </div>
                   
                   {isSelected && (
-                    <div className="px-3 py-1.5 bg-indigo-600 rounded-xl text-[10px] font-black text-white shadow-xl shadow-indigo-600/40 tracking-wider">
-                      VIENDO
+                    <div className="px-2 py-1 bg-indigo-600 rounded-md text-[9px] font-black text-white shrink-0 ml-1.5 tracking-wider shadow">
+                      VIVO
                     </div>
                   )}
                 </button>
@@ -418,12 +441,16 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
         </div>
 
         {/* Column 3: Preview & Details */}
-        <div className="flex flex-col overflow-hidden gap-3 h-full">
-          {/* Player Container - Enlarged to flex-1 to occupy maximum available height */}
-          <div className="flex-1 relative bg-black rounded-[28px] overflow-hidden border border-zinc-800/60 shadow-[0_20px_50px_rgba(0,0,0,0.8)] group min-h-0">
+        <div className="flex flex-col overflow-hidden gap-2 h-full">
+          {/* Player Container */}
+          <div className="flex-1 relative bg-black rounded-2xl overflow-hidden border border-zinc-800/60 shadow-2xl group min-h-0">
             {selectedStream ? (
               <VideoPlayer
-                url={iptvApi.buildStreamUrl('live', selectedStream.stream_id, 'm3u8', username)}
+                key={selectedStream.stream_id}
+                url={
+                  selectedStream.stream_url ||
+                  iptvApi.buildStreamUrl('live', selectedStream.stream_id, 'm3u8', username)
+                }
                 title={adjustTime(selectedStream.name)}
                 type="live"
                 autoPlay={true}
@@ -435,57 +462,55 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
               />
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center text-zinc-700 bg-[#08090d]">
-                <Radio className="w-16 h-16 mb-4 opacity-10 animate-pulse" />
-                <span className="text-xs font-black uppercase tracking-[4px] opacity-40">Cargando vista previa...</span>
+                <Radio className="w-12 h-12 mb-2 opacity-20 animate-pulse" />
+                <span className="text-[10px] font-black uppercase tracking-[3px] opacity-40">Seleccioná un canal para previsualizar</span>
               </div>
             )}
           </div>
 
-          {/* Info Card - Reduced to half size/height */}
-          <div className="shrink-0 bg-[#0c0e18]/90 rounded-[24px] border border-zinc-800/40 p-4 sm:p-5 flex flex-col gap-3">
-            <div className="flex items-center justify-between gap-4">
-              <div className="overflow-hidden">
-                <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight truncate leading-tight">
+          {/* Info Card Compact */}
+          <div className="shrink-0 bg-[#0c0e18]/95 rounded-2xl border border-zinc-800/50 p-3 sm:p-3.5 flex flex-col gap-2">
+            <div className="flex items-center justify-between gap-3">
+              <div className="overflow-hidden flex-1">
+                <h1 className="text-base sm:text-lg font-black text-white tracking-tight truncate leading-tight">
                   {adjustTime(selectedStream?.name) || 'Calix TV'}
                 </h1>
-                <div className="flex items-center gap-2.5 text-zinc-400 font-bold mt-1">
-                  <span className="px-2.5 py-0.5 bg-zinc-800/80 rounded-md border border-zinc-700/50 text-[10px] tracking-[1px] text-zinc-200">4K UHD</span>
-                  <span className="px-2.5 py-0.5 bg-zinc-800/80 rounded-md border border-zinc-700/50 text-[10px] tracking-[1px] text-zinc-200">60 FPS</span>
-                  <div className="flex items-center gap-1.5 text-[11px] ml-1">
-                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-zinc-400">Estable • 12ms</span>
+                <div className="flex items-center gap-2 text-zinc-400 font-bold mt-1">
+                  <span className="px-2 py-0.5 bg-zinc-800/90 rounded border border-zinc-700/50 text-[9px] tracking-wider text-zinc-200">HD / FHD</span>
+                  <span className="px-2 py-0.5 bg-zinc-800/90 rounded border border-zinc-700/50 text-[9px] tracking-wider text-zinc-200">HLS Live</span>
+                  <div className="flex items-center gap-1.5 text-[10px] ml-1">
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="text-zinc-400">Previa activa</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="p-3 bg-indigo-600/10 border-l-4 border-indigo-500 rounded-r-xl">
-              <p className="text-zinc-300 text-xs sm:text-sm font-medium leading-normal">
-                <span className="text-white font-black">OK</span> abre pantalla completa. Mantenga <span className="text-white font-black">OK</span> en la lista para agregar a favoritos o ver guía avanzada.
-              </p>
+            <div className="px-2.5 py-1.5 bg-indigo-600/10 border-l-2 border-indigo-500 rounded-r-lg text-zinc-300 text-[11px] leading-snug">
+              Presioná <span className="text-white font-black">OK</span> o hacé clic para ver en pantalla completa.
             </div>
             
-            <div className="flex items-center gap-3 pt-1">
+            <div className="flex items-center gap-2 pt-0.5">
               <button 
                 onClick={handleOpenFullscreen}
-                className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-sm rounded-xl shadow-lg shadow-indigo-600/30 transition-all transform active:scale-95 flex items-center gap-2 cursor-pointer"
+                className="tv-focusable px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
               >
-                <Maximize2 className="w-4 h-4" />
-                PANTALLA COMPLETA
+                <Maximize2 className="w-3.5 h-3.5" />
+                <span>PANTALLA COMPLETA</span>
               </button>
               <button 
                 onClick={(e) => selectedStream && handleToggleFavorite(e, selectedStream)}
-                className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-400 hover:text-amber-400 transition-all shadow-md hover:border-amber-500/50 group cursor-pointer"
+                className="tv-focusable p-2 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-400 hover:text-amber-400 transition-all shadow-sm group cursor-pointer"
                 title="Favoritos"
               >
-                <Star className={`w-5 h-5 transition-transform group-hover:scale-110 ${selectedStream && favoritesList.includes(String(selectedStream.stream_id)) ? 'fill-amber-400 text-amber-400' : ''}`} />
+                <Star className={`w-4 h-4 transition-transform group-hover:scale-110 ${selectedStream && favoritesList.includes(String(selectedStream.stream_id)) ? 'fill-amber-400 text-amber-400' : ''}`} />
               </button>
               
               <button 
                 onClick={onBack}
-                className="px-5 py-3 bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white font-black text-sm rounded-xl transition-all ml-auto cursor-pointer"
+                className="tv-focusable px-3.5 py-2 bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white font-black text-xs rounded-xl transition-all ml-auto cursor-pointer"
               >
-                SALIR SECCIÓN
+                VOLVER
               </button>
             </div>
           </div>

@@ -473,24 +473,24 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       {/* MIDDLE SECTION: RECIÉN AGREGADOS (PELÍCULAS Y SERIES) */}
       <div className="flex-1 flex flex-col justify-center gap-3 bg-zinc-950/80 border border-zinc-800/80 rounded-3xl p-3 sm:p-4 shadow-xl relative z-10 my-1.5 min-h-0 overflow-y-auto scrollbar-none">
         {/* BLOQUE 1: PELÍCULAS RECIÉN AGREGADAS */}
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between pb-1.5 border-b border-rose-900/40">
-            <div className="flex items-center gap-2 text-rose-500 font-extrabold text-xs sm:text-sm tracking-wider uppercase">
-              <Flame className="w-4 h-4 fill-rose-500" />
+        <div className="space-y-1">
+          <div className="flex items-center justify-between pb-1 border-b border-rose-900/30">
+            <div className="flex items-center gap-1.5 text-rose-500 font-extrabold text-[11px] sm:text-xs tracking-wider uppercase">
+              <Flame className="w-3.5 h-3.5 fill-rose-500" />
               <span>PELÍCULAS RECIÉN AGREGADAS</span>
             </div>
             <button
               onClick={() => onNavigate('movies')}
-              className="tv-focusable px-2.5 py-1 bg-rose-950/50 text-rose-300 hover:text-white text-[11px] font-bold flex items-center gap-1 cursor-pointer rounded-lg border border-rose-800/40 transition"
+              className="tv-focusable px-2 py-0.5 bg-rose-950/50 text-rose-300 hover:text-white text-[10px] font-bold flex items-center gap-1 cursor-pointer rounded-lg border border-rose-800/40 transition"
             >
               <span>Ver Catálogo</span>
-              <ChevronRight className="w-3.5 h-3.5" />
+              <ChevronRight className="w-3 h-3" />
             </button>
           </div>
 
-          <div className="flex items-center gap-2.5 overflow-x-auto pb-1 scrollbar-none">
+          <div className="flex items-center gap-2 overflow-x-auto pb-0.5 scrollbar-none">
             {recentMovies.length > 0 ? (
-              recentMovies.slice(0, 14).map((movie) => (
+              recentMovies.slice(0, 16).map((movie) => (
                 <div
                   key={movie.stream_id}
                   onClick={() => onPlayStream({
@@ -501,7 +501,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     poster: movie.stream_icon,
                     category: movie.category_id
                   })}
-                  className="tv-focusable group relative h-28 sm:h-32 aspect-[2/3] shrink-0 rounded-xl overflow-hidden border border-zinc-800/80 hover:border-cyan-400 bg-zinc-900 transition-all duration-300 shadow-md cursor-pointer flex flex-col"
+                  className="tv-focusable group relative h-20 sm:h-24 aspect-[2/3] shrink-0 rounded-lg overflow-hidden border border-zinc-800/80 hover:border-cyan-400 bg-zinc-900 transition-all duration-300 shadow-md cursor-pointer flex flex-col"
                 >
                   <img
                     src={movie.stream_icon}
@@ -510,8 +510,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     loading="lazy"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity flex items-end p-1.5">
-                    <span className="text-[10px] font-black text-white leading-tight uppercase tracking-tight drop-shadow line-clamp-2">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity flex items-end p-1">
+                    <span className="text-[9px] font-black text-white leading-tight uppercase tracking-tight drop-shadow line-clamp-2">
                       {movie.name}
                     </span>
                   </div>
@@ -519,35 +519,35 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               ))
             ) : (
               [1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="h-28 sm:h-32 aspect-[2/3] shrink-0 rounded-xl bg-zinc-900/50 border border-zinc-800 animate-pulse" />
+                <div key={i} className="h-20 sm:h-24 aspect-[2/3] shrink-0 rounded-lg bg-zinc-900/50 border border-zinc-800 animate-pulse" />
               ))
             )}
           </div>
         </div>
 
         {/* BLOQUE 2: SERIES RECIÉN AGREGADAS */}
-        <div className="space-y-1.5 pt-1">
-          <div className="flex items-center justify-between pb-1.5 border-b border-purple-900/40">
-            <div className="flex items-center gap-2 text-purple-400 font-extrabold text-xs sm:text-sm tracking-wider uppercase">
-              <Clapperboard className="w-4 h-4 text-purple-400" />
+        <div className="space-y-1 pt-0.5">
+          <div className="flex items-center justify-between pb-1 border-b border-purple-900/30">
+            <div className="flex items-center gap-1.5 text-purple-400 font-extrabold text-[11px] sm:text-xs tracking-wider uppercase">
+              <Clapperboard className="w-3.5 h-3.5 text-purple-400" />
               <span>SERIES RECIÉN AGREGADAS</span>
             </div>
             <button
               onClick={() => onNavigate('series')}
-              className="tv-focusable px-2.5 py-1 bg-purple-950/50 text-purple-300 hover:text-white text-[11px] font-bold flex items-center gap-1 cursor-pointer rounded-lg border border-purple-800/40 transition"
+              className="tv-focusable px-2 py-0.5 bg-purple-950/50 text-purple-300 hover:text-white text-[10px] font-bold flex items-center gap-1 cursor-pointer rounded-lg border border-purple-800/40 transition"
             >
               <span>Ver Catálogo</span>
-              <ChevronRight className="w-3.5 h-3.5" />
+              <ChevronRight className="w-3 h-3" />
             </button>
           </div>
 
-          <div className="flex items-center gap-2.5 overflow-x-auto pb-1 scrollbar-none">
+          <div className="flex items-center gap-2 overflow-x-auto pb-0.5 scrollbar-none">
             {recentSeries.length > 0 ? (
-              recentSeries.slice(0, 14).map((series) => (
+              recentSeries.slice(0, 16).map((series) => (
                 <div
                   key={series.series_id}
                   onClick={() => (onOpenSeriesDetail ? onOpenSeriesDetail(series) : onNavigate('series'))}
-                  className="tv-focusable group relative h-28 sm:h-32 aspect-[2/3] shrink-0 rounded-xl overflow-hidden border border-zinc-800/80 hover:border-purple-400 bg-zinc-900 transition-all duration-300 shadow-md cursor-pointer flex flex-col"
+                  className="tv-focusable group relative h-20 sm:h-24 aspect-[2/3] shrink-0 rounded-lg overflow-hidden border border-zinc-800/80 hover:border-purple-400 bg-zinc-900 transition-all duration-300 shadow-md cursor-pointer flex flex-col"
                 >
                   <img
                     src={series.cover}
@@ -556,8 +556,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     loading="lazy"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity flex items-end p-1.5">
-                    <span className="text-[10px] font-black text-white leading-tight uppercase tracking-tight drop-shadow line-clamp-2">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity flex items-end p-1">
+                    <span className="text-[9px] font-black text-white leading-tight uppercase tracking-tight drop-shadow line-clamp-2">
                       {series.name}
                     </span>
                   </div>
@@ -565,7 +565,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               ))
             ) : (
               [1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="h-28 sm:h-32 aspect-[2/3] shrink-0 rounded-xl bg-zinc-900/50 border border-zinc-800 animate-pulse" />
+                <div key={i} className="h-20 sm:h-24 aspect-[2/3] shrink-0 rounded-lg bg-zinc-900/50 border border-zinc-800 animate-pulse" />
               ))
             )}
           </div>
