@@ -131,7 +131,11 @@ public class PlayerActivity extends Activity {
         DefaultMediaSourceFactory mediaSourceFactory = new DefaultMediaSourceFactory(httpDataSourceFactory);
 
         DefaultLoadControl loadControl = new DefaultLoadControl.Builder()
-                .setBufferDurationsMs(30000, 60000, 2500, 5000)
+                // Películas y series: carga por delante mientras mirás (como YouTube).
+                // mínimo 50 s, máximo 120 s; arranca con 2,5 s y retoma tras un corte con 5 s.
+                .setBufferDurationsMs(50000, 120000, 2500, 5000)
+                // Guarda 20 s ya vistos para retroceder (-10 s / -30 s) sin volver a descargar.
+                .setBackBuffer(20000, false)
                 .build();
 
         player = new ExoPlayer.Builder(this, renderersFactory)

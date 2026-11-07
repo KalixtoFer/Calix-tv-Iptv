@@ -225,20 +225,20 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     if (isHlsStream && Hls.isSupported()) {
       const hls = new Hls({
         enableWorker: true,
-        lowLatencyMode: true,
-        backBufferLength: isMiniPlayer ? 10 : 30,
-        maxBufferLength: isMiniPlayer ? 10 : 25,
-        maxMaxBufferLength: isMiniPlayer ? 20 : 50,
-        liveSyncDurationCount: 2,
-        liveMaxLatencyDurationCount: 5,
-        manifestLoadingTimeOut: 10000,
-        manifestLoadingMaxRetry: 4,
-        levelLoadingTimeOut: 10000,
-        levelLoadingMaxRetry: 4,
-        fragLoadingTimeOut: 15000,
-        fragLoadingMaxRetry: 5,
+        lowLatencyMode: false,
+        backBufferLength: 30,
+        // Colchón de carga para que no se corte: en vivo reproduce ~20 s por detrás del directo.
+        maxBufferLength: 40,
+        maxMaxBufferLength: 90,
+        liveSyncDuration: 20,
+        liveMaxLatencyDuration: 60,
+        manifestLoadingTimeOut: 15000,
+        manifestLoadingMaxRetry: 5,
+        levelLoadingTimeOut: 15000,
+        levelLoadingMaxRetry: 5,
+        fragLoadingTimeOut: 20000,
+        fragLoadingMaxRetry: 6,
         startLevel: -1,
-        capLevelToPlayerSize: true,
       });
       hlsRef.current = hls;
 
