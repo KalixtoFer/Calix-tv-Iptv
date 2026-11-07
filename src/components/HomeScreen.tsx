@@ -6,20 +6,14 @@ import {
   Clock,
   Tv,
   Clapperboard,
-  Monitor,
   Smartphone,
-  Star,
   ChevronRight,
-  Play,
-  Flame,
-  Home,
   Film,
-  Sparkles,
   Trophy,
   LogOut,
+  Flame,
 } from 'lucide-react';
 import { ActiveSection, CentralizedConfig, DeviceViewMode } from '../types/iptv';
-
 import { iptvApi } from '../services/iptvApi';
 
 interface HomeScreenProps {
@@ -44,46 +38,52 @@ interface HomeScreenProps {
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
-  config,
   username,
   viewMode = 'tv',
   onChangeViewMode,
   onNavigate,
   onPlayStream,
   onOpenSettings,
-  onOpenSpeedTest,
-  onOpenFavorites,
   onOpenSeriesDetail,
   onLogout,
 }) => {
-  const [timeStr, setTimeStr] = useState<string>('13:45');
-  const [dateStr, setDateStr] = useState<string>('Mié, 03 Nov. 2026');
+  const [timeStr, setTimeStr] = useState<string>('12:00');
+  const [dateStr, setDateStr] = useState<string>('');
   const [recentMovies, setRecentMovies] = useState<any[]>([]);
   const [recentSeries, setRecentSeries] = useState<any[]>([]);
 
-  // 1. Fetch Recently Added Movies & Series
+  // 1. Fetch Recently Added Movies & Series (de TODAS las categorías, ordenados por fecha)
   useEffect(() => {
+    let cancelled = false;
+    const byDateDesc = (field: string, alt: string) => (x: any, y: any) =>
+      (Number(y[field] || y[alt]) || 0) - (Number(x[field] || x[alt]) || 0);
+
     async function loadRecent() {
       try {
         const session = iptvApi.getSavedSession();
         if (!session) return;
-        
-        const vodCats = await iptvApi.getCategories('vod', session.username);
-        if (vodCats && vodCats.length > 0) {
-          const list = await iptvApi.getStreams('vod', session.username, vodCats[0].category_id);
-          setRecentMovies(list.slice(0, 12));
-        }
 
-        const seriesCats = await iptvApi.getCategories('series', session.username);
-        if (seriesCats && seriesCats.length > 0) {
-          const sList = await iptvApi.getStreams('series', session.username, seriesCats[0].category_id);
-          setRecentSeries(sList.slice(0, 12));
+        const [vodAll, seriesAll] = await Promise.all([
+          iptvApi.getStreams('vod', session.username),
+          iptvApi.getStreams('series', session.username),
+        ]);
+        if (cancelled) return;
+
+        // Película: campo "added". Serie: "last_modified" (o "added" si el servidor lo trae)
+        if (Array.isArray(vodAll)) {
+          setRecentMovies([...vodAll].sort(byDateDesc('added', 'last_modified')).slice(0, 20));
+        }
+        if (Array.isArray(seriesAll)) {
+          setRecentSeries([...seriesAll].sort(byDateDesc('last_modified', 'added')).slice(0, 20));
         }
       } catch (e) {
         console.warn('Failed to load recent content for home:', e);
       }
     }
     loadRecent();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Live time ticker
@@ -113,9 +113,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     return () => clearInterval(interval);
   }, []);
 
-
-
-
+  // Helper para fallback de carátulas caídas
+  const handleImgError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    e.currentTarget.onerror = null;
+    e.currentTarget.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="450" viewBox="0 0 300 450" fill="#18181b"><rect width="100%" height="100%" fill="#18181b"/><text x="50%" y="50%" fill="#71717a" font-size="20" font-family="sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="middle">SIN IMAGEN</text></svg>'
+    );
+  };
 
   // =========================================================================
   // 1. MOBILE SMARTPHONE VIEW (Diseño optimizado para celulares verticales/horizontales)
@@ -142,7 +146,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Mode Switcher Pill (Celular y Android TV) */}
+            {/* Mode Switcher Pill */}
             {onChangeViewMode && (
               <div className="flex items-center bg-zinc-900 border border-zinc-700/80 rounded-xl p-0.5 text-[11px] font-bold">
                 <button
@@ -182,8 +186,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
         </div>
 
-
-
         {/* 4 Neon Category Touch Tiles in 2x2 grid: TV EN VIVO, EVENTOS DEPORTIVOS, PELÍCULAS, SERIES */}
         <div className="space-y-1.5 my-2">
           <h3 className="text-xs font-black uppercase tracking-wider text-zinc-400 px-1">
@@ -208,7 +210,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               </div>
             </button>
 
-            {/* 2. Eventos Deportivos (Al lado de TV en vivo) */}
+            {/* 2. Eventos Deportivos */}
             <button
               onClick={() => onNavigate('events')}
               className="p-3.5 rounded-2xl bg-gradient-to-br from-amber-950/90 to-orange-950/90 border border-amber-400/80 shadow-[0_0_15px_rgba(245,158,11,0.3)] flex items-center gap-2.5 active:scale-95 transition text-left cursor-pointer"
@@ -298,6 +300,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   <img
                     src={movie.stream_icon}
                     alt={movie.name}
+                    onError={handleImgError}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     loading="lazy"
                   />
@@ -343,6 +346,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   <img
                     src={series.cover}
                     alt={series.name}
+                    onError={handleImgError}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     loading="lazy"
                   />
@@ -395,7 +399,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
         </div>
 
-        {/* Top Right: Device Switcher (3 Versiones) | Date | Clock | Settings */}
+        {/* Top Right: Device Switcher | Date | Clock | Settings */}
         <div className="flex items-center gap-3 sm:gap-4">
           {/* Mode Switcher */}
           {onChangeViewMode && (
@@ -486,7 +490,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
           <div className="flex items-center gap-2.5 overflow-x-auto pb-1 scrollbar-none">
             {recentMovies.length > 0 ? (
-              recentMovies.slice(0, 10).map((movie) => (
+              recentMovies.slice(0, 14).map((movie) => (
                 <div
                   key={movie.stream_id}
                   onClick={() => onPlayStream({
@@ -502,6 +506,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   <img
                     src={movie.stream_icon}
                     alt={movie.name}
+                    onError={handleImgError}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     loading="lazy"
                   />
@@ -538,7 +543,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
           <div className="flex items-center gap-2.5 overflow-x-auto pb-1 scrollbar-none">
             {recentSeries.length > 0 ? (
-              recentSeries.slice(0, 10).map((series) => (
+              recentSeries.slice(0, 14).map((series) => (
                 <div
                   key={series.series_id}
                   onClick={() => (onOpenSeriesDetail ? onOpenSeriesDetail(series) : onNavigate('series'))}
@@ -547,6 +552,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   <img
                     src={series.cover}
                     alt={series.name}
+                    onError={handleImgError}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     loading="lazy"
                   />
@@ -566,7 +572,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </div>
       </div>
 
-      {/* BOTTOM NAVIGATION: Centered 4 High-Contrast Neon-Glow Buttons (TV EN VIVO, EVENTOS DEPORTIVOS, PELÍCULAS, SERIES) */}
+      {/* BOTTOM NAVIGATION: Centered 4 High-Contrast Neon-Glow Buttons */}
       <div className="flex justify-center items-center gap-3 sm:gap-5 max-w-5xl mx-auto w-full z-20 pt-2">
         {/* 1. TV EN VIVO */}
         <button
