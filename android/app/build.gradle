@@ -89,11 +89,11 @@ dependencies {
     implementation project(':capacitor-android')
     
     // Media3 ExoPlayer & NextLib FFmpeg extension
-    def media3_version = "1.4.1"
+    def media3_version = "1.7.1"
     implementation "androidx.media3:media3-exoplayer:$media3_version"
     implementation "androidx.media3:media3-exoplayer-hls:$media3_version"
     implementation "androidx.media3:media3-ui:$media3_version"
-    implementation "com.github.anilbeesetti.nextlib:nextlib-media3ext:0.8.2"
+    implementation "io.github.anilbeesetti:nextlib-media3ext:1.7.1-0.9.0"
 
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"

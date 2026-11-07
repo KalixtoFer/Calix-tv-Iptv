@@ -153,14 +153,14 @@ export const SeriesScreen: React.FC<SeriesScreenProps> = ({
   return (
     <div className="flex-1 flex flex-col h-[calc(100vh-65px)] overflow-hidden bg-[#08090d] text-zinc-100 select-none">
       {/* Top Header */}
-      <div className="px-4 py-2.5 bg-zinc-950/90 border-b border-zinc-800 flex flex-wrap items-center justify-between gap-3">
+      <div className="px-3 py-2 md:px-4 md:py-2.5 bg-zinc-950/90 border-b border-zinc-800 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
             className="tv-focusable p-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white rounded-xl border border-zinc-800 transition flex items-center gap-1.5 text-xs font-semibold cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Volver</span>
+            <span className="hidden md:inline">Volver</span>
           </button>
           <div className="flex items-center gap-2">
             <div className="p-1.5 bg-indigo-500/20 text-indigo-400 rounded-lg">
@@ -189,10 +189,10 @@ export const SeriesScreen: React.FC<SeriesScreenProps> = ({
       </div>
 
       {/* Main Layout */}
-      <div className="flex-1 grid grid-cols-1 md:grid-cols-12 overflow-hidden">
+      <div className="flex-1 min-h-0 flex flex-col md:grid md:grid-cols-12 overflow-hidden">
         {/* Categories Sidebar */}
-        <div className="md:col-span-3 lg:col-span-2 bg-zinc-950/60 border-r border-zinc-800/80 flex flex-col h-full overflow-hidden">
-          <div className="p-3 border-b border-zinc-800 flex items-center justify-between text-xs text-zinc-400 font-bold uppercase tracking-wider">
+        <div className="shrink-0 md:col-span-3 lg:col-span-2 bg-zinc-950/60 border-b md:border-b-0 md:border-r border-zinc-800/80 flex flex-col md:h-full overflow-hidden">
+          <div className="hidden md:flex p-3 border-b border-zinc-800 items-center justify-between text-xs text-zinc-400 font-bold uppercase tracking-wider">
             <div className="flex items-center gap-1.5">
               <Filter className="w-3.5 h-3.5 text-indigo-400" />
               <span>Categorías</span>
@@ -202,10 +202,10 @@ export const SeriesScreen: React.FC<SeriesScreenProps> = ({
             </span>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-2 space-y-1 scrollbar-thin">
+          <div className="flex flex-row md:flex-col flex-1 gap-2 md:gap-0 overflow-x-auto md:overflow-x-hidden md:overflow-y-auto p-2 md:space-y-1 scrollbar-thin">
             <button
               onClick={() => handleSelectCategory('all')}
-              className={`tv-focusable w-full text-left px-3 py-2 rounded-xl text-xs font-medium transition cursor-pointer flex items-center justify-between ${
+              className={`tv-focusable shrink-0 md:shrink md:w-full whitespace-nowrap md:whitespace-normal text-left px-3.5 py-1.5 md:px-3 md:py-2 rounded-full md:rounded-xl text-xs font-medium transition cursor-pointer flex items-center justify-between ${
                 selectedCategoryId === 'all'
                   ? 'bg-indigo-600 text-white font-extrabold shadow-[0_0_15px_rgba(99,102,241,0.4)]'
                   : 'text-zinc-300 hover:bg-zinc-800/70 hover:text-white'
@@ -220,7 +220,7 @@ export const SeriesScreen: React.FC<SeriesScreenProps> = ({
                 <button
                   key={cat.category_id}
                   onClick={() => handleSelectCategory(cat.category_id)}
-                  className={`tv-focusable w-full text-left px-3 py-2 rounded-xl text-xs font-medium transition cursor-pointer flex items-center justify-between ${
+                  className={`tv-focusable shrink-0 md:shrink md:w-full whitespace-nowrap md:whitespace-normal text-left px-3.5 py-1.5 md:px-3 md:py-2 rounded-full md:rounded-xl text-xs font-medium transition cursor-pointer flex items-center justify-between ${
                     isSelected
                       ? 'bg-indigo-600 text-white font-extrabold shadow-[0_0_15px_rgba(99,102,241,0.4)]'
                       : 'text-zinc-300 hover:bg-zinc-800/70 hover:text-white'
@@ -246,7 +246,7 @@ export const SeriesScreen: React.FC<SeriesScreenProps> = ({
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
+              <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-4">
                 {visibleSeries.map((series) => (
                   <div
                     key={series.series_id}
@@ -271,7 +271,7 @@ export const SeriesScreen: React.FC<SeriesScreenProps> = ({
                       {/* Top Badges */}
                       <div className="absolute top-2 left-2 z-10">
                         {series.rating && (
-                          <span className="px-1.5 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-amber-400 font-mono text-[11px] font-extrabold flex items-center gap-0.5 border border-amber-500/40">
+                          <span className="px-1.5 py-0.5 rounded-md bg-black/75 text-amber-400 font-mono text-[11px] font-extrabold flex items-center gap-0.5 border border-amber-500/40">
                             <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
                             {series.rating}
                           </span>
@@ -287,7 +287,7 @@ export const SeriesScreen: React.FC<SeriesScreenProps> = ({
                     </div>
 
                     {/* Series Info */}
-                    <div className="p-2.5 sm:p-3 flex-1 flex flex-col justify-between space-y-1">
+                    <div className="p-1.5 sm:p-3 flex-1 flex flex-col justify-between space-y-1">
                       <h4 className="text-xs sm:text-sm font-bold text-white truncate group-hover:text-indigo-300 transition-colors">
                         {series.name}
                       </h4>
@@ -322,7 +322,7 @@ export const SeriesScreen: React.FC<SeriesScreenProps> = ({
 
       {/* Series Episodes Browser Modal */}
       {selectedSeries && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/90 backdrop-blur-md animate-fadeIn">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/90 animate-fadeIn">
           <div className="relative w-full max-w-4xl max-h-[90vh] bg-zinc-950 border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col">
             <div className="p-4 sm:p-6 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/60">
               <div className="flex items-center gap-3">

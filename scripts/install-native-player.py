@@ -68,11 +68,11 @@ if os.path.exists(gradle):
         if anchor not in t:
             fail('No se encontró la sección dependencies en build.gradle')
         media3_deps = '''
-    def media3_version = "1.4.1"
+    def media3_version = "1.7.1"
     implementation "androidx.media3:media3-exoplayer:$media3_version"
     implementation "androidx.media3:media3-exoplayer-hls:$media3_version"
     implementation "androidx.media3:media3-ui:$media3_version"
-    implementation "com.github.anilbeesetti.nextlib:nextlib-media3ext:0.8.2"
+    implementation "io.github.anilbeesetti:nextlib-media3ext:1.7.1-0.9.0"
 '''
         t = t.replace(anchor, anchor + media3_deps)
         print('Media3 ExoPlayer y NextLib agregados')
