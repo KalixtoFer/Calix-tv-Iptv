@@ -243,7 +243,7 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
           </div>
 
           {/* Channels List */}
-          <div className="flex-1 bg-black overflow-y-auto custom-scrollbar">
+          <div className="flex-1 bg-black overflow-y-auto custom-scrollbar pb-20">
             {isLoading ? (
               <div className="flex items-center justify-center h-40">
                 <div className="w-6 h-6 border-2 border-rose-600 border-t-transparent rounded-full animate-spin" />

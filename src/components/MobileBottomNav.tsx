@@ -29,7 +29,10 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   return (
     <nav
       aria-label="Navegación móvil"
-      className="fixed bottom-0 left-0 right-0 z-40 bg-[#060812]/95 backdrop-blur-2xl border-t border-zinc-800/90 px-2 py-1.5 flex items-center justify-around shadow-[0_-10px_25px_rgba(0,0,0,0.6)] select-none"
+      style={{
+        paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 8px)',
+      }}
+      className="fixed bottom-0 left-0 right-0 z-40 bg-[#060812]/95 backdrop-blur-2xl border-t border-zinc-800/90 px-2 pt-2 flex items-center justify-around shadow-[0_-10px_25px_rgba(0,0,0,0.6)] select-none"
     >
       {navItems.map((item) => {
         const Icon = item.icon;

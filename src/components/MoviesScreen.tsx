@@ -242,7 +242,7 @@ export const MoviesScreen: React.FC<MoviesScreenProps> = ({
         </div>
 
         {/* Poster Grid */}
-        <div className="md:col-span-9 lg:col-span-10 bg-[#08090d] flex-1 overflow-y-auto p-3 sm:p-6">
+        <div className="md:col-span-9 lg:col-span-10 bg-[#08090d] flex-1 overflow-y-auto p-3 sm:p-6 pb-24">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center h-64 text-zinc-400 text-sm">
               <div className="w-10 h-10 border-2 border-amber-400 border-t-transparent rounded-full animate-spin mb-3" />

@@ -367,7 +367,16 @@ export default function App() {
       )}
 
       {/* Main View Router */}
-      <main className={`flex-1 flex flex-col overflow-hidden ${viewMode === 'mobile' ? 'pb-14 sm:pb-16' : ''}`}>
+      <main
+        className={`flex-1 flex flex-col overflow-hidden ${viewMode === 'mobile' ? 'pb-16 sm:pb-20' : ''}`}
+        style={
+          viewMode === 'mobile'
+            ? {
+                paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 4.25rem)',
+              }
+            : undefined
+        }
+      >
         {activeSection === 'home' && (
           <HomeScreen
             config={config}
