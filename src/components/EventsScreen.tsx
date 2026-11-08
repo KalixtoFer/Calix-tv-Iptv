@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { ArrowLeft, Search, Star, Tv, Play, X, RefreshCw, BarChart3 } from 'lucide-react';
+import { ArrowLeft, Search, Star, Tv, Play, X, RefreshCw, BarChart3, Info } from 'lucide-react';
 import { LiveStream, SeriesItem } from '../types/iptv';
 import { iptvApi } from '../services/iptvApi';
 import {
@@ -61,11 +61,10 @@ const timeLabel = (ts: number) => {
 
 type Tab = 'live' | 'today' | 'mine' | 'channels';
 
-/* ------------------------------ Tarjeta de partido ------------------------------ */
+/* ------------------------------ Tarjeta de partido Compacta ------------------------------ */
 interface CardProps {
   ev: SportEvent;
   channels: any[];
-  hero?: boolean;
   favs: string[];
   onFav: (t: SportTeam, sport: string) => void;
   onPlayChannel: (ch: any) => void;
@@ -73,106 +72,98 @@ interface CardProps {
   onFind: (ev: SportEvent) => void;
 }
 
-const TeamRow: React.FC<{ t: SportTeam; ev: SportEvent; big?: boolean; fav: boolean; onFav: () => void }> = ({ t, ev, big, fav, onFav }) => (
-  <div className="flex items-center gap-3">
+const TeamRow = React.memo(({ t, ev, fav, onFav }: { t: SportTeam; ev: SportEvent; fav: boolean; onFav: () => void }) => (
+  <div className="flex items-center gap-2 py-0.5">
     {t.logo ? (
-      <img src={t.logo} alt="" loading="lazy" className={big ? 'w-9 h-9 object-contain' : 'w-7 h-7 object-contain'} />
+      <img src={t.logo} alt="" loading="lazy" className="w-5 h-5 object-contain shrink-0" />
     ) : (
-      <span className={`${big ? 'w-9 h-9' : 'w-7 h-7'} rounded-full bg-[#1c2128]`} />
+      <div className="w-5 h-5 rounded-full bg-[#1c2128] shrink-0" />
     )}
-    <span className={`flex-1 min-w-0 truncate font-bold ${big ? 'text-lg' : 'text-[15px]'} text-[#f2f5f9]`}>{t.name}</span>
-    {t.record && ev.sport === 'soccer' && <span className="text-[11px] font-mono text-[#8a94a3]">{t.record}</span>}
+    <span className="flex-1 min-w-0 truncate text-[13px] font-bold text-[#f2f5f9]">{t.name}</span>
+    {ev.state !== 'pre' && (
+      <span className="text-sm font-black tabular-nums w-6 text-right text-[#f2f5f9]">
+        {t.score}
+      </span>
+    )}
     <button
       type="button"
-      aria-label={fav ? 'Dejar de seguir' : 'Seguir equipo'}
       onClick={(e) => {
         e.stopPropagation();
         onFav();
       }}
-      className="tv-focusable p-1 rounded-lg cursor-pointer"
+      className="tv-focusable p-1 rounded-md cursor-pointer hover:bg-white/10 transition-colors ml-1"
     >
-      <Star className={`w-4 h-4 ${fav ? 'fill-[#00c2e0] text-[#00c2e0]' : 'text-[#4a5568]'}`} />
+      <Star className={`w-3.5 h-3.5 ${fav ? 'fill-[#00c2e0] text-[#00c2e0]' : 'text-[#4a5568]'}`} />
     </button>
-    {ev.state !== 'pre' && <span className={`${big ? 'text-3xl' : 'text-2xl'} font-extrabold tabular-nums w-8 text-right text-[#f2f5f9]`}>{t.score}</span>}
   </div>
-);
+));
 
-const EventCard: React.FC<CardProps> = ({ ev, channels, hero, favs, onFav, onPlayChannel, onStats, onFind }) => {
+const EventCard = React.memo(({ ev, channels, favs, onFav, onPlayChannel, onStats, onFind }: CardProps) => {
   const live = ev.state === 'in';
   const isFav = (t: SportTeam) => favs.includes(`${ev.sport}:${t.id}`);
+
   return (
     <div
-      onClick={() => (channels[0] ? onPlayChannel(channels[0]) : onFind(ev))}
-      className={`tv-focusable rounded-2xl border p-3.5 space-y-3 cursor-pointer transition active:scale-[0.99] ${
-        hero
-          ? 'bg-gradient-to-br from-[#00c2e0]/30 via-[#1f5fff]/25 to-[#0b0d11] border-[#00c2e0]/40 shadow-[0_0_30px_rgba(0,194,224,0.15)]'
-          : `bg-[#111418] border-[#1c2128] ${live ? 'border-l-4 border-l-[#00c2e0]' : ''}`
+      onClick={() => {
+        if (channels.length === 1) onPlayChannel(channels[0]);
+        else if (channels.length > 1) onStats(ev); // Abrir detalle si hay múltiples opciones o stats
+        else onFind(ev);
+      }}
+      className={`tv-focusable group relative bg-[#111418] border border-[#1c2128] rounded-xl p-2.5 cursor-pointer transition-all hover:border-[#00c2e0]/50 active:scale-[0.98] ${
+        live ? 'shadow-[inset_2px_0_0_0_#ef4444]' : ''
       }`}
     >
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold text-[#8a94a3] uppercase tracking-wide">{ev.leagueName}</span>
+      {/* Header: Liga y Estado */}
+      <div className="flex items-center justify-between mb-1.5 border-b border-[#1c2128]/50 pb-1">
+        <span className="text-[10px] font-bold text-[#8a94a3] uppercase tracking-wider truncate max-w-[70%]">
+          {ev.leagueName}
+        </span>
         {live ? (
-          <span className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded-md bg-[#ef4444] text-white text-[11px] font-extrabold">EN VIVO</span>
-            <span className="text-sm font-bold text-[#f2f5f9]">{ev.statusText}</span>
-          </span>
+          <div className="flex items-center gap-1 shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#ef4444] animate-pulse" />
+            <span className="text-[10px] font-black text-[#ef4444] uppercase tracking-tighter">
+              {ev.statusText || 'VIVO'}
+            </span>
+          </div>
         ) : ev.state === 'post' ? (
-          <span className="text-xs font-bold text-[#8a94a3] uppercase">Final</span>
+          <span className="text-[10px] font-black text-[#8a94a3] uppercase tracking-tighter">
+            FINAL
+          </span>
         ) : (
-          <span className="text-sm font-bold text-[#00c2e0]">{ev.statusText || timeLabel(ev.start)}</span>
+          <span className="text-[10px] font-bold text-[#00c2e0] uppercase tracking-tighter">
+            {ev.statusText || timeLabel(ev.start)}
+          </span>
         )}
       </div>
 
-      <div className="space-y-2.5">
-        <TeamRow t={ev.home} ev={ev} big={hero} fav={isFav(ev.home)} onFav={() => onFav(ev.home, ev.sport)} />
-        <TeamRow t={ev.away} ev={ev} big={hero} fav={isFav(ev.away)} onFav={() => onFav(ev.away, ev.sport)} />
+      {/* Equipos y Marcador */}
+      <div className="space-y-0.5">
+        <TeamRow t={ev.home} ev={ev} fav={isFav(ev.home)} onFav={() => onFav(ev.home, ev.sport)} />
+        <TeamRow t={ev.away} ev={ev} fav={isFav(ev.away)} onFav={() => onFav(ev.away, ev.sport)} />
       </div>
 
-      <div className="flex items-center justify-between gap-3 pt-1">
-        <div className="flex-1 min-w-0 flex flex-wrap items-center gap-1.5">
-          {channels.length > 0 ? (
-            channels.map((ch) => (
-              <button
-                key={ch.stream_id}
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onPlayChannel(ch);
-                }}
-                className="tv-focusable flex items-center gap-1.5 max-w-full px-2.5 py-1 rounded-lg bg-[#00c2e0]/10 border border-[#00c2e0]/30 text-[#7fe3f2] text-xs font-semibold cursor-pointer"
-              >
-                <Tv className="w-3.5 h-3.5 shrink-0" />
-                <span className="truncate">{adjustTime(ch.name)}</span>
-              </button>
-            ))
-          ) : (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onFind(ev);
-              }}
-              className="tv-focusable flex items-center gap-1.5 text-xs text-[#8a94a3] cursor-pointer"
-            >
-              <Search className="w-3.5 h-3.5" />
-              <span>Sin canal asignado · buscar</span>
-            </button>
-          )}
-        </div>
+      {/* Botones de acción rápidos (solo visibles en hover o TV focus) */}
+      <div className="flex items-center justify-end gap-2 mt-1.5 pt-1.5 border-t border-[#1c2128]/30 group-hover:border-[#1c2128]">
+        {channels.length > 0 && (
+          <div className="flex items-center gap-1 mr-auto">
+             <Tv className="w-3 h-3 text-[#00c2e0]" />
+             <span className="text-[9px] font-bold text-[#00c2e0]">{channels.length} {channels.length === 1 ? 'canal' : 'canales'}</span>
+          </div>
+        )}
         <button
           type="button"
           onClick={(e) => {
             e.stopPropagation();
             onStats(ev);
           }}
-          className="tv-focusable shrink-0 text-xs font-bold text-[#00c2e0] cursor-pointer"
+          className="tv-focusable text-[10px] font-black text-[#00c2e0] uppercase px-2 py-0.5 rounded bg-[#00c2e0]/5 border border-transparent hover:border-[#00c2e0]/30 transition"
         >
-          Estadísticas
+          Detalles
         </button>
       </div>
     </div>
   );
-};
+});
 
 /* --------------------------------- Pantalla --------------------------------- */
 export const EventsScreen: React.FC<EventsScreenProps> = ({ username, onBack, onPlayStream }) => {
@@ -207,7 +198,7 @@ export const EventsScreen: React.FC<EventsScreenProps> = ({ username, onBack, on
     };
   }, [loadScores]);
 
-  // Canales del servidor (para relacionar partidos) + lista de canales/repeticiones de eventos
+  // Canales del servidor (para relacionar partidos)
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -246,7 +237,7 @@ export const EventsScreen: React.FC<EventsScreenProps> = ({ username, onBack, on
     return m;
   }, [events, index]);
 
-  const toggleFav = (t: SportTeam, sport: string) => {
+  const toggleFav = useCallback((t: SportTeam, sport: string) => {
     const key = `${sport}:${t.id}`;
     setFavs((prev) => {
       const next = prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key];
@@ -255,9 +246,9 @@ export const EventsScreen: React.FC<EventsScreenProps> = ({ username, onBack, on
       } catch {}
       return next;
     });
-  };
+  }, []);
 
-  const playChannel = (ch: any) =>
+  const playChannel = useCallback((ch: any) =>
     onPlayStream({
       streamId: ch.stream_id,
       title: adjustTime(ch.name),
@@ -265,38 +256,79 @@ export const EventsScreen: React.FC<EventsScreenProps> = ({ username, onBack, on
       type: 'live',
       poster: ch.stream_icon,
       category: 'Eventos',
-    });
+    }), [onPlayStream, username]);
 
-  const openStats = (ev: SportEvent) => {
+  const openStats = useCallback((ev: SportEvent) => {
     setStatsEv(ev);
     setStats(null);
     fetchStats(ev).then(setStats).catch(() => setStats([]));
-  };
+  }, []);
 
-  const findChannel = (ev: SportEvent) => {
+  const findChannel = useCallback((ev: SportEvent) => {
     setQuery(ev.home.short || ev.home.name);
     setTab('channels');
-  };
+  }, []);
 
-  const liveEvents = events.filter((e) => e.state === 'in');
-  const mineEvents = events.filter((e) => favs.includes(`${e.sport}:${e.home.id}`) || favs.includes(`${e.sport}:${e.away.id}`));
-  const card = (ev: SportEvent, hero = false) => (
-    <EventCard key={ev.id} ev={ev} hero={hero} channels={channelsFor[ev.id] || []} favs={favs} onFav={toggleFav} onPlayChannel={playChannel} onStats={openStats} onFind={findChannel} />
-  );
+  /* ------------------------------ Agrupación ------------------------------ */
+  const groupedSections = useMemo(() => {
+    let filtered = events;
+    if (tab === 'live') filtered = events.filter(e => e.state === 'in');
+    else if (tab === 'mine') filtered = events.filter(e => favs.includes(`${e.sport}:${e.home.id}`) || favs.includes(`${e.sport}:${e.away.id}`));
+
+    const sections: { title: string; events: SportEvent[]; isLive?: boolean }[] = [];
+    
+    // Si estamos en "Hoy", separar explícitamente En Vivo, Próximos y Finalizados
+    if (tab === 'today') {
+      const live = filtered.filter(e => e.state === 'in');
+      const upcoming = filtered.filter(e => e.state === 'pre');
+      const finished = filtered.filter(e => e.state === 'post');
+
+      if (live.length) sections.push({ title: 'EN VIVO AHORA', events: live, isLive: true });
+      
+      const byLeague: Record<string, SportEvent[]> = {};
+      [...upcoming, ...finished].forEach(e => {
+        const l = e.leagueName || 'OTRAS LIGAS';
+        if (!byLeague[l]) byLeague[l] = [];
+        byLeague[l].push(e);
+      });
+
+      Object.entries(byLeague)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .forEach(([title, evs]) => sections.push({ title, events: evs }));
+      
+      return sections;
+    }
+
+    // Para "En vivo" o "Mis equipos", agrupar por liga simplemente
+    const byLeague: Record<string, SportEvent[]> = {};
+    filtered.forEach(e => {
+      const l = e.leagueName || 'OTRAS LIGAS';
+      if (!byLeague[l]) byLeague[l] = [];
+      byLeague[l].push(e);
+    });
+
+    Object.entries(byLeague)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .forEach(([title, evs]) => sections.push({ title, events: evs, isLive: tab === 'live' }));
+
+    return sections;
+  }, [events, tab, favs]);
 
   const q = norm(query);
   const channelResults = q ? allLive.filter((s) => norm(s.name).includes(q)).slice(0, 60) : sportsLive;
   const replayResults = q ? replays.filter((s) => norm(s.name).includes(q)) : replays;
 
   const tabs: { id: Tab; label: string; count?: number }[] = [
-    { id: 'live', label: 'En vivo ahora', count: liveEvents.length },
-    { id: 'today', label: 'Hoy' },
-    { id: 'mine', label: 'Mis equipos' },
+    { id: 'live', label: 'En vivo', count: events.filter(e => e.state === 'in').length },
+    { id: 'today', label: 'Agenda' },
+    { id: 'mine', label: 'Siguiendo' },
     { id: 'channels', label: 'Canales' },
   ];
 
   const empty = (text: string) => <p className="text-center text-sm text-[#8a94a3] py-16">{text}</p>;
-  const grid = 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3';
+  
+  // Grilla responsiva optimizada
+  const gridClass = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3";
 
   return (
     <div className="flex-1 flex flex-col h-[calc(100vh-65px)] overflow-hidden bg-[#07090c] text-[#f2f5f9] select-none">
@@ -305,7 +337,7 @@ export const EventsScreen: React.FC<EventsScreenProps> = ({ username, onBack, on
           <button onClick={onBack} className="tv-focusable hidden md:flex p-2 rounded-xl bg-[#111418] border border-[#1c2128] text-[#8a94a3] cursor-pointer">
             <ArrowLeft className="w-4 h-4" />
           </button>
-          <h2 className="text-2xl font-extrabold">Deportes</h2>
+          <h2 className="text-xl font-black uppercase tracking-tight">Deportes</h2>
           <button
             onClick={() => loadScores()}
             aria-label="Actualizar"
@@ -314,108 +346,109 @@ export const EventsScreen: React.FC<EventsScreenProps> = ({ username, onBack, on
             <RefreshCw className="w-4 h-4" />
           </button>
         </div>
-        <div className="flex gap-5 overflow-x-auto mt-2">
+        <div className="flex gap-5 overflow-x-auto mt-2 no-scrollbar">
           {tabs.map((t) => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
-              className={`tv-focusable shrink-0 pb-2.5 text-[15px] font-bold border-b-[3px] cursor-pointer transition ${
-                tab === t.id ? 'text-[#f2f5f9] border-[#00c2e0]' : 'text-[#8a94a3] border-transparent'
+              className={`tv-focusable shrink-0 pb-2.5 text-xs font-black uppercase tracking-widest border-b-[3px] cursor-pointer transition ${
+                tab === t.id ? 'text-[#00c2e0] border-[#00c2e0]' : 'text-[#4a5568] border-transparent'
               }`}
             >
               {t.label}
-              {t.count ? <span className="ml-1.5 text-[#ef4444]">{t.count}</span> : null}
+              {t.count ? <span className="ml-1.5 px-1.5 py-0.5 rounded bg-[#ef4444] text-white text-[10px] tabular-nums">{t.count}</span> : null}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3">
+      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-4 custom-scrollbar">
         {updated > 0 && tab !== 'channels' && (
-          <p className="text-[11px] text-[#8a94a3] px-1">
-            Marcadores actualizados {new Date(updated).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false })} · se refrescan solos cada minuto
-          </p>
+          <div className="flex items-center gap-2 px-1 text-[10px] font-bold text-[#4a5568] uppercase tracking-wider">
+            <RefreshCw className="w-3 h-3" />
+            <span>Actualizado {new Date(updated).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false })}</span>
+          </div>
         )}
 
         {loading && tab !== 'channels' ? (
-          <div className="flex flex-col items-center py-20 text-[#8a94a3] text-sm">
-            <div className="w-9 h-9 border-2 border-[#00c2e0] border-t-transparent rounded-full animate-spin mb-3" />
-            Cargando partidos…
+          <div className="flex flex-col items-center py-20 text-[#8a94a3] text-xs font-bold uppercase tracking-widest gap-4">
+            <div className="w-10 h-10 border-2 border-[#00c2e0] border-t-transparent rounded-full animate-spin" />
+            Cargando agenda deportiva…
           </div>
         ) : allFailed && tab !== 'channels' ? (
           empty('No se pudo cargar la agenda deportiva. Revisá tu conexión y tocá actualizar.')
-        ) : tab === 'live' ? (
-          liveEvents.length === 0 ? (
-            empty('No hay partidos en vivo en este momento. Mirá la pestaña Hoy.')
+        ) : tab !== 'channels' ? (
+          groupedSections.length === 0 ? (
+            empty(tab === 'mine' ? 'Seguí a tus equipos con la estrella para ver sus partidos acá.' : 'No hay partidos disponibles.')
           ) : (
-            <>
-              {card(liveEvents.find((e) => (channelsFor[e.id] || []).length) || liveEvents[0], true)}
-              <div className="flex items-center gap-2 pt-1 text-sm font-bold">
-                <span className="w-2 h-2 rounded-full bg-[#ef4444]" /> En vivo ahora
-              </div>
-              <div className={grid}>{liveEvents.map((e) => card(e))}</div>
-            </>
-          )
-        ) : tab === 'today' ? (
-          events.length === 0 ? (
-            empty('No hay partidos cargados para hoy.')
-          ) : (
-            (['in', 'pre', 'post'] as const).map((s) => {
-              const list = events.filter((e) => e.state === s);
-              if (!list.length) return null;
-              return (
-                <section key={s} className="space-y-2">
-                  <h3 className="text-sm font-bold text-[#8a94a3] uppercase tracking-wide pt-1">{s === 'in' ? 'En vivo' : s === 'pre' ? 'Próximos' : 'Finalizados'}</h3>
-                  <div className={grid}>{list.map((e) => card(e))}</div>
-                </section>
-              );
-            })
-          )
-        ) : tab === 'mine' ? (
-          favs.length === 0 ? (
-            empty('Tocá la estrella al lado de un equipo para seguirlo. Sus partidos aparecen acá.')
-          ) : mineEvents.length === 0 ? (
-            empty('Tus equipos no juegan hoy.')
-          ) : (
-            <div className={grid}>{mineEvents.map((e) => card(e))}</div>
+            groupedSections.map((sec) => (
+              <section key={sec.title} className="space-y-2">
+                <div className="flex items-center gap-2 px-1">
+                  <h3 className={`text-[11px] font-black uppercase tracking-[2px] ${sec.isLive ? 'text-[#ef4444]' : 'text-[#8a94a3]'}`}>
+                    {sec.title}
+                  </h3>
+                  <div className="flex-1 h-[1px] bg-[#1c2128]" />
+                </div>
+                <div className={gridClass}>
+                  {sec.events.map((e) => (
+                    <EventCard 
+                      key={e.id} 
+                      ev={e} 
+                      channels={channelsFor[e.id] || []} 
+                      favs={favs} 
+                      onFav={toggleFav} 
+                      onPlayChannel={playChannel} 
+                      onStats={openStats} 
+                      onFind={findChannel} 
+                    />
+                  ))}
+                </div>
+              </section>
+            ))
           )
         ) : (
-          <>
+          /* Pestaña de Canales */
+          <div className="space-y-4">
             <div className="relative">
-              <Search className="w-4 h-4 text-[#8a94a3] absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-[#4a5568] absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Buscar canal o evento…"
-                className="w-full bg-[#111418] border border-[#1c2128] rounded-xl pl-9 pr-9 py-2.5 text-sm placeholder-[#4a5568] focus:outline-none focus:border-[#00c2e0]"
+                placeholder="BUSCAR CANAL O EQUIPO…"
+                className="w-full bg-[#111418] border border-[#1c2128] rounded-xl pl-10 pr-10 py-3 text-xs font-bold uppercase tracking-wider placeholder-[#4a5568] focus:outline-none focus:border-[#00c2e0] transition-colors"
               />
               {query && (
-                <button onClick={() => setQuery('')} className="tv-focusable absolute right-2 top-1/2 -translate-y-1/2 p-1 cursor-pointer" aria-label="Borrar">
-                  <X className="w-4 h-4 text-[#8a94a3]" />
+                <button onClick={() => setQuery('')} className="tv-focusable absolute right-2 top-1/2 -translate-y-1/2 p-1.5 cursor-pointer text-[#4a5568] hover:text-white" aria-label="Borrar">
+                  <X className="w-4 h-4" />
                 </button>
               )}
             </div>
+            
             {channelResults.length === 0 ? (
-              empty('No se encontraron canales.')
+              empty('No se encontraron señales.')
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6 gap-2.5">
                 {channelResults.map((s) => (
                   <button
                     key={s.stream_id}
                     onClick={() => playChannel(s)}
-                    className="tv-focusable flex items-center gap-3 p-2.5 rounded-xl bg-[#111418] border border-[#1c2128] text-left cursor-pointer hover:border-[#00c2e0]"
+                    className="tv-focusable flex items-center gap-3 p-2 rounded-xl bg-[#111418] border border-[#1c2128] text-left cursor-pointer hover:border-[#00c2e0] transition-all"
                   >
-                    {s.stream_icon ? <img src={s.stream_icon} alt="" loading="lazy" className="w-10 h-10 object-contain rounded-lg bg-black" /> : <span className="w-10 h-10 rounded-lg bg-[#1c2128]" />}
-                    <span className="flex-1 min-w-0 text-sm font-semibold line-clamp-2">{adjustTime(s.name)}</span>
-                    <Play className="w-4 h-4 text-[#00c2e0] shrink-0" />
+                    {s.stream_icon ? <img src={s.stream_icon} alt="" loading="lazy" className="w-9 h-9 object-contain rounded-lg bg-black" /> : <div className="w-9 h-9 rounded-lg bg-[#1c2128]" />}
+                    <span className="flex-1 min-w-0 text-[11px] font-bold uppercase leading-tight line-clamp-2">{adjustTime(s.name)}</span>
+                    <Play className="w-3.5 h-3.5 text-[#00c2e0] shrink-0" />
                   </button>
                 ))}
               </div>
             )}
+
             {replayResults.length > 0 && (
-              <>
-                <h3 className="text-sm font-bold text-[#8a94a3] uppercase tracking-wide pt-3">Repeticiones y resúmenes</h3>
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 xl:grid-cols-7 gap-2">
+              <section className="space-y-2 pt-2">
+                <div className="flex items-center gap-2 px-1">
+                  <h3 className="text-[11px] font-black uppercase tracking-[2px] text-[#8a94a3]">REPeticiones</h3>
+                  <div className="flex-1 h-[1px] bg-[#1c2128]" />
+                </div>
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 2xl:grid-cols-9 gap-2">
                   {replayResults.map((r) => (
                     <button
                       key={r.series_id}
@@ -428,54 +461,114 @@ export const EventsScreen: React.FC<EventsScreenProps> = ({ username, onBack, on
                           poster: r.cover,
                         })
                       }
-                      className="tv-focusable rounded-xl overflow-hidden bg-[#111418] border border-[#1c2128] text-left cursor-pointer hover:border-[#00c2e0]"
+                      className="tv-focusable rounded-xl overflow-hidden bg-[#111418] border border-[#1c2128] text-left cursor-pointer hover:border-[#00c2e0] group transition-all"
                     >
-                      <div className="aspect-[2/3] bg-black">{r.cover && <img src={r.cover} alt={r.name} loading="lazy" className="w-full h-full object-cover" />}</div>
-                      <p className="p-1.5 text-[11px] leading-tight font-bold line-clamp-2">{r.name}</p>
+                      <div className="aspect-[2/3] bg-black relative">
+                        {r.cover ? <img src={r.cover} alt={r.name} loading="lazy" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center opacity-20"><Tv /></div>}
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                           <Play className="w-6 h-6 text-[#00c2e0] fill-current" />
+                        </div>
+                      </div>
+                      <p className="p-1.5 text-[10px] leading-tight font-black uppercase truncate">{r.name}</p>
                     </button>
                   ))}
                 </div>
-              </>
+              </section>
             )}
-          </>
+          </div>
         )}
       </div>
 
+      {/* Modal de Detalle / Estadísticas */}
       {statsEv && (
-        <div className="fixed inset-0 z-40 bg-black/70 flex items-end md:items-center justify-center" onClick={() => setStatsEv(null)}>
-          <div className="w-full md:max-w-md bg-[#111418] border border-[#1c2128] rounded-t-3xl md:rounded-3xl p-5 max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-4">
-              <span className="flex items-center gap-2 text-sm font-bold text-[#00c2e0]">
-                <BarChart3 className="w-4 h-4" /> Estadísticas
-              </span>
-              <button onClick={() => setStatsEv(null)} className="tv-focusable p-1 cursor-pointer" aria-label="Cerrar">
-                <X className="w-5 h-5 text-[#8a94a3]" />
-              </button>
+        <div className="fixed inset-0 z-40 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setStatsEv(null)}>
+          <div className="w-full max-w-lg bg-[#0b0d11] border border-[#1c2128] rounded-3xl overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            {/* Header Modal */}
+            <div className="bg-[#111418] p-4 flex items-center justify-between border-b border-[#1c2128]">
+               <span className="flex items-center gap-2 text-xs font-black text-[#00c2e0] uppercase tracking-[2px]">
+                <BarChart3 className="w-4 h-4" /> Detalle del encuentro
+               </span>
+               <button onClick={() => setStatsEv(null)} className="tv-focusable p-1.5 rounded-lg hover:bg-white/5 text-[#8a94a3] cursor-pointer">
+                <X className="w-5 h-5" />
+               </button>
             </div>
-            <div className="flex items-center justify-between gap-2 mb-1 text-center">
-              <span className="flex-1 font-bold text-sm">{statsEv.home.name}</span>
-              <span className="text-2xl font-extrabold tabular-nums">{statsEv.state === 'pre' ? 'vs' : `${statsEv.home.score} - ${statsEv.away.score}`}</span>
-              <span className="flex-1 font-bold text-sm">{statsEv.away.name}</span>
-            </div>
-            <p className="text-center text-xs text-[#8a94a3] mb-4">
-              {statsEv.leagueName} · {statsEv.state === 'in' ? statsEv.statusText : statsEv.state === 'post' ? 'Final' : timeLabel(statsEv.start)}
-              {statsEv.venue ? ` · ${statsEv.venue}` : ''}
-            </p>
-            {stats === null ? (
-              <p className="text-center text-sm text-[#8a94a3] py-6">Cargando…</p>
-            ) : stats.length === 0 ? (
-              <p className="text-center text-sm text-[#8a94a3] py-6">Todavía no hay estadísticas para este partido.</p>
-            ) : (
-              <div className="space-y-2.5">
-                {stats.map((s) => (
-                  <div key={s.label} className="flex items-center justify-between text-sm">
-                    <span className="w-16 font-bold tabular-nums">{s.home}</span>
-                    <span className="flex-1 text-center text-xs text-[#8a94a3]">{s.label}</span>
-                    <span className="w-16 text-right font-bold tabular-nums">{s.away}</span>
-                  </div>
-                ))}
+
+            <div className="p-6">
+              {/* Marcador Grande */}
+              <div className="flex items-center justify-between gap-4 mb-2">
+                <div className="flex-1 flex flex-col items-center gap-2">
+                   {statsEv.home.logo ? <img src={statsEv.home.logo} className="w-14 h-14 object-contain" alt="" /> : <div className="w-14 h-14 rounded-full bg-[#1c2128]" />}
+                   <span className="text-xs font-black uppercase text-center leading-tight">{statsEv.home.name}</span>
+                </div>
+                <div className="flex flex-col items-center gap-1">
+                   <span className="text-4xl font-black tabular-nums tracking-tighter">
+                    {statsEv.state === 'pre' ? 'VS' : `${statsEv.home.score} - ${statsEv.away.score}`}
+                   </span>
+                   {statsEv.state === 'in' && <span className="text-[10px] font-black text-[#ef4444] animate-pulse">{statsEv.statusText}</span>}
+                </div>
+                <div className="flex-1 flex flex-col items-center gap-2">
+                   {statsEv.away.logo ? <img src={statsEv.away.logo} className="w-14 h-14 object-contain" alt="" /> : <div className="w-14 h-14 rounded-full bg-[#1c2128]" />}
+                   <span className="text-xs font-black uppercase text-center leading-tight">{statsEv.away.name}</span>
+                </div>
               </div>
-            )}
+              
+              <p className="text-center text-[10px] font-bold text-[#4a5568] uppercase tracking-[1px] mb-6">
+                {statsEv.leagueName} {statsEv.venue ? `· ${statsEv.venue}` : ''}
+              </p>
+
+              {/* Canales Disponibles */}
+              {(channelsFor[statsEv.id] || []).length > 0 && (
+                <div className="mb-6 space-y-2">
+                  <h4 className="text-[10px] font-black text-[#8a94a3] uppercase tracking-[2px] mb-3">Transmisión en vivo</h4>
+                  <div className="grid grid-cols-1 gap-2">
+                    {(channelsFor[statsEv.id] || []).map(ch => (
+                      <button 
+                        key={ch.stream_id}
+                        onClick={() => { playChannel(ch); setStatsEv(null); }}
+                        className="tv-focusable flex items-center justify-between p-3 rounded-xl bg-[#00c2e0]/10 border border-[#00c2e0]/30 hover:bg-[#00c2e0]/20 text-left transition-colors"
+                      >
+                         <div className="flex items-center gap-3">
+                           <Tv className="w-4 h-4 text-[#00c2e0]" />
+                           <span className="text-xs font-black uppercase text-[#f2f5f9]">{adjustTime(ch.name)}</span>
+                         </div>
+                         <Play className="w-4 h-4 text-[#00c2e0] fill-current" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Estadísticas */}
+              <div>
+                <h4 className="text-[10px] font-black text-[#8a94a3] uppercase tracking-[2px] mb-3">Estadísticas del partido</h4>
+                {stats === null ? (
+                  <div className="flex justify-center py-6"><RefreshCw className="w-6 h-6 text-[#1c2128] animate-spin" /></div>
+                ) : stats.length === 0 ? (
+                  <div className="flex flex-col items-center gap-2 py-6 opacity-30">
+                    <Info className="w-8 h-8" />
+                    <span className="text-[10px] font-bold uppercase">Sin datos disponibles aún</span>
+                  </div>
+                ) : (
+                  <div className="space-y-3 bg-[#111418] p-4 rounded-2xl border border-[#1c2128]">
+                    {stats.map((s) => (
+                      <div key={s.label} className="space-y-1">
+                        <div className="flex items-center justify-between text-[11px] font-black">
+                          <span className="text-[#f2f5f9]">{s.home}</span>
+                          <span className="text-[#4a5568] uppercase tracking-tighter">{s.label}</span>
+                          <span className="text-[#f2f5f9]">{s.away}</span>
+                        </div>
+                        <div className="flex h-1.5 bg-[#1c2128] rounded-full overflow-hidden">
+                           {/* Simple bar visualization */}
+                           <div className="h-full bg-[#00c2e0]" style={{ width: `${(parseInt(s.home) / (parseInt(s.home) + parseInt(s.away) || 1)) * 100}%` }} />
+                           <div className="h-full bg-white/10" style={{ width: '2px' }} />
+                           <div className="h-full bg-[#ef4444]" style={{ width: `${(parseInt(s.away) / (parseInt(s.home) + parseInt(s.away) || 1)) * 100}%` }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}
