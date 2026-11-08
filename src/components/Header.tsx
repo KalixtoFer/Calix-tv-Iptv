@@ -31,6 +31,61 @@ interface HeaderProps {
   onNavigate?: (section: ActiveSection) => void;
 }
 
+type NavItem = { id: 'events' | 'movies' | 'series'; label: string; icon: string };
+const NAV_ITEMS: NavItem[] = [
+  { id: 'events', label: 'Eventos en vivo', icon: '📅' },
+  { id: 'movies', label: 'Películas', icon: '🎬' },
+  { id: 'series', label: 'Series', icon: '📺' },
+];
+
+function TopNavButtons({ onNavigate }: { onNavigate: (id: NavItem['id']) => void }) {
+  const refs = React.useRef<(HTMLButtonElement | null)[]>([]);
+
+  const onKeyDown = (e: React.KeyboardEvent, i: number) => {
+    if (e.key === 'ArrowRight') {
+      if (refs.current[i + 1]) {
+        refs.current[i + 1]?.focus();
+        e.preventDefault();
+      }
+    }
+    if (e.key === 'ArrowLeft') {
+      if (refs.current[i - 1]) {
+        refs.current[i - 1]?.focus();
+        e.preventDefault();
+      }
+    }
+    if (e.key === 'ArrowDown') {
+      // volver a la lista de categorías/canales
+      const channelTarget = document.querySelector('[data-focus-zone="channels"] [tabindex="0"], [data-focus-zone="channels"] button') as HTMLElement | null;
+      const catTarget = document.querySelector('[data-focus-zone="categories"] [tabindex="0"], [data-focus-zone="categories"] button') as HTMLElement | null;
+      const target = channelTarget || catTarget || (document.querySelector('.tv-focusable') as HTMLElement | null);
+      if (target) {
+        target.focus();
+        e.preventDefault();
+      }
+    }
+    if (e.key === 'Enter') onNavigate(NAV_ITEMS[i].id);
+  };
+
+  return (
+    <div className="top-nav-buttons">
+      {NAV_ITEMS.map((item, i) => (
+        <button
+          key={item.id}
+          ref={el => { refs.current[i] = el; }}
+          tabIndex={0}
+          className="top-nav-btn tv-focusable"
+          onClick={() => onNavigate(item.id)}
+          onKeyDown={e => onKeyDown(e, i)}
+          onFocus={() => console.log(`[TopNav] Botón enfocado: ${item.label} (${item.id})`)}
+        >
+          <span>{item.icon}</span> {item.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export const Header: React.FC<HeaderProps> = ({
   appName = 'Calix Tv iptv Pro',
   version = 'v2.5.4',
@@ -129,23 +184,10 @@ export const Header: React.FC<HeaderProps> = ({
         </button>
       </div>
 
-      {/* Center: Navigation Shortcuts (TV & Tablet) */}
-      <div className="hidden lg:flex items-center gap-3 mx-4">
-        <button
-          onClick={() => onNavigate && onNavigate('movies')}
-          className="tv-focusable px-4 py-2 rounded-xl flex items-center gap-2 text-xs font-black uppercase tracking-widest text-zinc-400 hover:text-blue-400 bg-zinc-900/50 border border-zinc-800 hover:border-blue-500/50 transition-all cursor-pointer outline-none focus:ring-2 focus:ring-blue-500 focus:bg-blue-500/10"
-        >
-          <span className="text-sm">🎬</span>
-          <span>Películas</span>
-        </button>
-        <button
-          onClick={() => onNavigate && onNavigate('series')}
-          className="tv-focusable px-4 py-2 rounded-xl flex items-center gap-2 text-xs font-black uppercase tracking-widest text-zinc-400 hover:text-purple-400 bg-zinc-900/50 border border-zinc-800 hover:border-purple-500/50 transition-all cursor-pointer outline-none focus:ring-2 focus:ring-purple-500 focus:bg-purple-500/10"
-        >
-          <span className="text-sm">📺</span>
-          <span>Series</span>
-        </button>
-      </div>
+      {/* Center: Direct Access Navigation Shortcuts (TV & Tablet) */}
+      {viewMode !== 'mobile' && onNavigate && (
+        <TopNavButtons onNavigate={onNavigate} />
+      )}
 
       {/* Right: Status, Clock, Admin Settings */}
       <div className="flex items-center gap-2 sm:gap-3">

@@ -81,3 +81,38 @@
 .animate-pulse-subtle {
   animation: pulse-subtle 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+/* Top Nav Direct Access Buttons (TV & Tablet) */
+.top-nav-buttons {
+  display: flex;
+  gap: 1vw;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto; /* ocupa el espacio vacío del centro de la barra */
+}
+.top-nav-btn {
+  padding: 0.8vh 1.6vw;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: clamp(12px, 1.6vh, 18px);
+  white-space: nowrap;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+.top-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+.top-nav-btn:focus,
+.top-nav-btn:focus-visible {
+  outline: 3px solid #22d3ee !important;
+  box-shadow: 0 0 14px rgba(34, 211, 238, 0.6) !important;
+  background: rgba(34, 211, 238, 0.15) !important;
+  border-color: #22d3ee !important;
+}

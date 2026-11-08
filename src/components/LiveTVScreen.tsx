@@ -333,7 +333,7 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
       <div className="flex-1 grid grid-cols-[22%_34%_1fr] overflow-hidden p-3 gap-3">
         
         {/* COL 1: CATEGORÍAS (~22%) */}
-        <div className="flex flex-col overflow-hidden bg-[#0c0e18]/90 rounded-2xl border border-zinc-800/50 shadow-2xl">
+        <div data-focus-zone="categories" className="flex flex-col overflow-hidden bg-[#0c0e18]/90 rounded-2xl border border-zinc-800/50 shadow-2xl">
           <div className="px-4 py-3 border-b border-zinc-800/40 flex items-center justify-between">
             <h2 className="text-[10px] font-black text-cyan-400 uppercase tracking-[3px]">Categorías</h2>
             <span className="text-[10px] text-zinc-500 font-mono font-bold bg-zinc-900 px-1.5 py-0.5 rounded">
@@ -342,12 +342,20 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
           </div>
           
           <div className="flex-1 overflow-y-auto p-2 space-y-1.5 custom-scrollbar">
-            {categories.map((cat) => {
+            {categories.map((cat, catIdx) => {
               const isSelected = selectedCategoryId === cat.category_id;
               return (
                 <button
                   key={cat.category_id}
+                  tabIndex={0}
                   onClick={() => handleSelectCategory(cat.category_id)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'ArrowUp' && catIdx === 0) {
+                      e.preventDefault();
+                      const topBtn = document.querySelector<HTMLElement>('.top-nav-btn');
+                      topBtn?.focus();
+                    }
+                  }}
                   className={`tv-focusable group w-full text-left px-3.5 py-3 rounded-xl transition-all flex items-center justify-between border outline-none cursor-pointer ${
                     isSelected
                       ? 'bg-cyan-500/10 border-cyan-500/50 text-white'
@@ -365,7 +373,7 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
         </div>
 
         {/* COL 2: LISTA DE CANALES (~34%) */}
-        <div className="flex flex-col overflow-hidden bg-[#0c0e18]/90 rounded-2xl border border-zinc-800/50 shadow-2xl">
+        <div data-focus-zone="channels" className="flex flex-col overflow-hidden bg-[#0c0e18]/90 rounded-2xl border border-zinc-800/50 shadow-2xl">
           <div className="px-4 py-3 border-b border-zinc-800/40 flex flex-col gap-0.5">
             <div className="flex items-center justify-between">
               <h2 className="text-[10px] font-black text-white uppercase tracking-[2px]">Canales</h2>
@@ -394,11 +402,19 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
               return (
                 <button
                   key={stream.stream_id}
+                  tabIndex={0}
                   onFocus={() => handleChannelFocus(stream)}
                   onMouseEnter={() => handleChannelFocus(stream)}
                   onClick={() => {
                      setSelectedStream(stream);
                      if (isSelected) handleOpenFullscreen();
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'ArrowUp' && idx === 0) {
+                      e.preventDefault();
+                      const topBtn = document.querySelector<HTMLElement>('.top-nav-btn');
+                      topBtn?.focus();
+                    }
                   }}
                   className={`tv-focusable w-full text-left p-2 rounded-xl transition-all flex items-center gap-3 border outline-none cursor-pointer group ${
                     isSelected
