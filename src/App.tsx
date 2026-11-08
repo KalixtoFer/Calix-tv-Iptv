@@ -26,7 +26,10 @@ import { VideoPlayer } from './components/VideoPlayer';
 import { VirtualRemote } from './components/VirtualRemote';
 import { ApkExportGuideModal } from './components/ApkExportGuideModal';
 import { MobileBottomNav } from './components/MobileBottomNav';
+import { DeviceSelector } from './components/DeviceSelector';
+import { InitialLoader } from './components/InitialLoader';
 import { Loader2 } from 'lucide-react';
+import { dbService } from './services/db';
 import { ScreenOrientation } from '@capacitor/screen-orientation';
 import { App as CapacitorApp } from '@capacitor/app';
 
@@ -38,7 +41,9 @@ export default function App() {
 
   // Navigation State
   const [activeSection, setActiveSection] = useState<ActiveSection>('home');
-  const [viewMode, setViewMode] = useState<DeviceViewMode>(() => {
+  const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false);
+  const [isCheckingCache, setIsCheckingCache] = useState<boolean>(true);
+  const [viewMode, setViewMode] = useState<DeviceViewMode | null>(() => {
     try {
       const saved = localStorage.getItem('calixtv_device_mode') as DeviceViewMode | null;
       if (saved === 'mobile' || saved === 'tv') {
@@ -52,11 +57,14 @@ export default function App() {
     } catch {
       // fallback
     }
-    return 'mobile';
+    return null;
   });
+
+  const [hasChosenDevice, setHasChosenDevice] = useState<boolean>(!!viewMode);
 
   const handleViewModeChange = (mode: DeviceViewMode) => {
     setViewMode(mode);
+    setHasChosenDevice(true);
     try {
       localStorage.setItem('calixtv_device_mode', mode);
     } catch {}
@@ -78,11 +86,27 @@ export default function App() {
         const fetchedConfig = await iptvApi.fetchConfig();
         setConfig(fetchedConfig);
 
+        // Check cache
+        const [live, vod, series] = await Promise.all([
+          dbService.get('live'),
+          dbService.get('vod'),
+          dbService.get('series')
+        ]);
+        
+        if (live && vod && series) {
+          setIsDataLoaded(true);
+          // Apply cache to API service for immediate use
+          iptvApi.setStreamsCache('live', live.data);
+          iptvApi.setStreamsCache('vod', vod.data);
+          iptvApi.setStreamsCache('series', series.data);
+        }
 
         // Check if URL specifies /admin or #admin
         if (typeof window !== 'undefined' && (window.location.pathname === '/admin' || window.location.hash === '#admin')) {
           setIsAdminOpen(true);
-        }        const savedSession = iptvApi.getSavedSession();
+        }
+        
+        const savedSession = iptvApi.getSavedSession();
         if (savedSession) {
           setSession(savedSession);
         }
@@ -90,10 +114,43 @@ export default function App() {
         console.error('Initialization error:', err);
       } finally {
         setIsInitializing(false);
+        setIsCheckingCache(false);
       }
     }
     init();
   }, []);
+
+  // 1.1 Background Refresh: if loaded from cache, check for updates silently
+  useEffect(() => {
+    if (isDataLoaded && session && !isInitializing) {
+      // Small delay to let the app finish rendering the UI first
+      const timer = setTimeout(async () => {
+        try {
+          const username = session.username;
+          // Refresh each type
+          await Promise.all([
+            iptvApi.getStreams('live', username),
+            iptvApi.getStreams('vod', username),
+            iptvApi.getStreams('series', username)
+          ]);
+          // Sync with IndexedDB
+          const types: ('live' | 'vod' | 'series')[] = ['live', 'vod', 'series'];
+          for (const t of types) {
+            const fresh = await iptvApi.getStreams(t, username);
+            await dbService.set({
+              id: t,
+              data: fresh,
+              timestamp: Date.now(),
+              count: fresh.length
+            });
+          }
+        } catch (e) {
+          console.warn('Background refresh failed (silent):', e);
+        }
+      }, 10000); // 10 seconds after start
+      return () => clearTimeout(timer);
+    }
+  }, [isDataLoaded, session, isInitializing]);
 
   // 2. Play Stream Handler
   const handlePlayStream = useCallback((stream: {
@@ -294,7 +351,12 @@ export default function App() {
     );
   }
 
-  // If no session, show Login Screen (with OTA Update modal if available)
+  // Stage 1: Device Selection (One-time)
+  if (!hasChosenDevice || !viewMode) {
+    return <DeviceSelector onSelect={handleViewModeChange} />;
+  }
+
+  // If no session, show Login Screen
   if (!session) {
     return (
       <div className="relative min-h-screen">
@@ -307,6 +369,16 @@ export default function App() {
           onEnterGuest={handleEnterGuestMode}
         />
       </div>
+    );
+  }
+
+  // Stage 2: Initial Data Loading (One-time or when cleared)
+  if (!isDataLoaded) {
+    return (
+      <InitialLoader 
+        username={session.username} 
+        onComplete={() => setIsDataLoaded(true)} 
+      />
     );
   }
 
@@ -452,6 +524,8 @@ export default function App() {
           onClose={() => setIsProfileOpen(false)}
           onLogout={handleLogout}
           onOpenAdminPanel={() => setIsAdminOpen(true)}
+          viewMode={viewMode || 'mobile'}
+          onChangeViewMode={handleViewModeChange}
         />
       )}
 

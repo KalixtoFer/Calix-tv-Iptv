@@ -7,12 +7,9 @@ import {
   Tv,
   LogOut,
   X,
-  Sparkles,
-  Wifi,
+  Smartphone,
   Settings,
   CheckCircle2,
-  AlertCircle,
-  Smartphone,
 } from 'lucide-react';
 import { XtreamUserInfo } from '../types/iptv';
 
@@ -22,6 +19,8 @@ interface UserProfileModalProps {
   onClose: () => void;
   onLogout: () => void;
   onOpenAdminPanel?: () => void;
+  viewMode: 'tv' | 'mobile' | 'web';
+  onChangeViewMode: (mode: 'tv' | 'mobile') => void;
 }
 
 export const UserProfileModal: React.FC<UserProfileModalProps> = ({
@@ -30,6 +29,8 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   onClose,
   onLogout,
   onOpenAdminPanel,
+  viewMode,
+  onChangeViewMode,
 }) => {
   // 1. Format Expiration Date
   const formatExpDate = (expTimestamp?: string) => {
@@ -164,7 +165,6 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
           {/* Subscription Details Grid */}
           <div className="grid grid-cols-2 gap-3">
-            {/* Connections Limit */}
             <div className="p-3.5 rounded-2xl bg-zinc-900/70 border border-zinc-800 space-y-1">
               <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
                 <Tv className="w-3.5 h-3.5 text-cyan-400" /> Dispositivos
@@ -174,7 +174,6 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
               </span>
             </div>
 
-            {/* Creation Date */}
             <div className="p-3.5 rounded-2xl bg-zinc-900/70 border border-zinc-800 space-y-1">
               <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5 text-cyan-400" /> Alta de Cuenta
@@ -182,6 +181,40 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
               <span className="text-sm font-black text-white block font-mono">
                 {createdDateStr}
               </span>
+            </div>
+          </div>
+
+          {/* Device Mode Selection */}
+          <div className="p-4 rounded-2xl bg-zinc-900/40 border border-zinc-800 space-y-3 shadow-inner">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
+                <Settings className="w-3.5 h-3.5 text-cyan-400" /> Modo de Interfaz
+              </span>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-2 p-1 bg-zinc-950 rounded-xl border border-zinc-800">
+              <button
+                onClick={() => onChangeViewMode('mobile')}
+                className={`py-2 px-3 rounded-lg text-xs font-black flex items-center justify-center gap-2 transition cursor-pointer ${
+                  viewMode === 'mobile'
+                    ? 'bg-cyan-500 text-black shadow-lg shadow-cyan-500/20'
+                    : 'text-zinc-500 hover:text-white'
+                }`}
+              >
+                <Smartphone className="w-4 h-4" />
+                <span>MÓVIL</span>
+              </button>
+              <button
+                onClick={() => onChangeViewMode('tv')}
+                className={`py-2 px-3 rounded-lg text-xs font-black flex items-center justify-center gap-2 transition cursor-pointer ${
+                  viewMode === 'tv'
+                    ? 'bg-cyan-500 text-black shadow-lg shadow-cyan-500/20'
+                    : 'text-zinc-500 hover:text-white'
+                }`}
+              >
+                <Tv className="w-4 h-4" />
+                <span>TV / BOX</span>
+              </button>
             </div>
           </div>
 
@@ -209,7 +242,6 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
               <span>CERRAR SESIÓN DE ESTE DISPOSITIVO</span>
             </button>
 
-            {/* Subtle Admin Panel Link */}
             {onOpenAdminPanel && (
               <div className="text-center pt-2">
                 <button

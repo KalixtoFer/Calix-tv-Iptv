@@ -45,6 +45,10 @@ class IptvApiService {
   private categoryCache: Map<string, any[]> = new Map();
   private streamCache: Map<string, any[]> = new Map();
 
+  setStreamsCache(type: string, data: any[], categoryId?: string) {
+    this.streamCache.set(`${type}_${categoryId || 'all'}`, data);
+  }
+
   private getEffectivePassword(overridePass?: string): string {
     if (overridePass && overridePass !== '•••' && overridePass.trim() !== '') return overridePass;
     if (this.activePassword && this.activePassword !== '•••' && this.activePassword.trim() !== '') return this.activePassword;
