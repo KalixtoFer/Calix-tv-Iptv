@@ -84,11 +84,13 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
         {/* Top Modal Header */}
         <div className="px-6 py-5 border-b border-zinc-800/80 flex items-center justify-between relative z-10">
           <div className="flex items-center gap-3">
-            <img
-              src="/logo.png"
-              alt="Calix TV"
-              className="h-9 w-auto object-contain drop-shadow-[0_0_10px_rgba(6,182,212,0.6)]"
-            />
+            <div className="w-10 h-10 rounded-xl overflow-hidden bg-[#05070a] border border-zinc-800 shadow-[0_0_12px_rgba(6,182,212,0.4)]">
+              <img
+                src="/logo_icon.png"
+                alt="Calix TV"
+                className="w-full h-full object-cover"
+              />
+            </div>
             <div>
               <h2 className="text-base font-black text-white tracking-wide uppercase leading-tight">
                 Mi Cuenta • Perfil

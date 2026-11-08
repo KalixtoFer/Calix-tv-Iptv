@@ -133,11 +133,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         {/* Top Header Mobile */}
         <div className="flex items-center justify-between pb-3 border-b border-zinc-800/80 z-20">
           <div className="flex items-center gap-2.5">
-            <img
-              src="/logo.png"
-              alt="CALIX TV"
-              className="h-12 sm:h-14 w-auto object-contain drop-shadow-[0_0_15px_rgba(6,182,212,0.6)]"
-            />
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl overflow-hidden bg-[#05070a] border border-zinc-800 shadow-[0_0_15px_rgba(6,182,212,0.4)]">
+              <img
+                src="/logo_icon.png"
+                alt="CALIX TV"
+                className="w-full h-full object-cover"
+              />
+            </div>
             <div>
               <span className="text-[10px] font-bold text-cyan-400 tracking-wider">
                 Móvil • Tu Servicio Digital
@@ -387,11 +389,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       <div className="flex items-center justify-between w-full z-20 pb-1">
         {/* Top Left: CALIX TV Branding */}
         <div className="flex items-center gap-3">
-          <img
-            src="/logo.png"
-            alt="CALIX TV"
-            className="h-12 sm:h-14 md:h-16 w-auto object-contain drop-shadow-[0_0_20px_rgba(6,182,212,0.6)]"
-          />
+          <div className="h-12 sm:h-14 md:h-16 aspect-square rounded-2xl overflow-hidden bg-[#05070a] border-2 border-zinc-800 shadow-[0_0_20px_rgba(6,182,212,0.5)]">
+            <img
+              src="/logo_icon.png"
+              alt="CALIX TV"
+              className="w-full h-full object-cover"
+            />
+          </div>
           <div className="hidden sm:flex flex-col leading-tight">
             <span className="text-xs font-bold text-cyan-400 tracking-wider">
               {isWeb ? 'Versión Web • PC' : 'Tu Servicio Digital'}

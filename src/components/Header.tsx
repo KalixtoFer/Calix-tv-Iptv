@@ -92,11 +92,11 @@ export const Header: React.FC<HeaderProps> = ({
           title="Ir a Inicio"
         >
           {/* Official Calix TV Logo Image */}
-          <div className="relative group-hover:scale-105 transition-transform">
+          <div className="relative group-hover:scale-105 transition-transform w-10 h-10 sm:w-11 sm:h-11 rounded-xl overflow-hidden bg-[#05070a] border border-zinc-800 shadow-[0_0_15px_rgba(6,182,212,0.3)]">
             <img
-              src="/logo.png"
+              src="/logo_icon.png"
               alt="Calix TV"
-              className="h-10 sm:h-11 w-auto object-contain drop-shadow-[0_0_12px_rgba(6,182,212,0.5)]"
+              className="w-full h-full object-cover"
             />
           </div>
 

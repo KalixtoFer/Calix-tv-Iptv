@@ -107,10 +107,10 @@ const DEFAULT_CONFIG: CentralizedConfig = {
   },
   demoModeEnabled: true,
   appUpdate: {
-    latestVersion: '1.1',
+    latestVersion: '1.0',
     minVersion: '1.0',
     apkDownloadUrl: 'https://github.com/KalixtoFer/calixtvapp/releases/latest/download/CalixTV.apk',
-    releaseNotes: 'Versión 1.1 oficial con mejoras de velocidad, estabilidad en reproductor y agenda deportiva.',
+    releaseNotes: 'Versión oficial Calix TV.',
     forceUpdate: false,
     publishedAt: '2026-11-05',
   },

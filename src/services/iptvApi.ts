@@ -755,7 +755,7 @@ class IptvApiService {
       hasUploadedApk: false,
       sizeFormatted: '0 MB',
       mtime: null,
-      latestVersion: '1.1',
+      latestVersion: '1.0',
       apkDownloadUrl: '/api/iptv/download-apk',
       releaseNotes: '',
       forceUpdate: false,
@@ -782,14 +782,6 @@ class IptvApiService {
     forceUpdate: boolean;
     publishedAt?: string;
   }> {
-    try {
-      const res = await fetch(`/api/iptv/check-update?currentVersion=${encodeURIComponent(currentVersion)}`);
-      if (res.ok) {
-        return await res.json();
-      }
-    } catch (e) {
-      console.warn('Update check error:', e);
-    }
     return {
       hasUpdate: false,
       currentVersion,

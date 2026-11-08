@@ -141,11 +141,13 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
         {/* Logo & Branding */}
         <div className="text-center space-y-2">
           <div className="flex justify-center mb-1">
-            <img
-              src="/logo.png"
-              alt="Calix TV"
-              className="h-24 sm:h-28 w-auto object-contain drop-shadow-[0_0_30px_rgba(6,182,212,0.7)]"
-            />
+            <div className="h-24 sm:h-28 aspect-square rounded-3xl overflow-hidden bg-[#05070a] border-2 border-zinc-800 shadow-[0_0_30px_rgba(6,182,212,0.4)]">
+              <img
+                src="/logo_icon.png"
+                alt="Calix TV"
+                className="w-full h-full object-cover"
+              />
+            </div>
           </div>
 
           <p className="text-[10px] text-cyan-400/60 font-bold tracking-[4px] uppercase mt-2">
