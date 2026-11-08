@@ -129,27 +129,20 @@ export const Header: React.FC<HeaderProps> = ({
         </button>
       </div>
 
-      {/* Center: Navigation Shortcuts (TV & Web) */}
-      <div className="hidden lg:flex items-center gap-1.5 mx-4">
-        <button
-          onClick={() => onNavigate && onNavigate('live')}
-          className="tv-focusable px-3 py-2 rounded-xl flex items-center gap-2 text-xs font-black uppercase tracking-wider text-zinc-400 hover:text-cyan-400 hover:bg-cyan-500/10 transition-all cursor-pointer"
-        >
-          <Radio className="w-4 h-4 text-cyan-500" />
-          <span>TV en Vivo</span>
-        </button>
+      {/* Center: Navigation Shortcuts (TV & Tablet) */}
+      <div className="hidden lg:flex items-center gap-3 mx-4">
         <button
           onClick={() => onNavigate && onNavigate('movies')}
-          className="tv-focusable px-3 py-2 rounded-xl flex items-center gap-2 text-xs font-black uppercase tracking-wider text-zinc-400 hover:text-blue-400 hover:bg-blue-500/10 transition-all cursor-pointer"
+          className="tv-focusable px-4 py-2 rounded-xl flex items-center gap-2 text-xs font-black uppercase tracking-widest text-zinc-400 hover:text-blue-400 bg-zinc-900/50 border border-zinc-800 hover:border-blue-500/50 transition-all cursor-pointer outline-none focus:ring-2 focus:ring-blue-500 focus:bg-blue-500/10"
         >
-          <Monitor className="w-4 h-4 text-blue-500" />
+          <span className="text-sm">🎬</span>
           <span>Películas</span>
         </button>
         <button
           onClick={() => onNavigate && onNavigate('series')}
-          className="tv-focusable px-3 py-2 rounded-xl flex items-center gap-2 text-xs font-black uppercase tracking-wider text-zinc-400 hover:text-purple-400 hover:bg-purple-500/10 transition-all cursor-pointer"
+          className="tv-focusable px-4 py-2 rounded-xl flex items-center gap-2 text-xs font-black uppercase tracking-widest text-zinc-400 hover:text-purple-400 bg-zinc-900/50 border border-zinc-800 hover:border-purple-500/50 transition-all cursor-pointer outline-none focus:ring-2 focus:ring-purple-500 focus:bg-purple-500/10"
         >
-          <Tv className="w-4 h-4 text-purple-500" />
+          <span className="text-sm">📺</span>
           <span>Series</span>
         </button>
       </div>
