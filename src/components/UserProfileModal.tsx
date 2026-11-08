@@ -186,36 +186,90 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
             </div>
           </div>
 
-          {/* Device Mode Selection */}
-          <div className="p-4 rounded-2xl bg-zinc-900/40 border border-zinc-800 space-y-3 shadow-inner">
+          {/* Tipo de dispositivo (Ajustes con navegación D-pad y soporte táctil) */}
+          <div className="setting-row p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-3 shadow-inner">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-                <Settings className="w-3.5 h-3.5 text-cyan-400" /> Modo de Interfaz
+              <span className="text-xs font-black text-white uppercase tracking-wider flex items-center gap-1.5">
+                <Settings className="w-3.5 h-3.5 text-cyan-400" /> Tipo de dispositivo
+              </span>
+              <span className="text-[11px] font-semibold text-cyan-400 font-mono">
+                {viewMode === 'mobile' ? '📱 Celular Activo' : '📺 Android TV Activo'}
               </span>
             </div>
             
-            <div className="grid grid-cols-2 gap-2 p-1 bg-zinc-950 rounded-xl border border-zinc-800">
+            <div className="segmented grid grid-cols-2 gap-2 p-1.5 bg-zinc-950 rounded-xl border border-zinc-800/80">
               <button
-                onClick={() => onChangeViewMode('mobile')}
-                className={`py-2 px-3 rounded-lg text-xs font-black flex items-center justify-center gap-2 transition cursor-pointer ${
+                tabIndex={0}
+                onClick={() => {
+                  try {
+                    localStorage.setItem('deviceMode', 'mobile');
+                    localStorage.setItem('calixtv_device_mode', 'mobile');
+                  } catch {}
+                  if (typeof document !== 'undefined') {
+                    document.documentElement.classList.toggle('tv-mode', false);
+                    document.documentElement.classList.toggle('mobile-mode', true);
+                  }
+                  onChangeViewMode('mobile');
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    try {
+                      localStorage.setItem('deviceMode', 'mobile');
+                      localStorage.setItem('calixtv_device_mode', 'mobile');
+                    } catch {}
+                    if (typeof document !== 'undefined') {
+                      document.documentElement.classList.toggle('tv-mode', false);
+                      document.documentElement.classList.toggle('mobile-mode', true);
+                    }
+                    onChangeViewMode('mobile');
+                  }
+                }}
+                className={`tv-focusable py-3 px-3 rounded-xl text-xs font-black flex items-center justify-center gap-2 transition cursor-pointer outline-none focus:ring-2 focus:ring-cyan-400 focus:scale-[1.02] ${
                   viewMode === 'mobile'
-                    ? 'bg-cyan-500 text-black shadow-lg shadow-cyan-500/20'
-                    : 'text-zinc-500 hover:text-white'
+                    ? 'active bg-gradient-to-r from-cyan-500 to-blue-600 text-black shadow-lg shadow-cyan-500/30'
+                    : 'text-zinc-400 hover:text-white bg-zinc-900/50 hover:bg-zinc-800/80'
                 }`}
+                title="Cambiar a Modo Celular"
               >
                 <Smartphone className="w-4 h-4" />
-                <span>MÓVIL</span>
+                <span>📱 Celular</span>
               </button>
+
               <button
-                onClick={() => onChangeViewMode('tv')}
-                className={`py-2 px-3 rounded-lg text-xs font-black flex items-center justify-center gap-2 transition cursor-pointer ${
+                tabIndex={0}
+                onClick={() => {
+                  try {
+                    localStorage.setItem('deviceMode', 'tv');
+                    localStorage.setItem('calixtv_device_mode', 'tv');
+                  } catch {}
+                  if (typeof document !== 'undefined') {
+                    document.documentElement.classList.toggle('tv-mode', true);
+                    document.documentElement.classList.toggle('mobile-mode', false);
+                  }
+                  onChangeViewMode('tv');
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    try {
+                      localStorage.setItem('deviceMode', 'tv');
+                      localStorage.setItem('calixtv_device_mode', 'tv');
+                    } catch {}
+                    if (typeof document !== 'undefined') {
+                      document.documentElement.classList.toggle('tv-mode', true);
+                      document.documentElement.classList.toggle('mobile-mode', false);
+                    }
+                    onChangeViewMode('tv');
+                  }
+                }}
+                className={`tv-focusable py-3 px-3 rounded-xl text-xs font-black flex items-center justify-center gap-2 transition cursor-pointer outline-none focus:ring-2 focus:ring-cyan-400 focus:scale-[1.02] ${
                   viewMode === 'tv'
-                    ? 'bg-cyan-500 text-black shadow-lg shadow-cyan-500/20'
-                    : 'text-zinc-500 hover:text-white'
+                    ? 'active bg-gradient-to-r from-cyan-500 to-blue-600 text-black shadow-lg shadow-cyan-500/30'
+                    : 'text-zinc-400 hover:text-white bg-zinc-900/50 hover:bg-zinc-800/80'
                 }`}
+                title="Cambiar a Modo Android TV"
               >
                 <Tv className="w-4 h-4" />
-                <span>TV / BOX</span>
+                <span>📺 Android TV</span>
               </button>
             </div>
           </div>

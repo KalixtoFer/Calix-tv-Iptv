@@ -3,22 +3,29 @@
   <head>
     <meta charset="UTF-8" />
     <script>
-      // Defensive fix for "TypeError: Cannot set property fetch of #<Window> which has only a getter"
-      // This happens when extensions try to intercept fetch in a protected environment like AI Studio.
+      // Defensive fix for extensions attempting to overwrite window.fetch
       (function() {
         try {
-          const descriptor = Object.getOwnPropertyDescriptor(window, 'fetch');
-          if (descriptor && descriptor.get && !descriptor.set) {
-            Object.defineProperty(window, 'fetch', {
-              configurable: true,
-              enumerable: true,
-              get: descriptor.get,
-              set: function(v) { 
-                console.warn('Blocked attempt to overwrite fetch by an extension/interceptor.');
-              }
-            });
-          }
-        } catch (e) {}
+          var _f = window.fetch;
+          Object.defineProperty(window, 'fetch', {
+            configurable: true,
+            enumerable: true,
+            get: function() { return _f; },
+            set: function(v) { _f = v; }
+          });
+        } catch (e) {
+          try {
+            if (typeof Window !== 'undefined' && Window.prototype) {
+              var _pf = Window.prototype.fetch;
+              Object.defineProperty(Window.prototype, 'fetch', {
+                configurable: true,
+                enumerable: true,
+                get: function() { return _pf; },
+                set: function(v) { _pf = v; }
+              });
+            }
+          } catch (e2) {}
+        }
       })();
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />

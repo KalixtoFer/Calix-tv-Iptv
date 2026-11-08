@@ -46,8 +46,12 @@ export default function App() {
   const [isCheckingCache, setIsCheckingCache] = useState<boolean>(true);
   const [viewMode, setViewMode] = useState<DeviceViewMode | null>(() => {
     try {
-      const saved = localStorage.getItem('calixtv_device_mode') as DeviceViewMode | null;
+      const saved = (localStorage.getItem('deviceMode') || localStorage.getItem('calixtv_device_mode')) as DeviceViewMode | null;
       if (saved === 'mobile' || saved === 'tv') {
+        if (typeof document !== 'undefined') {
+          document.documentElement.classList.toggle('tv-mode', saved === 'tv');
+          document.documentElement.classList.toggle('mobile-mode', saved === 'mobile');
+        }
         return saved;
       }
       if (typeof window !== 'undefined') {
@@ -67,8 +71,13 @@ export default function App() {
     setViewMode(mode);
     setHasChosenDevice(true);
     try {
+      localStorage.setItem('deviceMode', mode);
       localStorage.setItem('calixtv_device_mode', mode);
     } catch {}
+    if (typeof document !== 'undefined') {
+      document.documentElement.classList.toggle('tv-mode', mode === 'tv');
+      document.documentElement.classList.toggle('mobile-mode', mode === 'mobile');
+    }
   };
 
   // Modals
