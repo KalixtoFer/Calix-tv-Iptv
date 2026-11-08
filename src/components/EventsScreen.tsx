@@ -72,7 +72,7 @@ interface CardProps {
   onFind: (ev: SportEvent) => void;
 }
 
-const TeamRow = React.memo(({ t, ev, fav, onFav }: { t: SportTeam; ev: SportEvent; fav: boolean; onFav: () => void }) => (
+const TeamRow = React.memo(({ t, ev, fav, isTv, onFav }: { t: SportTeam; ev: SportEvent; fav: boolean; isTv: boolean; onFav: () => void }) => (
   <div className="flex items-center gap-2 py-0.5">
     {t.logo ? (
       <img src={t.logo} alt="" loading="lazy" className="w-5 h-5 object-contain shrink-0" />
@@ -85,34 +85,111 @@ const TeamRow = React.memo(({ t, ev, fav, onFav }: { t: SportTeam; ev: SportEven
         {t.score}
       </span>
     )}
-    <button
-      type="button"
-      onClick={(e) => {
-        e.stopPropagation();
-        onFav();
-      }}
-      className="tv-focusable p-1 rounded-md cursor-pointer hover:bg-white/10 transition-colors ml-1"
-    >
-      <Star className={`w-3.5 h-3.5 ${fav ? 'fill-[#00c2e0] text-[#00c2e0]' : 'text-[#4a5568]'}`} />
-    </button>
+    {!isTv && (
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onFav();
+        }}
+        className="p-1 rounded-md text-[#4a5568] ml-1 hover:bg-white/10 transition-colors"
+      >
+        <Star className={`w-3.5 h-3.5 ${fav ? 'fill-[#00c2e0] text-[#00c2e0]' : ''}`} />
+      </button>
+    )}
   </div>
 ));
 
 const EventCard = React.memo(({ ev, channels, favs, onFav, onPlayChannel, onStats, onFind }: CardProps) => {
   const live = ev.state === 'in';
   const isFav = (t: SportTeam) => favs.includes(`${ev.sport}:${t.id}`);
+  const isTv = document.body.classList.contains('tv-overscan') || window.innerWidth > 1024;
+  
+  const [isLongPressing, setIsLongPressing] = useState(false);
+  const timerRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  const handleLongPress = () => {
+    setIsLongPressing(true);
+    onFav(ev.home, ev.sport); // Toggle favorite for home team as representative
+    setTimeout(() => setIsLongPressing(false), 1200);
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === 'OK') {
+      if (!timerRef.current) {
+        timerRef.current = setTimeout(() => {
+          handleLongPress();
+          timerRef.current = null;
+        }, 600);
+      }
+    }
+  };
+
+  const onKeyUp = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === 'OK') {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+        // Normal click
+        if (channels.length === 1) onPlayChannel(channels[0]);
+        else if (channels.length > 1) onStats(ev);
+        else onFind(ev);
+      }
+    }
+  };
+
+  // For touch devices (Tablet)
+  const onTouchStart = () => {
+    timerRef.current = setTimeout(() => {
+      handleLongPress();
+      timerRef.current = null;
+    }, 600);
+  };
+
+  const onTouchEnd = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  };
 
   return (
     <div
-      onClick={() => {
-        if (channels.length === 1) onPlayChannel(channels[0]);
-        else if (channels.length > 1) onStats(ev); // Abrir detalle si hay múltiples opciones o stats
-        else onFind(ev);
+      tabIndex={0}
+      onFocus={(e) => {
+        if (isTv) {
+          e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
       }}
-      className={`tv-focusable group relative bg-[#111418] border border-[#1c2128] rounded-xl p-2.5 cursor-pointer transition-all hover:border-[#00c2e0]/50 active:scale-[0.98] ${
+      onKeyDown={onKeyDown}
+      onKeyUp={onKeyUp}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+      onMouseDown={onTouchStart}
+      onMouseUp={onTouchEnd}
+      onMouseLeave={onTouchEnd}
+      onClick={() => {
+        if (!isTv) {
+          if (channels.length === 1) onPlayChannel(channels[0]);
+          else if (channels.length > 1) onStats(ev);
+          else onFind(ev);
+        }
+      }}
+      className={`tv-focusable group relative bg-[#111418] border border-[#1c2128] rounded-xl p-2.5 cursor-pointer transition-all outline-none 
+        focus:ring-2 focus:ring-[#00c2e0] focus:border-[#00c2e0] focus:shadow-[0_0_15px_rgba(0,194,224,0.4)]
+        hover:border-[#00c2e0]/50 active:scale-[0.98] ${
         live ? 'shadow-[inset_2px_0_0_0_#ef4444]' : ''
       }`}
     >
+      {isLongPressing && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/80 rounded-xl animate-in fade-in zoom-in duration-200">
+           <div className="flex flex-col items-center gap-2">
+              <Star className="w-10 h-10 text-[#00c2e0] fill-[#00c2e0] animate-bounce" />
+              <span className="text-[10px] font-black uppercase text-white tracking-widest">Favorito</span>
+           </div>
+        </div>
+      )}
+
       {/* Header: Liga y Estado */}
       <div className="flex items-center justify-between mb-1.5 border-b border-[#1c2128]/50 pb-1">
         <span className="text-[10px] font-bold text-[#8a94a3] uppercase tracking-wider truncate max-w-[70%]">
@@ -138,11 +215,11 @@ const EventCard = React.memo(({ ev, channels, favs, onFav, onPlayChannel, onStat
 
       {/* Equipos y Marcador */}
       <div className="space-y-0.5">
-        <TeamRow t={ev.home} ev={ev} fav={isFav(ev.home)} onFav={() => onFav(ev.home, ev.sport)} />
-        <TeamRow t={ev.away} ev={ev} fav={isFav(ev.away)} onFav={() => onFav(ev.away, ev.sport)} />
+        <TeamRow t={ev.home} ev={ev} fav={isFav(ev.home)} isTv={isTv} onFav={() => onFav(ev.home, ev.sport)} />
+        <TeamRow t={ev.away} ev={ev} fav={isFav(ev.away)} isTv={isTv} onFav={() => onFav(ev.away, ev.sport)} />
       </div>
 
-      {/* Botones de acción rápidos (solo visibles en hover o TV focus) */}
+      {/* Footer Info */}
       <div className="flex items-center justify-end gap-2 mt-1.5 pt-1.5 border-t border-[#1c2128]/30 group-hover:border-[#1c2128]">
         {channels.length > 0 && (
           <div className="flex items-center gap-1 mr-auto">
@@ -150,16 +227,24 @@ const EventCard = React.memo(({ ev, channels, favs, onFav, onPlayChannel, onStat
              <span className="text-[9px] font-bold text-[#00c2e0]">{channels.length} {channels.length === 1 ? 'canal' : 'canales'}</span>
           </div>
         )}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onStats(ev);
-          }}
-          className="tv-focusable text-[10px] font-black text-[#00c2e0] uppercase px-2 py-0.5 rounded bg-[#00c2e0]/5 border border-transparent hover:border-[#00c2e0]/30 transition"
-        >
-          Detalles
-        </button>
+        
+        {isTv ? (
+           <div className="flex items-center gap-2 opacity-40 group-focus:opacity-100 transition-opacity">
+              { (isFav(ev.home) || isFav(ev.away)) && <Star className="w-3 h-3 text-[#00c2e0] fill-[#00c2e0]" /> }
+              <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">OK: Detalles</span>
+           </div>
+        ) : (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onStats(ev);
+            }}
+            className="text-[10px] font-black text-[#00c2e0] uppercase px-2 py-0.5 rounded bg-[#00c2e0]/5 border border-transparent hover:border-[#00c2e0]/30 transition"
+          >
+            Detalles
+          </button>
+        )}
       </div>
     </div>
   );
