@@ -94,6 +94,10 @@ public class PlayerActivity extends Activity {
     private long prepareStartTimeMs = 0;
     private String lastReportedVideoDecoder = null;
 
+    // Canal y MediaItem guardados para desconectar en onStop y reenganchar al directo en onStart
+    private String savedChannelUrl = null;
+    private MediaItem savedMediaItem = null;
+
     // 3) FLAG DE ARRANQUE RÁPIDO CON PLAN B:
     // Permite iniciar la decodificación inmediatamente en cualquier keyframe no-IDR para reducir latencia inicial.
     // Si en algún equipo o stream específico aparecen cuadros verdes o pixelados al iniciar el canal,
@@ -277,6 +281,8 @@ public class PlayerActivity extends Activity {
         Log.d(TAG, "playCurrentMedia -> prepare() llamado para URL: " + effectiveUrl + " (título: " + title + ")");
 
         MediaItem mediaItem = MediaItem.fromUri(Uri.parse(effectiveUrl));
+        savedChannelUrl = url;
+        savedMediaItem = mediaItem;
         player.setMediaItem(mediaItem);
         if (startMs > 0) {
             player.seekTo(startMs);
@@ -316,7 +322,33 @@ public class PlayerActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
-        playCurrentMedia();
+        initPlayer();
+
+        if (savedMediaItem != null || (savedChannelUrl != null && !savedChannelUrl.isEmpty())) {
+            Log.d(TAG, "onStart: reenganchando al directo del canal guardado: " + (title != null ? title : savedChannelUrl));
+            setBuffering(true);
+            prepareStartTimeMs = System.currentTimeMillis();
+            lastReportedVideoDecoder = null;
+            startupRetryCount = 0;
+            hideRetryNotice();
+            if (errorView != null) {
+                errorView.setVisibility(View.GONE);
+            }
+
+            if (savedMediaItem != null) {
+                player.setMediaItem(savedMediaItem);
+            } else {
+                String effectiveUrl = getEffectiveStreamUrl(savedChannelUrl);
+                savedMediaItem = MediaItem.fromUri(Uri.parse(effectiveUrl));
+                player.setMediaItem(savedMediaItem);
+            }
+            player.prepare();
+            player.play();
+            startProgressUpdates();
+        } else {
+            Log.d(TAG, "onStart: iniciando reproducción de canal: " + title);
+            playCurrentMedia();
+        }
     }
 
     @Override
@@ -328,8 +360,18 @@ public class PlayerActivity extends Activity {
             long dur = player.getDuration();
             if (dur > 0 && dur != C.TIME_UNSET) length = dur;
             startMs = lastTime;
-            // 4) Pausar el reproductor en onStop() para soltar el consumo de datos
-            player.pause();
+
+            // Guardar la URL y el MediaItem actual antes de detener
+            if (player.getCurrentMediaItem() != null) {
+                savedMediaItem = player.getCurrentMediaItem();
+            }
+            if (url != null && !url.isEmpty()) {
+                savedChannelUrl = url;
+            }
+
+            Log.d(TAG, "onStop: cerrando conexión con proveedor IPTV (player.stop()) y liberando buffer (player.clearMediaItems()). Canal guardado: " + (title != null ? title : savedChannelUrl));
+            player.stop();
+            player.clearMediaItems();
         }
     }
 
@@ -338,10 +380,12 @@ public class PlayerActivity extends Activity {
         super.onDestroy();
         ui.removeCallbacksAndMessages(null);
         stopProgressUpdates();
+        savedMediaItem = null;
+        savedChannelUrl = null;
         if (player != null) {
-            // 4) Liberar completamente ExoPlayer al destruir la Activity para soltar
-            // el decodificador de hardware y la conexión con el servidor IPTV
-            Log.d(TAG, "Liberando instancia de ExoPlayer al destruir Activity");
+            // Liberar completamente ExoPlayer al destruir la Activity para soltar
+            // el decodificador de hardware y los recursos del sistema
+            Log.d(TAG, "onDestroy: liberando instancia de ExoPlayer (player.release())");
             player.removeListener(playerListener);
             player.removeAnalyticsListener(analyticsListener);
             player.stop();
