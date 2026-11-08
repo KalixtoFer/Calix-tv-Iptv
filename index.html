@@ -2,6 +2,25 @@
 <html lang="es" class="dark">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      // Defensive fix for "TypeError: Cannot set property fetch of #<Window> which has only a getter"
+      // This happens when extensions try to intercept fetch in a protected environment like AI Studio.
+      (function() {
+        try {
+          const descriptor = Object.getOwnPropertyDescriptor(window, 'fetch');
+          if (descriptor && descriptor.get && !descriptor.set) {
+            Object.defineProperty(window, 'fetch', {
+              configurable: true,
+              enumerable: true,
+              get: descriptor.get,
+              set: function(v) { 
+                console.warn('Blocked attempt to overwrite fetch by an extension/interceptor.');
+              }
+            });
+          }
+        } catch (e) {}
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>Calix TV - Tu Servicio Digital</title>
     <meta name="description" content="Calix TV - Tu Servicio Digital. Aplicación IPTV profesional para Android TV, TV Box y smartphones con soporte Xtream Codes." />

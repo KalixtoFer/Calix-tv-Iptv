@@ -162,8 +162,8 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
         if (!raw) return prev;
         item = {
           id: normId,
-          originalName: raw.category_name,
-          displayName: raw.category_name,
+          sourceGroup: raw.category_name,
+          name: raw.category_name,
           hidden: false,
           pinned: false,
           order: current.length + 1
@@ -174,7 +174,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
       if (action === 'show') item.hidden = false;
       if (action === 'pin') item.pinned = true;
       if (action === 'unpin') item.pinned = false;
-      if (action === 'rename') item.displayName = value || item.originalName;
+      if (action === 'rename') item.name = value || item.sourceGroup || item.id;
 
       const newConfig = { ...prev.categoriesConfig };
       const list = [...(newConfig[catTab] || [])];
@@ -193,8 +193,8 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
           const found = list.find(l => l.id === nid);
           return found || {
             id: nid,
-            originalName: c.category_name,
-            displayName: c.category_name,
+            sourceGroup: c.category_name,
+            name: c.category_name,
             hidden: false,
             pinned: false,
             order: 9999
@@ -1297,10 +1297,14 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       ) : (
                         currentCategories.map((cat, idx) => {
                           const normId = iptvApi.normalizeCategoryName(cat.category_name);
-                          const conf = config.categoriesConfig?.[catTab]?.find(c => c.id === normId);
+                          const conf = config.categoriesConfig?.[catTab]?.find(c => 
+                            c.id === normId || 
+                            iptvApi.normalizeName(c.sourceGroup || '') === normId ||
+                            iptvApi.normalizeName(c.name || '') === normId
+                          );
                           const isHidden = conf?.hidden || false;
                           const isPinned = conf?.pinned || false;
-                          const displayName = conf?.displayName || cat.category_name;
+                          const displayName = conf?.name || cat.category_name;
 
                           return (
                             <div
@@ -1325,7 +1329,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                   />
                                 </div>
                                 <div className="text-[9px] text-zinc-500 truncate">
-                                  Original: {cat.category_name}
+                                  Grupo Origen: {conf?.sourceGroup || cat.category_name} {conf?.dynamic ? '(Dinámico)' : ''}
                                 </div>
                               </div>
 

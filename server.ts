@@ -63,6 +63,12 @@ interface CentralizedConfig {
     forceUpdate: boolean;
     publishedAt?: string;
   };
+  categoriesConfig?: {
+    version?: number;
+    live?: any[];
+    vod?: any[];
+    series?: any[];
+  };
 }
 
 export interface AdminAuthData {
@@ -121,14 +127,46 @@ if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
-function loadConfig(): CentralizedConfig {
+const CHANNEL_MAP_FILE = path.join(DATA_DIR, 'channel-map.json');
+
+function loadChannelMap() {
   try {
-    if (fs.existsSync(CONFIG_FILE)) {
-      const content = fs.readFileSync(CONFIG_FILE, 'utf-8');
-      return { ...DEFAULT_CONFIG, ...JSON.parse(content) };
+    if (fs.existsSync(CHANNEL_MAP_FILE)) {
+      const content = fs.readFileSync(CHANNEL_MAP_FILE, 'utf-8');
+      return JSON.parse(content);
     }
   } catch (err) {
-    console.error('Error reading centralized config:', err);
+    console.error('Error reading channel map:', err);
+  }
+  return null;
+}
+
+function loadConfig(): CentralizedConfig {
+  try {
+    let config = DEFAULT_CONFIG;
+    if (fs.existsSync(CONFIG_FILE)) {
+      const content = fs.readFileSync(CONFIG_FILE, 'utf-8');
+      config = { ...DEFAULT_CONFIG, ...JSON.parse(content) };
+    }
+    
+    // Merge or load channel-map.json (v2 logic)
+    const channelMap = loadChannelMap();
+    if (channelMap) {
+      // Version 2 compatibility: if a single 'categories' list exists, 
+      // treat it as the 'live' configuration if 'live' is missing.
+      if (channelMap.categories && Array.isArray(channelMap.categories) && !channelMap.live) {
+        config.categoriesConfig = {
+          ...channelMap,
+          live: channelMap.categories
+        };
+      } else {
+        config.categoriesConfig = channelMap;
+      }
+    }
+    
+    return config;
+  } catch (err) {
+    console.error('Error loading centralized config:', err);
   }
   return DEFAULT_CONFIG;
 }

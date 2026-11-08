@@ -272,12 +272,18 @@ class IptvApiService {
   }
 
   // Helper to get a stable ID from a category name
-  normalizeCategoryName(name: string): string {
+  normalizeName(name: string): string {
+    if (!name) return '';
     return name
       .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Remove accents
       .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1F3FB}-\u{1F3FF}\u{200D}\u{200C}\u{AD}\u{FE0F}]/gu, '') // Remove emojis
-      .replace(/[⭐🌟✨💫🔥💥]/g, '') // Remove specific characters common in IPTV lists
+      .replace(/[^a-z0-9]/g, '') // Remove all non-alphanumeric
       .trim();
+  }
+
+  normalizeCategoryName(name: string): string {
+    return this.normalizeName(name);
   }
 
   // Apply order, renaming and visibility to categories
@@ -290,40 +296,42 @@ class IptvApiService {
     const config = this.activeConfig.categoriesConfig[type];
     if (!config || !Array.isArray(config) || config.length === 0) return rawCategories;
 
-    // 1. Index config by normalized ID
-    const configMap = new Map<string, any>();
-    config.forEach((item) => configMap.set(item.id, item));
-
-    // 2. Prepare items
-    const result = rawCategories.map(cat => {
-      const normId = this.normalizeCategoryName(cat.category_name);
-      const conf = configMap.get(normId);
-      
-      return {
-        ...cat,
-        _normId: normId,
-        _managed: !!conf,
-        managedName: conf?.displayName || cat.category_name,
-        isHidden: conf?.hidden || false,
-        isPinned: conf?.pinned || false,
-        sortOrder: conf?.order ?? 9999
-      };
+    const rawMap = new Map<string, any>();
+    rawCategories.forEach(cat => {
+      rawMap.set(this.normalizeName(cat.category_name), cat);
     });
 
-    // 3. Filter hidden
-    const visible = result.filter(cat => !cat.isHidden);
-
-    // 4. Sort: Pinned first, then by defined order, then alphabetically for new ones
-    return visible.sort((a, b) => {
-      if (a.isPinned && !b.isPinned) return -1;
-      if (!a.isPinned && b.isPinned) return 1;
+    const result = config.map(managed => {
+      // Search original category by fuzzy matching sourceGroup
+      const targetSearch = managed.sourceGroup || managed.name;
+      const normTarget = this.normalizeName(targetSearch);
       
-      if (a.sortOrder !== b.sortOrder) {
-        return a.sortOrder - b.sortOrder;
+      // Try to find the exact normalized match
+      let source = rawMap.get(normTarget);
+      
+      // Fallback: if not found, check if any category contains the name (fuzzy)
+      if (!source) {
+        source = rawCategories.find(c => this.normalizeName(c.category_name) === normTarget);
       }
-      
-      return a.category_name.localeCompare(b.category_name);
-    });
+
+      // Rule: if dynamic and doesn't exist, hide silently
+      if (managed.dynamic && !source) return null;
+
+      return {
+        ...source,
+        category_id: managed.id, // We use the mapping ID as the stable ID in the UI
+        category_name: managed.name || source?.category_name,
+        managedName: managed.name,
+        isHidden: managed.hidden || false,
+        isPinned: managed.pinned || false,
+        sortOrder: managed.order,
+        _managed: managed,
+        _providerCategoryId: source?.category_id || null
+      };
+    }).filter(c => c !== null && !c.isHidden);
+
+    // Respect order as defined in channel-map.json
+    return result.sort((a, b) => a.sortOrder - b.sortOrder);
   }
 
   // 4. Fetch Categories (Direct + Proxy fallback + Memory Cache)
@@ -407,6 +415,14 @@ class IptvApiService {
       return this.streamCache.get(cacheKey)!;
     }
 
+    // 1. Identify if it is a managed category
+    const cats = await this.getCategories(type, username, password);
+    const managed = cats.find(c => c.category_id === categoryId);
+    
+    const isDynamic = managed?._managed?.dynamic === true;
+    const channelsMap = managed?._managed?.channels;
+    const providerCatId = managed?._providerCategoryId || categoryId;
+
     const action =
       type === 'live'
         ? 'get_live_streams'
@@ -419,46 +435,61 @@ class IptvApiService {
     const cleanBase = base.endsWith('/') ? base.slice(0, -1) : base;
 
     let catParam = '';
-    if (categoryId && categoryId !== 'all') {
-      catParam = `&category_id=${encodeURIComponent(categoryId)}`;
+    if (providerCatId && providerCatId !== 'all') {
+      catParam = `&category_id=${encodeURIComponent(providerCatId)}`;
     }
 
-    // 1. Direct call
+    let rawData: any[] = [];
+
+    // Fetch from Xtream API
     try {
       const directUrl = `${cleanBase}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(effectivePass)}&action=${action}${catParam}`;
       const res = await fetch(directUrl);
       if (res.ok) {
         const text = await res.text();
         if (text.trim().startsWith('[')) {
-          const data = JSON.parse(text);
-          if (Array.isArray(data)) {
-            this.streamCache.set(cacheKey, data);
-            return data;
-          }
+          rawData = JSON.parse(text);
         }
       }
     } catch {
-      // Fallback to proxy
+      // ignore
     }
 
-    // 2. Proxy call fallback
-    try {
-      const proxyUrl = `/api/iptv/proxy?action=${action}&username=${encodeURIComponent(username)}&password=${encodeURIComponent(effectivePass)}${catParam}`;
-      const res = await fetch(proxyUrl);
-      if (res.ok) {
-        const text = await res.text();
-        if (text.trim().startsWith('[')) {
-          const data = JSON.parse(text);
-          if (Array.isArray(data)) {
-            this.streamCache.set(cacheKey, data);
-            return data;
+    if (rawData.length === 0) {
+      try {
+        const proxyUrl = `/api/iptv/proxy?action=${action}&username=${encodeURIComponent(username)}&password=${encodeURIComponent(effectivePass)}${catParam}`;
+        const res = await fetch(proxyUrl);
+        if (res.ok) {
+          const text = await res.text();
+          if (text.trim().startsWith('[')) {
+            rawData = JSON.parse(text);
           }
         }
+      } catch (e) {
+        console.error(`Error loading ${type} streams:`, e);
       }
-    } catch (e) {
-      console.error(`Error loading ${type} streams:`, e);
     }
-    return [];
+
+    // 2. Apply filtering if not dynamic and map exists
+    let result = rawData;
+    if (managed && !isDynamic && Array.isArray(channelsMap) && channelsMap.length > 0) {
+      result = rawData.filter(stream => {
+        return channelsMap.some(m => 
+          String(m.id) === String(stream.stream_id) || 
+          this.normalizeName(m.originalName || '') === this.normalizeName(stream.name)
+        );
+      });
+      
+      // Bonus: Sort by map order if possible? 
+      // The user didn't ask for channel sorting, but it's common. 
+      // For now, let's keep provider order.
+    }
+
+    if (result.length > 0) {
+      this.streamCache.set(cacheKey, result);
+    }
+    
+    return result;
   }
 
   // 6. Fetch Series Details (Seasons + Episodes)

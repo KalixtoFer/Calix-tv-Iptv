@@ -155,16 +155,24 @@ export interface AppUpdateConfig {
   publishedAt?: string;
 }
 
+export interface CategoryChannelMap {
+  id: string | number;
+  originalName?: string;
+}
+
 export interface CategoryManagedItem {
-  id: string; // normalized original name
-  originalName: string;
-  displayName: string;
-  hidden: boolean;
-  pinned: boolean;
+  id: string; // unique mapping ID
+  name: string; // Visible name
+  sourceGroup?: string; // Original provider group name
+  dynamic?: boolean; // If true, take all channels from sourceGroup
+  hidden?: boolean;
+  pinned?: boolean;
   order: number;
+  channels?: CategoryChannelMap[];
 }
 
 export interface CategoriesConfig {
+  version?: number;
   live?: CategoryManagedItem[];
   vod?: CategoryManagedItem[];
   series?: CategoryManagedItem[];

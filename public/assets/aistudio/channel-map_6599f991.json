@@ -1,0 +1,8468 @@
+{
+ "version": 2,
+ "categories": [
+  {
+   "id": "tv-argentina",
+   "name": "TV Argentina",
+   "order": 1,
+   "sourceGroup": "▶️ TV ARGENTINA",
+   "channels": [
+    {
+     "id": "639235",
+     "name": "TN Noticias",
+     "originalName": "TN Noticias",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "639238",
+     "name": "ARG | Telefe",
+     "originalName": "ARG | Telefe",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "639219",
+     "name": "ARG | TELEFE",
+     "originalName": "ARG | TELEFE",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "639243",
+     "name": "ARG | America",
+     "originalName": "ARG | America",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "639229",
+     "name": "ARG | America TV HD*",
+     "originalName": "ARG | America TV HD*",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "639240",
+     "name": "ARG | El Nueve  HD",
+     "originalName": "ARG | El Nueve  HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "639252",
+     "name": "ARG | EL NUEVE HD",
+     "originalName": "ARG | EL NUEVE HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "639220",
+     "name": "ARG | 13 EL TRECE OPC. A",
+     "originalName": "ARG | 13 EL TRECE OPC. A",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "639221",
+     "name": "ARG | 13 EL TRECE OPC. B",
+     "originalName": "ARG | 13 EL TRECE OPC. B",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "639228",
+     "name": "ARG | C5N SD",
+     "originalName": "ARG | C5N SD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "639227",
+     "name": "ARG | C5N FHD",
+     "originalName": "ARG | C5N FHD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "639232",
+     "name": "CIUDAD MAGAZINE OPC A",
+     "originalName": "CIUDAD MAGAZINE OPC A",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "639234",
+     "name": "CIUDAD MAGAZINE OPC C",
+     "originalName": "CIUDAD MAGAZINE OPC C",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "639223",
+     "name": "ARG | TELEMAX",
+     "originalName": "ARG | TELEMAX",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1001997",
+     "name": "ARG: VOLVER",
+     "originalName": "ARG: VOLVER",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "639218",
+     "name": "ARG | CANAL 26 HD",
+     "originalName": "ARG | CANAL 26 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "639244",
+     "name": "ARG | A24",
+     "originalName": "ARG | A24",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "639224",
+     "name": "AR | Canal 79 Mar del Plata",
+     "originalName": "AR | Canal 79 Mar del Plata",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "639225",
+     "name": "Uni Teve | AR",
+     "originalName": "Uni Teve | AR",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "639236",
+     "name": "ARG | TV Publica",
+     "originalName": "ARG | TV Publica",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "639239",
+     "name": "ARG | NET TV",
+     "originalName": "ARG | NET TV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "639241",
+     "name": "ARG | Cine AR",
+     "originalName": "ARG | Cine AR",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "639253",
+     "name": "ARG | CRONICA TV",
+     "originalName": "ARG | CRONICA TV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "639246",
+     "name": "AR | LA NACION",
+     "originalName": "AR | LA NACION",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "639250",
+     "name": "ARG | Canal 7 Jujuy",
+     "originalName": "ARG | Canal 7 Jujuy",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100309",
+     "name": "TN NOTICIAS",
+     "originalName": "TN NOTICIAS",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100310",
+     "name": "ARG: A24",
+     "originalName": "ARG: A24",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100311",
+     "name": "TN Noticias",
+     "originalName": "TN Noticias",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100313",
+     "name": "CANAL A24",
+     "originalName": "CANAL A24",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "deportes-argentina",
+   "name": "Deportes Argentina",
+   "order": 2,
+   "sourceGroup": "⚽DEPORTES ARGENTINA",
+   "channels": [
+    {
+     "id": "639271",
+     "name": "AR | ESPN 1 HD",
+     "originalName": "AR | ESPN 1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "639272",
+     "name": "AR | ESPN 2 HD",
+     "originalName": "AR | ESPN 2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "639273",
+     "name": "AR | ESPN 3 FHD",
+     "originalName": "AR | ESPN 3 FHD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "639283",
+     "name": "ARG | ESPN 4",
+     "originalName": "ARG | ESPN 4",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "639284",
+     "name": "ESPN 5",
+     "originalName": "ESPN 5",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "639274",
+     "name": "AR | ESPN PREMIUM HD",
+     "originalName": "AR | ESPN PREMIUM HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "639286",
+     "name": "DSPORTS",
+     "originalName": "DSPORTS",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "639276",
+     "name": "AR | FOX SPORTS 1",
+     "originalName": "AR | FOX SPORTS 1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "639277",
+     "name": "AR | FOX SPORTS 2",
+     "originalName": "AR | FOX SPORTS 2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "639278",
+     "name": "AR | FOX SPORTS 3",
+     "originalName": "AR | FOX SPORTS 3",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "639280",
+     "name": "AR | TNT SPORTS",
+     "originalName": "AR | TNT SPORTS",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "639281",
+     "name": "AR | TYC SPORTS",
+     "originalName": "AR | TYC SPORTS",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "tv-uruguay",
+   "name": "TV Uruguay",
+   "order": 3,
+   "sourceGroup": "▶️ TV URUGUAY",
+   "channels": [
+    {
+     "id": "966248",
+     "name": "URUY: Canal 10 SAETA ●",
+     "originalName": "URUY: Canal 10 SAETA ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966249",
+     "name": "URUY: Canal 4 Montecarlo ● @",
+     "originalName": "URUY: Canal 4 Montecarlo ● @",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966250",
+     "name": "URUY Canal A+V ●",
+     "originalName": "URUY Canal A+V ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966251",
+     "name": "URUY: Canal 7 Punta Del Este ●",
+     "originalName": "URUY: Canal 7 Punta Del Este ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966252",
+     "name": "URUY: Canal 12 ● La Tele // Teledoce",
+     "originalName": "URUY: Canal 12 ● La Tele // Teledoce",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966253",
+     "name": "URUY: Canal 12 Melo ●",
+     "originalName": "URUY: Canal 12 Melo ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966254",
+     "name": "URUY: TeleDoce ●",
+     "originalName": "URUY: TeleDoce ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966255",
+     "name": "URUY: VTV",
+     "originalName": "URUY: VTV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966256",
+     "name": "URUY: VTV SD (5Mb)  @",
+     "originalName": "URUY: VTV SD (5Mb)  @",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966257",
+     "name": "URUY: VTV + Plus ● @",
+     "originalName": "URUY: VTV + Plus ● @",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966258",
+     "name": "URUY: CANAL 8 ARTIGAS",
+     "originalName": "URUY: CANAL 8 ARTIGAS",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966259",
+     "name": "URUY: Telerocha Canal 9 ●",
+     "originalName": "URUY: Telerocha Canal 9 ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966260",
+     "name": "URUY: TV CIUDAD ● @",
+     "originalName": "URUY: TV CIUDAD ● @",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966261",
+     "name": "URUY: CANAL M ● Pantalla IMPO",
+     "originalName": "URUY: CANAL M ● Pantalla IMPO",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966262",
+     "name": "URUY: TNU CANAL 5 NACIONAL URUGUAY ●",
+     "originalName": "URUY: TNU CANAL 5 NACIONAL URUGUAY ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966263",
+     "name": "URUY: Canal 4 Paysandu ●",
+     "originalName": "URUY: Canal 4 Paysandu ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966264",
+     "name": "URUY: La red ●",
+     "originalName": "URUY: La red ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966265",
+     "name": "URUY:  CineAzul",
+     "originalName": "URUY:  CineAzul",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966266",
+     "name": "URUY:  Ultra Kids",
+     "originalName": "URUY:  Ultra Kids",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966267",
+     "name": "URUY:  Ultra Urbano Music",
+     "originalName": "URUY:  Ultra Urbano Music",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966268",
+     "name": "URUY:  Directv Sports  (20Mb) ●",
+     "originalName": "URUY:  Directv Sports  (20Mb) ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966269",
+     "name": "URUY:  Directv Sports ©️  (5Mb)",
+     "originalName": "URUY:  Directv Sports ©️  (5Mb)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966270",
+     "name": "REPLAY EVENTOS Uruguay",
+     "originalName": "REPLAY EVENTOS Uruguay",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966271",
+     "name": "URUY: VTV ● @",
+     "originalName": "URUY: VTV ● @",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966272",
+     "name": "UY:  MARONAS CABALLOS",
+     "originalName": "UY:  MARONAS CABALLOS",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "tv-paraguay",
+   "name": "TV Paraguay",
+   "order": 4,
+   "sourceGroup": "▶️ TV PARAGUAY",
+   "channels": [
+    {
+     "id": "966276",
+     "name": "PY: EL TRECE  Canal 13 @",
+     "originalName": "PY: EL TRECE  Canal 13 @",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966277",
+     "name": "PY: LA TELE // @",
+     "originalName": "PY: LA TELE // @",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966278",
+     "name": "PY: Noticias Paraguay NPY",
+     "originalName": "PY: Noticias Paraguay NPY",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966279",
+     "name": "PY: Paravision",
+     "originalName": "PY: Paravision",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966280",
+     "name": "PY: C9N @",
+     "originalName": "PY: C9N @",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966281",
+     "name": "PY: Telefuturo ● // @",
+     "originalName": "PY: Telefuturo ● // @",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966282",
+     "name": "PY: SNT HD @",
+     "originalName": "PY: SNT HD @",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966283",
+     "name": "PY: Canal Pro HD",
+     "originalName": "PY: Canal Pro HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966284",
+     "name": "PY: RCC Chaqueña //",
+     "originalName": "PY: RCC Chaqueña //",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966285",
+     "name": "PY: Sur TV HD @",
+     "originalName": "PY: Sur TV HD @",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966286",
+     "name": "PY: Paraguay TV @",
+     "originalName": "PY: Paraguay TV @",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966287",
+     "name": "PY: GenTV ● @",
+     "originalName": "PY: GenTV ● @",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966288",
+     "name": "PY: UNICANAL",
+     "originalName": "PY: UNICANAL",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966289",
+     "name": "PY: CIUDAD TV (Canal de la cudad )",
+     "originalName": "PY: CIUDAD TV (Canal de la cudad )",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966290",
+     "name": "PY: REPLAY EVENTOS INTERNACIONALES",
+     "originalName": "PY: REPLAY EVENTOS INTERNACIONALES",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966291",
+     "name": "PY: Tigo Sports 2 Plus + ●",
+     "originalName": "PY: Tigo Sports 2 Plus + ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966292",
+     "name": "PY: Tigo Sports 1 ●",
+     "originalName": "PY: Tigo Sports 1 ●",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "tv-peru",
+   "name": "TV Peru",
+   "order": 5,
+   "sourceGroup": "▶️ TV PERU",
+   "channels": [
+    {
+     "id": "573",
+     "name": "PE| Latina OP1 HD",
+     "originalName": "PE| Latina OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "574",
+     "name": "PE| Latina OP2 HD",
+     "originalName": "PE| Latina OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "571",
+     "name": "PE| America OP1 HD",
+     "originalName": "PE| America OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "572",
+     "name": "PE| America OP2 HD",
+     "originalName": "PE| America OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "577",
+     "name": "PE| ATV OP1 HD",
+     "originalName": "PE| ATV OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "578",
+     "name": "PE| ATV OP2 HD",
+     "originalName": "PE| ATV OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "575",
+     "name": "PE| Panamericana OP1 HD",
+     "originalName": "PE| Panamericana OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "576",
+     "name": "PE| Panamericana OP2 HD",
+     "originalName": "PE| Panamericana OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "587",
+     "name": "PE| Canal N OP1 HD",
+     "originalName": "PE| Canal N OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "588",
+     "name": "PE| Canal N OP2 HD",
+     "originalName": "PE| Canal N OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "593",
+     "name": "PE| Willax OP1 HD",
+     "originalName": "PE| Willax OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "594",
+     "name": "PE | Willax OP2 HD",
+     "originalName": "PE | Willax OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "585",
+     "name": "PE| Exitosa OP1 HD",
+     "originalName": "PE| Exitosa OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "586",
+     "name": "PE| Exitosa OP2 HD",
+     "originalName": "PE| Exitosa OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "581",
+     "name": "PE| RPP OP1 HD",
+     "originalName": "PE| RPP OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "582",
+     "name": "PE| RPP OP2 HD",
+     "originalName": "PE| RPP OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "583",
+     "name": "PE| Global TV OP1 HD",
+     "originalName": "PE| Global TV OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "584",
+     "name": "PE| Global TV OP2 HD",
+     "originalName": "PE| Global TV OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "579",
+     "name": "PE| ATV+ OP1 HD",
+     "originalName": "PE| ATV+ OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "580",
+     "name": "PE| ATV+ OP2 HD",
+     "originalName": "PE| ATV+ OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "589",
+     "name": "PE| TV PERU OP1 HD",
+     "originalName": "PE| TV PERU OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "590",
+     "name": "PE| TV PERU OP2 HD",
+     "originalName": "PE| TV PERU OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "591",
+     "name": "PERU Noticias OP1 HD",
+     "originalName": "PERU Noticias OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "592",
+     "name": "PERU Noticias OP2 HD",
+     "originalName": "PERU Noticias OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "595",
+     "name": "PE | IPE OP1 HD",
+     "originalName": "PE | IPE OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "596",
+     "name": "PE | IPE OP2 HD",
+     "originalName": "PE | IPE OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "597",
+     "name": "PE| Nativa OP1 HD",
+     "originalName": "PE| Nativa OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "598",
+     "name": "PE| Nativa OP2 HD",
+     "originalName": "PE| Nativa OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "599",
+     "name": "PE| KaribeÑa OP1 HD",
+     "originalName": "PE| KaribeÑa OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "600",
+     "name": "PE| KaribeÑa OP2 HD",
+     "originalName": "PE| KaribeÑa OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "602",
+     "name": "PE| HTV HD",
+     "originalName": "PE| HTV HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "601",
+     "name": "PE|TELEHIT HD",
+     "originalName": "PE|TELEHIT HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "973935",
+     "name": "PE| TOP LATINO",
+     "originalName": "PE| TOP LATINO",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "973938",
+     "name": "PE| VIVA TV",
+     "originalName": "PE| VIVA TV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "973947",
+     "name": "PE| TRACE LATINA",
+     "originalName": "PE| TRACE LATINA",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "603",
+     "name": "PE| PBO HD",
+     "originalName": "PE| PBO HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "604",
+     "name": "ATV SUR HD",
+     "originalName": "ATV SUR HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "606",
+     "name": "PE|BITME",
+     "originalName": "PE|BITME",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "607",
+     "name": "PE| Kanal D Drama",
+     "originalName": "PE| Kanal D Drama",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "596743",
+     "name": "PE| ALPHA TELEVISION",
+     "originalName": "PE| ALPHA TELEVISION",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1059694",
+     "name": "PE| JUNTOS TV (LIGA2)",
+     "originalName": "PE| JUNTOS TV (LIGA2)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "973956",
+     "name": "PE| Uranio TV",
+     "originalName": "PE| Uranio TV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1059825",
+     "name": "PE| TRECE TV",
+     "originalName": "PE| TRECE TV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1060493",
+     "name": "PE| Nativa",
+     "originalName": "PE| Nativa",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1060496",
+     "name": "PE| CANAL 21",
+     "originalName": "PE| CANAL 21",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1060499",
+     "name": "PE| CADENA TV",
+     "originalName": "PE| CADENA TV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1060502",
+     "name": "PE| ANTENA SUR",
+     "originalName": "PE| ANTENA SUR",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1060505",
+     "name": "PE| YURIVISION TV",
+     "originalName": "PE| YURIVISION TV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1060508",
+     "name": "PE| VIA TV",
+     "originalName": "PE| VIA TV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1175101",
+     "name": "PE| TELELIMA",
+     "originalName": "PE| TELELIMA",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1176736",
+     "name": "PE| Fans TV",
+     "originalName": "PE| Fans TV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1180279",
+     "name": "PE| RTV CADENA SUR",
+     "originalName": "PE| RTV CADENA SUR",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1182017",
+     "name": "PE| Sanjuanera TV",
+     "originalName": "PE| Sanjuanera TV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1182020",
+     "name": "PE| VIVATV",
+     "originalName": "PE| VIVATV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1182023",
+     "name": "PE| TROPICAL TV",
+     "originalName": "PE| TROPICAL TV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1182026",
+     "name": "PE| VIA TARAPOTO",
+     "originalName": "PE| VIA TARAPOTO",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1182029",
+     "name": "PE| PIURA TV",
+     "originalName": "PE| PIURA TV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1182032",
+     "name": "PE| TELECOLOR",
+     "originalName": "PE| TELECOLOR",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "deportes-peru",
+   "name": "Deportes Peru",
+   "order": 6,
+   "sourceGroup": "⚽DEPORTES PERU",
+   "channels": [
+    {
+     "id": "1146643",
+     "name": "PE | L1G4 1⚽ OP1 HD",
+     "originalName": "PE | L1G4 1⚽ OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "612",
+     "name": "PE | L1G4 1⚽ OP2 HD",
+     "originalName": "PE | L1G4 1⚽ OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "609",
+     "name": "PE | L1G4 1 M4x⚽ OP1 HD",
+     "originalName": "PE | L1G4 1 M4x⚽ OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "610",
+     "name": "PE | L1G4 1 M4x⚽ OP2 HD",
+     "originalName": "PE | L1G4 1 M4x⚽ OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1060253",
+     "name": "PE|LIGA2 PERU (EXCLUSIVO)",
+     "originalName": "PE|LIGA2 PERU (EXCLUSIVO)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "615",
+     "name": "PE | Movistar Deportes OP1 HD",
+     "originalName": "PE | Movistar Deportes OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "616",
+     "name": "PE | Movistar Deportes OP2 HD",
+     "originalName": "PE | Movistar Deportes OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "618",
+     "name": "PE | ESPN 1 SD",
+     "originalName": "PE | ESPN 1 SD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "617",
+     "name": "PE | E$PN 1 HD",
+     "originalName": "PE | E$PN 1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "620",
+     "name": "PE| E$PN 2 SD",
+     "originalName": "PE| E$PN 2 SD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "619",
+     "name": "PE| E$PN 2 HD",
+     "originalName": "PE| E$PN 2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "622",
+     "name": "PE| E$PN 3 SD",
+     "originalName": "PE| E$PN 3 SD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "621",
+     "name": "PE| E$PN 3 HD",
+     "originalName": "PE| E$PN 3 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "624",
+     "name": "PE| ESPN 4 SD",
+     "originalName": "PE| ESPN 4 SD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "623",
+     "name": "PE| ESPN 4 HD",
+     "originalName": "PE| ESPN 4 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "626",
+     "name": "PE| ESPN 5 SD",
+     "originalName": "PE| ESPN 5 SD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "625",
+     "name": "PE| ESPN 5 HD",
+     "originalName": "PE| ESPN 5 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "628",
+     "name": "PE| E$PN 6 SD",
+     "originalName": "PE| E$PN 6 SD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "627",
+     "name": "PE| E$PN 6 HD",
+     "originalName": "PE| E$PN 6 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "630",
+     "name": "PE| E$PN 7 SD",
+     "originalName": "PE| E$PN 7 SD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "629",
+     "name": "PE| E$PN 7 HD",
+     "originalName": "PE| E$PN 7 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "229518",
+     "name": "PE| Espn Premium",
+     "originalName": "PE| Espn Premium",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "637",
+     "name": "PE| Ovacion SD",
+     "originalName": "PE| Ovacion SD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "636",
+     "name": "PE| Ovacion HD",
+     "originalName": "PE| Ovacion HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "632",
+     "name": "PE| D$ports 1 SD",
+     "originalName": "PE| D$ports 1 SD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "631",
+     "name": "PE| D$ports 1 HD",
+     "originalName": "PE| D$ports 1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "634",
+     "name": "PE| D$ports 2 SD",
+     "originalName": "PE| D$ports 2 SD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "633",
+     "name": "PE| D$ports 2 HD",
+     "originalName": "PE| D$ports 2 HD",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "tv-el-salvador",
+   "name": "TV El Salvador",
+   "order": 7,
+   "sourceGroup": "▶️ TV EL SALVADOR",
+   "channels": [
+    {
+     "id": "664091",
+     "name": "SV | CANAL 2",
+     "originalName": "SV | CANAL 2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "664092",
+     "name": "SV | CANAL 2 ᴴᴰ",
+     "originalName": "SV | CANAL 2 ᴴᴰ",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "664095",
+     "name": "SV | CANAL 4",
+     "originalName": "SV | CANAL 4",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "664096",
+     "name": "SV | CANAL 4 ᴴᴰ",
+     "originalName": "SV | CANAL 4 ᴴᴰ",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "664097",
+     "name": "SV | CANAL 6",
+     "originalName": "SV | CANAL 6",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "664098",
+     "name": "SV | CANAL 6 ᴴᴰ",
+     "originalName": "SV | CANAL 6 ᴴᴰ",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "664085",
+     "name": "SV | CANAL 10",
+     "originalName": "SV | CANAL 10",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "664086",
+     "name": "SV | CANAL 10 ᴴᴰ",
+     "originalName": "SV | CANAL 10 ᴴᴰ",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "186561",
+     "name": "Canal 11 Tv",
+     "originalName": "Canal 11 Tv",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "186573",
+     "name": "CAnal 11 TU TV HD",
+     "originalName": "CAnal 11 TU TV HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "664087",
+     "name": "SV | CANAL 12",
+     "originalName": "SV | CANAL 12",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "664088",
+     "name": "SV | CANAL 12 ᴴᴰ",
+     "originalName": "SV | CANAL 12 ᴴᴰ",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "664089",
+     "name": "SV | CANAL 19",
+     "originalName": "SV | CANAL 19",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "664090",
+     "name": "SV | CANAL 19 ᴴᴰ",
+     "originalName": "SV | CANAL 19 ᴴᴰ",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "664093",
+     "name": "SV | CANAL 21",
+     "originalName": "SV | CANAL 21",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "664094",
+     "name": "SV | CANAL 21 ᴴᴰ",
+     "originalName": "SV | CANAL 21 ᴴᴰ",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "664102",
+     "name": "SV | TVO 23",
+     "originalName": "SV | TVO 23",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "664099",
+     "name": "SV | TABER TV",
+     "originalName": "SV | TABER TV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "664100",
+     "name": "SV | TV CRET",
+     "originalName": "SV | TV CRET",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "186562",
+     "name": "ELIM TV",
+     "originalName": "ELIM TV",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "deportes-el-salvador",
+   "name": "Deportes El Salvador",
+   "order": 8,
+   "sourceGroup": "⚽DEPORTES EL SALVADOR",
+   "channels": [
+    {
+     "id": "636414",
+     "name": "ES| TIGO (FOX) OP1",
+     "originalName": "ES| TIGO (FOX) OP1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "636415",
+     "name": "ES| TIGO (FOX) OP2",
+     "originalName": "ES| TIGO (FOX) OP2",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "tv-colombia",
+   "name": "TV Colombia",
+   "order": 9,
+   "sourceGroup": "▶️ TV COLOMBIA",
+   "channels": [
+    {
+     "id": "232351",
+     "name": "RCN Opcion 1",
+     "originalName": "RCN Opcion 1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "232352",
+     "name": "RCN Opcion 2",
+     "originalName": "RCN Opcion 2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "232355",
+     "name": "RCN Novelas Opcion 1",
+     "originalName": "RCN Novelas Opcion 1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "232356",
+     "name": "RCN Novelas opcion 2",
+     "originalName": "RCN Novelas opcion 2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "232357",
+     "name": "NTN24 Opcion 1",
+     "originalName": "NTN24 Opcion 1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "232358",
+     "name": "NTN24 Opcion 2",
+     "originalName": "NTN24 Opcion 2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "232385",
+     "name": "Caracol Opcion 1",
+     "originalName": "Caracol Opcion 1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "232386",
+     "name": "Caracol Opcion 2",
+     "originalName": "Caracol Opcion 2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "232389",
+     "name": "Caracol Internacional",
+     "originalName": "Caracol Internacional",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "232359",
+     "name": "Canal Uno",
+     "originalName": "Canal Uno",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "232362",
+     "name": "Señal Colombia",
+     "originalName": "Señal Colombia",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "232364",
+     "name": "Telecafe",
+     "originalName": "Telecafe",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "232365",
+     "name": "Telecaribe",
+     "originalName": "Telecaribe",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "232373",
+     "name": "Trece Opcion 1",
+     "originalName": "Trece Opcion 1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "232374",
+     "name": "Trece opcion 2",
+     "originalName": "Trece opcion 2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "232366",
+     "name": "Telemedellin Opcion 1",
+     "originalName": "Telemedellin Opcion 1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "232367",
+     "name": "Telemedellin Opcion 2",
+     "originalName": "Telemedellin Opcion 2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "232368",
+     "name": "Telepacifico",
+     "originalName": "Telepacifico",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "232363",
+     "name": "Teleantioquia",
+     "originalName": "Teleantioquia",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1170677",
+     "name": "City TV",
+     "originalName": "City TV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "232375",
+     "name": "TV Agro",
+     "originalName": "TV Agro",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "232372",
+     "name": "Pasiones",
+     "originalName": "Pasiones",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "232369",
+     "name": "Canal Capital",
+     "originalName": "Canal Capital",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "232390",
+     "name": "La Kalle",
+     "originalName": "La Kalle",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "deportes-colombia",
+   "name": "Deportes Colombia",
+   "order": 10,
+   "sourceGroup": "⚽DEPORTES COLOMBIA",
+   "channels": [
+    {
+     "id": "975059",
+     "name": "WinSports OP1",
+     "originalName": "WinSports OP1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "975060",
+     "name": "WinSports OP2",
+     "originalName": "WinSports OP2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "975061",
+     "name": "Win Sports + OP 1",
+     "originalName": "Win Sports + OP 1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "975062",
+     "name": "Win Sports + OP 2",
+     "originalName": "Win Sports + OP 2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "975064",
+     "name": "DIRECTV SPORTS 1 CO",
+     "originalName": "DIRECTV SPORTS 1 CO",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "975065",
+     "name": "DIRECTV SPORTS 2 CO",
+     "originalName": "DIRECTV SPORTS 2 CO",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "975066",
+     "name": "DIRECTV SPORTS + CO",
+     "originalName": "DIRECTV SPORTS + CO",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "tv-ecuador",
+   "name": "TV Ecuador",
+   "order": 11,
+   "sourceGroup": "▶️ TV ECUADOR",
+   "channels": [
+    {
+     "id": "1100450",
+     "name": "EC | 01 • ECUAVISA COSTA",
+     "originalName": "EC | 01 • ECUAVISA COSTA",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100452",
+     "name": "EC | 02 • ECUAVISA SIERRA",
+     "originalName": "EC | 02 • ECUAVISA SIERRA",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100454",
+     "name": "EC | 03 • ECUAVISA INTERNACIONAL",
+     "originalName": "EC | 03 • ECUAVISA INTERNACIONAL",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100455",
+     "name": "EC | 01 • TELEAMAZONAS COSTA",
+     "originalName": "EC | 01 • TELEAMAZONAS COSTA",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100458",
+     "name": "EC | 02 • TELEAMAZONAS SIERRA",
+     "originalName": "EC | 02 • TELEAMAZONAS SIERRA",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100460",
+     "name": "EC | 01 • TC TELEVISION",
+     "originalName": "EC | 01 • TC TELEVISION",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100461",
+     "name": "EC | 02 • TC TELEVISION HD",
+     "originalName": "EC | 02 • TC TELEVISION HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100462",
+     "name": "EC | 01 • GAMAVISION",
+     "originalName": "EC | 01 • GAMAVISION",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100463",
+     "name": "EC | 02 • GAMAVISION",
+     "originalName": "EC | 02 • GAMAVISION",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100464",
+     "name": "EC | 01 • RTS",
+     "originalName": "EC | 01 • RTS",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100465",
+     "name": "EC | 02 • RTS",
+     "originalName": "EC | 02 • RTS",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100466",
+     "name": "EC | 01 • ECUADOR TV",
+     "originalName": "EC | 01 • ECUADOR TV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100467",
+     "name": "EC | 02 • ECUADOR TV",
+     "originalName": "EC | 02 • ECUADOR TV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100468",
+     "name": "EC | 01 • TVC",
+     "originalName": "EC | 01 • TVC",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100469",
+     "name": "EC | 02 • TVC",
+     "originalName": "EC | 02 • TVC",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100470",
+     "name": "EC | 01 • OROMAR",
+     "originalName": "EC | 01 • OROMAR",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100471",
+     "name": "EC | 02 • OROMAR",
+     "originalName": "EC | 02 • OROMAR",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100472",
+     "name": "EC | 01 • TELERAMA",
+     "originalName": "EC | 01 • TELERAMA",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100473",
+     "name": "EC | 02 • TELERAMA",
+     "originalName": "EC | 02 • TELERAMA",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100474",
+     "name": "EC | WUAN+ FHD",
+     "originalName": "EC | WUAN+ FHD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100475",
+     "name": "EC | ZARACAY TV",
+     "originalName": "EC | ZARACAY TV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100479",
+     "name": "EC™ | MAJESTAD TV (LOCAL)",
+     "originalName": "EC™ | MAJESTAD TV (LOCAL)",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "deportes-ecuador",
+   "name": "Deportes Ecuador",
+   "order": 12,
+   "sourceGroup": "⚽DEPORTES ECUADOR",
+   "channels": [
+    {
+     "id": "845083",
+     "name": "EC | 01 • DSPORTS ECUADOR",
+     "originalName": "EC | 01 • DSPORTS ECUADOR",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "845084",
+     "name": "EC | 02 • DSPORTS ECUADOR",
+     "originalName": "EC | 02 • DSPORTS ECUADOR",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "845085",
+     "name": "EC | 01 • ECDF",
+     "originalName": "EC | 01 • ECDF",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "845086",
+     "name": "EC | 02 • ECDF",
+     "originalName": "EC | 02 • ECDF",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "845087",
+     "name": "EC | 04 • LIGA PR0",
+     "originalName": "EC | 04 • LIGA PR0",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "845088",
+     "name": "EC | 05 • LIGA PR0",
+     "originalName": "EC | 05 • LIGA PR0",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1058109",
+     "name": "ZAPPING LIGA PRO ECUADOR",
+     "originalName": "ZAPPING LIGA PRO ECUADOR",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1058110",
+     "name": "ECU: ZAPPING (SOLO Eventos) ( ᴸᶦᵍᵃ Eᶜᵘᵃᵈᵒʳ ᴴᴰ)",
+     "originalName": "ECU: ZAPPING (SOLO Eventos) ( ᴸᶦᵍᵃ Eᶜᵘᵃᵈᵒʳ ᴴᴰ)",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "tv-chile",
+   "name": "TV Chile",
+   "order": 13,
+   "sourceGroup": "▶️ TV CHILE",
+   "channels": [
+    {
+     "id": "1100414",
+     "name": "CH | TVN • 01",
+     "originalName": "CH | TVN • 01",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100415",
+     "name": "CH | TVN • 02",
+     "originalName": "CH | TVN • 02",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100416",
+     "name": "CH | TVN • 03",
+     "originalName": "CH | TVN • 03",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100417",
+     "name": "CH | MEGA • 01",
+     "originalName": "CH | MEGA • 01",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100418",
+     "name": "CH | MEGA • 02",
+     "originalName": "CH | MEGA • 02",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100419",
+     "name": "CH | CHILE VISION • 01",
+     "originalName": "CH | CHILE VISION • 01",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100420",
+     "name": "CH | CHILE VISION • 02",
+     "originalName": "CH | CHILE VISION • 02",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100421",
+     "name": "CH | CHILE VISION • 03",
+     "originalName": "CH | CHILE VISION • 03",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100422",
+     "name": "CH | LA RED • 01",
+     "originalName": "CH | LA RED • 01",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100423",
+     "name": "CH | LA RED • 02",
+     "originalName": "CH | LA RED • 02",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100424",
+     "name": "CHI | TELETRAK",
+     "originalName": "CHI | TELETRAK",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100425",
+     "name": "Teletrak",
+     "originalName": "Teletrak",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100426",
+     "name": "CH | CANAL 13 • 01",
+     "originalName": "CH | CANAL 13 • 01",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100427",
+     "name": "CH | CANAL 13 • 02",
+     "originalName": "CH | CANAL 13 • 02",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100428",
+     "name": "CHI | CANAL 13 • 03",
+     "originalName": "CHI | CANAL 13 • 03",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100429",
+     "name": "ETC",
+     "originalName": "ETC",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100430",
+     "name": "CL: ETC TV",
+     "originalName": "CL: ETC TV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100431",
+     "name": "CH | REC TV",
+     "originalName": "CH | REC TV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100432",
+     "name": "ETC TV",
+     "originalName": "ETC TV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100433",
+     "name": "CH | 24 Horas • 01",
+     "originalName": "CH | 24 Horas • 01",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100434",
+     "name": "CH | 24 Horas • 02",
+     "originalName": "CH | 24 Horas • 02",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100435",
+     "name": "CH | Tv + • 01",
+     "originalName": "CH | Tv + • 01",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100436",
+     "name": "CH | TV + • 02",
+     "originalName": "CH | TV + • 02",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100437",
+     "name": "CL | Viax",
+     "originalName": "CL | Viax",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100438",
+     "name": "CH | MEGA FHD",
+     "originalName": "CH | MEGA FHD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100439",
+     "name": "CH | CNN CHILE",
+     "originalName": "CH | CNN CHILE",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100440",
+     "name": "13 Realities | CL",
+     "originalName": "13 Realities | CL",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100441",
+     "name": "13 Festival | CL",
+     "originalName": "13 Festival | CL",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100442",
+     "name": "13 Teleseries | CL",
+     "originalName": "13 Teleseries | CL",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100443",
+     "name": "CHI || LA RED [HD] (G)",
+     "originalName": "CHI || LA RED [HD] (G)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100444",
+     "name": "UCV 2 | CL",
+     "originalName": "UCV 2 | CL",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100445",
+     "name": "UCV | CL",
+     "originalName": "UCV | CL",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100446",
+     "name": "CL | LA RED",
+     "originalName": "CL | LA RED",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100447",
+     "name": "CL | CHILEVISION",
+     "originalName": "CL | CHILEVISION",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100448",
+     "name": "CL | CDO 2",
+     "originalName": "CL | CDO 2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100449",
+     "name": "RETROPLUS",
+     "originalName": "RETROPLUS",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "deportes-chile",
+   "name": "Deportes Chile",
+   "order": 14,
+   "sourceGroup": "⚽DEPORTES CHILE",
+   "channels": [
+    {
+     "id": "964096",
+     "name": "CH | 01 • TNT SPORTS PREMIUM",
+     "originalName": "CH | 01 • TNT SPORTS PREMIUM",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "964097",
+     "name": "CH | 02 • TNT SPORTS PREMIUM",
+     "originalName": "CH | 02 • TNT SPORTS PREMIUM",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "964098",
+     "name": "CH | 03 • TNT SPORTS PREMIUM",
+     "originalName": "CH | 03 • TNT SPORTS PREMIUM",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "964099",
+     "name": "CH | 01 • ESTADIO (SOLO EVENTOS)",
+     "originalName": "CH | 01 • ESTADIO (SOLO EVENTOS)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "964100",
+     "name": "CH | • 02 ESTADIO (SOLO EVENTOS)",
+     "originalName": "CH | • 02 ESTADIO (SOLO EVENTOS)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "964101",
+     "name": "TNT-max (SOLO EVENTOS)",
+     "originalName": "TNT-max (SOLO EVENTOS)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "964102",
+     "name": "TNT-max (SOLO EVENTOS)",
+     "originalName": "TNT-max (SOLO EVENTOS)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "964103",
+     "name": "CH | 01 • FOX SPORTS 1",
+     "originalName": "CH | 01 • FOX SPORTS 1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "964104",
+     "name": "CH | 02 • FOX SPORTS2",
+     "originalName": "CH | 02 • FOX SPORTS2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "964105",
+     "name": "CL | ESPN PREMIUM HD",
+     "originalName": "CL | ESPN PREMIUM HD",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "tv-bolivia",
+   "name": "TV Bolivia",
+   "order": 15,
+   "sourceGroup": "▶️ TV BOLIVIA",
+   "channels": [
+    {
+     "id": "1100379",
+     "name": "BOL | Unitel HD OP A",
+     "originalName": "BOL | Unitel HD OP A",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100380",
+     "name": "BOL | Unitel HD OP B",
+     "originalName": "BOL | Unitel HD OP B",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100383",
+     "name": "BOL | RTP OP A",
+     "originalName": "BOL | RTP OP A",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100384",
+     "name": "BOL | RTP OP B",
+     "originalName": "BOL | RTP OP B",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100386",
+     "name": "BOL | BOLIVISION OP A",
+     "originalName": "BOL | BOLIVISION OP A",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100387",
+     "name": "BOL | BOLIVISION OP B",
+     "originalName": "BOL | BOLIVISION OP B",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100388",
+     "name": "BOL | btv BOLIVIA TV OP A",
+     "originalName": "BOL | btv BOLIVIA TV OP A",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100389",
+     "name": "BOL | btv BOLIVIA TV OP B",
+     "originalName": "BOL | btv BOLIVIA TV OP B",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100390",
+     "name": "BOL | ATB - Santa Cruz",
+     "originalName": "BOL | ATB - Santa Cruz",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100391",
+     "name": "BOL | ATB - Cochabamba",
+     "originalName": "BOL | ATB - Cochabamba",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100392",
+     "name": "BOL | ATB 1",
+     "originalName": "BOL | ATB 1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100393",
+     "name": "BOL | ATB 2",
+     "originalName": "BOL | ATB 2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100394",
+     "name": "BOL | Red Uno HD- La Paz",
+     "originalName": "BOL | Red Uno HD- La Paz",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100395",
+     "name": "BOL | Red Uno HD- Santa Cruz",
+     "originalName": "BOL | Red Uno HD- Santa Cruz",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100396",
+     "name": "BOL | Red Uno HD- Cochabamba",
+     "originalName": "BOL | Red Uno HD- Cochabamba",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100397",
+     "name": "BOL | GIGAVISION OP A",
+     "originalName": "BOL | GIGAVISION OP A",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100398",
+     "name": "BOL | GIGAVISION OP B",
+     "originalName": "BOL | GIGAVISION OP B",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100399",
+     "name": "PAT (HDe)",
+     "originalName": "PAT (HDe)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100400",
+     "name": "RED ADVENIR (HD)",
+     "originalName": "RED ADVENIR (HD)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100401",
+     "name": "PALENQUE TV (SD)",
+     "originalName": "PALENQUE TV (SD)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100402",
+     "name": "Coral TV",
+     "originalName": "Coral TV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100403",
+     "name": "BOL | TV Show (ORURO)",
+     "originalName": "BOL | TV Show (ORURO)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100404",
+     "name": "BOL | F10",
+     "originalName": "BOL | F10",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100405",
+     "name": "BOL | DTV",
+     "originalName": "BOL | DTV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100406",
+     "name": "UPEA TV",
+     "originalName": "UPEA TV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100407",
+     "name": "BOL | TV UNIVERSITARIA",
+     "originalName": "BOL | TV UNIVERSITARIA",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100408",
+     "name": "BOL | UNIVALLE TV",
+     "originalName": "BOL | UNIVALLE TV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100409",
+     "name": "BOL | TELE ESTRELLA",
+     "originalName": "BOL | TELE ESTRELLA",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100410",
+     "name": "BOL | XTO TV",
+     "originalName": "BOL | XTO TV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100411",
+     "name": "BOL | CADENA A",
+     "originalName": "BOL | CADENA A",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100412",
+     "name": "ABYA YALA TV HD",
+     "originalName": "ABYA YALA TV HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100413",
+     "name": "NEO TV",
+     "originalName": "NEO TV",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "deportes-bolivia",
+   "name": "Deportes Bolivia",
+   "order": 16,
+   "sourceGroup": "⚽DEPORTES BOLIVIA",
+   "channels": [
+    {
+     "id": "845092",
+     "name": "Tigo Sports 1 OP2",
+     "originalName": "Tigo Sports 1 OP2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "845093",
+     "name": "Tigo Sports 2 OP2",
+     "originalName": "Tigo Sports 2 OP2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "845094",
+     "name": "Tigo Sports 3 OP2",
+     "originalName": "Tigo Sports 3 OP2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1042359",
+     "name": "FUTBOL CANAL ENTELTV OP1",
+     "originalName": "FUTBOL CANAL ENTELTV OP1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1042358",
+     "name": "FUTBOL CANAL ENTELTV OP2",
+     "originalName": "FUTBOL CANAL ENTELTV OP2",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "tv-venezuela",
+   "name": "TV Venezuela",
+   "order": 17,
+   "sourceGroup": "▶️ TV VENEZUELA",
+   "channels": [
+    {
+     "id": "1100350",
+     "name": "VEN ◊ Venevision @",
+     "originalName": "VEN ◊ Venevision @",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100351",
+     "name": "VEN ◊ Venevision Plus Ve+  @",
+     "originalName": "VEN ◊ Venevision Plus Ve+  @",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100352",
+     "name": "VEN ◊ Globovision",
+     "originalName": "VEN ◊ Globovision",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100353",
+     "name": "VEN ◊ Televen   // ● @",
+     "originalName": "VEN ◊ Televen   // ● @",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100354",
+     "name": "VEN ◊ Catatumbo TV //",
+     "originalName": "VEN ◊ Catatumbo TV //",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100355",
+     "name": "VEN ◊ Telearagua    //",
+     "originalName": "VEN ◊ Telearagua    //",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100356",
+     "name": "VEN ◊ Vale TV",
+     "originalName": "VEN ◊ Vale TV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100357",
+     "name": "VEN ◊ Meridiano TV (Sports) @",
+     "originalName": "VEN ◊ Meridiano TV (Sports) @",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100358",
+     "name": "VEN ◊ Promar",
+     "originalName": "VEN ◊ Promar",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100359",
+     "name": "VEN ◊ TLT Tele tuya",
+     "originalName": "VEN ◊ TLT Tele tuya",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100360",
+     "name": "VEN ◊ Telesur ●",
+     "originalName": "VEN ◊ Telesur ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100361",
+     "name": "VEN ◊ TVO Nubeh",
+     "originalName": "VEN ◊ TVO Nubeh",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100362",
+     "name": "VEN ◊ Tves  //",
+     "originalName": "VEN ◊ Tves  //",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100363",
+     "name": "VEN ◊ El Venezolano EVTV //",
+     "originalName": "VEN ◊ El Venezolano EVTV //",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100364",
+     "name": "VEN ◊ VTV Venezolana de Television",
+     "originalName": "VEN ◊ VTV Venezolana de Television",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100365",
+     "name": "VEN ◊  Canal I Panavision //",
+     "originalName": "VEN ◊  Canal I Panavision //",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100366",
+     "name": "VEN ◊  Telesol TV",
+     "originalName": "VEN ◊  Telesol TV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100367",
+     "name": "VEN ◊ Radio Caracas",
+     "originalName": "VEN ◊ Radio Caracas",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100368",
+     "name": "VEN ◊ Radio Musica Llanera",
+     "originalName": "VEN ◊ Radio Musica Llanera",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100369",
+     "name": "VEN ◊ UNITV",
+     "originalName": "VEN ◊ UNITV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100370",
+     "name": "VEN ◊ TNO",
+     "originalName": "VEN ◊ TNO",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100371",
+     "name": "VEN ◊ SOMOS TV",
+     "originalName": "VEN ◊ SOMOS TV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100372",
+     "name": "VEN ◊ FORTUNA TV",
+     "originalName": "VEN ◊ FORTUNA TV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100373",
+     "name": "VEN ◊ Venevision Noticias ●",
+     "originalName": "VEN ◊ Venevision Noticias ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100374",
+     "name": "VEN ◊ Sports Venezuela",
+     "originalName": "VEN ◊ Sports Venezuela",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100375",
+     "name": "VEN ◊ IVC ● (EVENTOS) Baseball @",
+     "originalName": "VEN ◊ IVC ● (EVENTOS) Baseball @",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100376",
+     "name": "VEN ◊ ByM SPORTS Beisbol Baseball  @",
+     "originalName": "VEN ◊ ByM SPORTS Beisbol Baseball  @",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1100377",
+     "name": "VEN ◊  ISLA TV",
+     "originalName": "VEN ◊  ISLA TV",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "brasil",
+   "name": "Brasil",
+   "order": 18,
+   "sourceGroup": "▶️ BRASIL",
+   "channels": [
+    {
+     "id": "966337",
+     "name": "BR:  Rede Gospel // Religion #",
+     "originalName": "BR:  Rede Gospel // Religion #",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966338",
+     "name": "BR: TV Universal Religion //",
+     "originalName": "BR: TV Universal Religion //",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966339",
+     "name": "BR: TV Plan //",
+     "originalName": "BR: TV Plan //",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966340",
+     "name": "BR: TV Mais",
+     "originalName": "BR: TV Mais",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966341",
+     "name": "BR: TV Curuça //",
+     "originalName": "BR: TV Curuça //",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966342",
+     "name": "BR: Classique TV //",
+     "originalName": "BR: Classique TV //",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966343",
+     "name": "BR: SBT MARANHAO",
+     "originalName": "BR: SBT MARANHAO",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966344",
+     "name": "BR: Canal Brasil ●",
+     "originalName": "BR: Canal Brasil ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966345",
+     "name": "BR:  Off Canal ●",
+     "originalName": "BR:  Off Canal ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966346",
+     "name": "BR: Cancao Nova (Religion) CANÇAO",
+     "originalName": "BR: Cancao Nova (Religion) CANÇAO",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966347",
+     "name": "BR: TV Aparecida (Religion)",
+     "originalName": "BR: TV Aparecida (Religion)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966348",
+     "name": "BR: TV Brasil",
+     "originalName": "BR: TV Brasil",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966349",
+     "name": "BR: SBT GOIAS ●",
+     "originalName": "BR: SBT GOIAS ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966350",
+     "name": "BR: TV Cidade Canal 9 //",
+     "originalName": "BR: TV Cidade Canal 9 //",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966351",
+     "name": "BR: FUTURA",
+     "originalName": "BR: FUTURA",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966352",
+     "name": "BR: RECORD BRASILIA RJ",
+     "originalName": "BR: RECORD BRASILIA RJ",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966353",
+     "name": "BR: RECORD MANAUS",
+     "originalName": "BR: RECORD MANAUS",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966354",
+     "name": "BR: RECORD RS",
+     "originalName": "BR: RECORD RS",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966355",
+     "name": "BR: SBT BAHIA ●",
+     "originalName": "BR: SBT BAHIA ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966356",
+     "name": "BR: TV Evangelizar (Religion)",
+     "originalName": "BR: TV Evangelizar (Religion)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966357",
+     "name": "BR: NOVO TEMPO (Religion)",
+     "originalName": "BR: NOVO TEMPO (Religion)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966358",
+     "name": "BR: TV Gazeta",
+     "originalName": "BR: TV Gazeta",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966359",
+     "name": "BR: TV Interlagos //",
+     "originalName": "BR: TV Interlagos //",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966360",
+     "name": "BR: SBT RJ",
+     "originalName": "BR: SBT RJ",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966361",
+     "name": "BR: RECORD BELEM",
+     "originalName": "BR: RECORD BELEM",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966362",
+     "name": "BR: JOVEM PAN NEWS",
+     "originalName": "BR: JOVEM PAN NEWS",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966363",
+     "name": "BR: TV PAI ETERNO Religion",
+     "originalName": "BR: TV PAI ETERNO Religion",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966364",
+     "name": "BR: SBT Interior  //",
+     "originalName": "BR: SBT Interior  //",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966365",
+     "name": "BR: SBT REDE MASSA CURITIBA ●   //",
+     "originalName": "BR: SBT REDE MASSA CURITIBA ●   //",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966366",
+     "name": "BR: REDE SECULO 21 (Religion)",
+     "originalName": "BR: REDE SECULO 21 (Religion)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966367",
+     "name": "BR: BAND NEWS",
+     "originalName": "BR: BAND NEWS",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966368",
+     "name": "BR:  Rede Vida // Religion",
+     "originalName": "BR:  Rede Vida // Religion",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966369",
+     "name": "BR: TV Terceiro Anjo (Religion)",
+     "originalName": "BR: TV Terceiro Anjo (Religion)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966370",
+     "name": "BR: TV Padre Cicero ●  // Religioso",
+     "originalName": "BR: TV Padre Cicero ●  // Religioso",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966371",
+     "name": "BR: CULTURA",
+     "originalName": "BR: CULTURA",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966372",
+     "name": "BR: TV Bahia",
+     "originalName": "BR: TV Bahia",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966373",
+     "name": "BR: BAND CURITIBA",
+     "originalName": "BR: BAND CURITIBA",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966374",
+     "name": "BR: REDE Brasil tv",
+     "originalName": "BR: REDE Brasil tv",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966375",
+     "name": "BR: Rede Familia",
+     "originalName": "BR: Rede Familia",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966376",
+     "name": "BR: Rede Minas //",
+     "originalName": "BR: Rede Minas //",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966377",
+     "name": "BR: Rede TV",
+     "originalName": "BR: Rede TV",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "brasil-globo",
+   "name": "Brasil Globo",
+   "order": 19,
+   "sourceGroup": "▶️ BRASIL GLOBO",
+   "channels": [
+    {
+     "id": "1181160",
+     "name": "BR: Globo News",
+     "originalName": "BR: Globo News",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1181161",
+     "name": "BR: GLOBO NORDESTE  UFC",
+     "originalName": "BR: GLOBO NORDESTE  UFC",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1181164",
+     "name": "BR: Sim Vitoria  //",
+     "originalName": "BR: Sim Vitoria  //",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1181165",
+     "name": "BR: GLOBO NSC FLORIANOPOLIS",
+     "originalName": "BR: GLOBO NSC FLORIANOPOLIS",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1181166",
+     "name": "BR: GLOBO RJ Globo Rio de Janeiro",
+     "originalName": "BR: GLOBO RJ Globo Rio de Janeiro",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1181168",
+     "name": "BR: GLOBO RBS PASSO FUNDO",
+     "originalName": "BR: GLOBO RBS PASSO FUNDO",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1181169",
+     "name": "BR: GLOBO RBS CAXIAS DO SUL",
+     "originalName": "BR: GLOBO RBS CAXIAS DO SUL",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1181172",
+     "name": "BR: GLOBO INTER CABUGI",
+     "originalName": "BR: GLOBO INTER CABUGI",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1181173",
+     "name": "BR:  GLOBO INTER DOS VALES",
+     "originalName": "BR:  GLOBO INTER DOS VALES",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1181174",
+     "name": "BR: GLOBO GAZETA ALAGOAS",
+     "originalName": "BR: GLOBO GAZETA ALAGOAS",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "deportes-brasil",
+   "name": "Deportes Brasil",
+   "order": 20,
+   "sourceGroup": "⚽DEPORTES BRASIL",
+   "channels": [
+    {
+     "id": "966381",
+     "name": "BR: PRIME VIDEO 2 (Deporte solo evento)",
+     "originalName": "BR: PRIME VIDEO 2 (Deporte solo evento)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966382",
+     "name": "BR: PREMIERE  Solo eventos",
+     "originalName": "BR: PREMIERE  Solo eventos",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966383",
+     "name": "BR: PREMIERE CLUBES. ●",
+     "originalName": "BR: PREMIERE CLUBES. ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966384",
+     "name": "BR: PREMIERE  Solo eventos OP 2",
+     "originalName": "BR: PREMIERE  Solo eventos OP 2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966385",
+     "name": "BR: PRIME VIDEO 1 (Deporte solo evento)",
+     "originalName": "BR: PRIME VIDEO 1 (Deporte solo evento)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966386",
+     "name": "BR: COMBATE ●",
+     "originalName": "BR: COMBATE ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966387",
+     "name": "BR: SPORTV 1  ●",
+     "originalName": "BR: SPORTV 1  ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966388",
+     "name": "BR: SPORTV 2 ●",
+     "originalName": "BR: SPORTV 2 ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966389",
+     "name": "BR: SPORTV  3 ●",
+     "originalName": "BR: SPORTV  3 ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966390",
+     "name": "BR: FISH TV",
+     "originalName": "BR: FISH TV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966391",
+     "name": "BR:  CAZÉ TV (Somente em eventos)",
+     "originalName": "BR:  CAZÉ TV (Somente em eventos)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966392",
+     "name": "BR: ESPN 2 ●",
+     "originalName": "BR: ESPN 2 ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966393",
+     "name": "BR: ESPN 1 ●",
+     "originalName": "BR: ESPN 1 ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966394",
+     "name": "BR: ESPN 4",
+     "originalName": "BR: ESPN 4",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966395",
+     "name": "BR: ESPN 3 ●",
+     "originalName": "BR: ESPN 3 ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966396",
+     "name": "BR: SPORTV  4 ● Somente em evento",
+     "originalName": "BR: SPORTV  4 ● Somente em evento",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966397",
+     "name": "BR: ESPN 5  ●",
+     "originalName": "BR: ESPN 5  ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966398",
+     "name": "BR: Band Sports (Box)",
+     "originalName": "BR: Band Sports (Box)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966399",
+     "name": "BR: NOSSO FUTEBOL 2",
+     "originalName": "BR: NOSSO FUTEBOL 2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966400",
+     "name": "BR: NOSSO FUTEBOL 3",
+     "originalName": "BR: NOSSO FUTEBOL 3",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966401",
+     "name": "BR:  PARAMOUNT + 1",
+     "originalName": "BR:  PARAMOUNT + 1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966402",
+     "name": "BR:  STAR + 2 PPV (SOMENTE EM DIAS DE JOGOS)",
+     "originalName": "BR:  STAR + 2 PPV (SOMENTE EM DIAS DE JOGOS)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966403",
+     "name": "BR: FURACÃO PLAY    PPV (SOMENTE EM DIAS DE JOGOS)",
+     "originalName": "BR: FURACÃO PLAY    PPV (SOMENTE EM DIAS DE JOGOS)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966404",
+     "name": "BR: NOSSO FUTEBOL 1  ●",
+     "originalName": "BR: NOSSO FUTEBOL 1  ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966405",
+     "name": "BR: STAR + 3    PPV (SOMENTE EM DIAS DE JOGOS)",
+     "originalName": "BR: STAR + 3    PPV (SOMENTE EM DIAS DE JOGOS)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966406",
+     "name": "BR: PARAMOUNT + 2",
+     "originalName": "BR: PARAMOUNT + 2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966407",
+     "name": "BR: PARAMOUNT + 3",
+     "originalName": "BR: PARAMOUNT + 3",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966408",
+     "name": "BR: STAR + 1    PPV (SOMENTE EM DIAS DE JOGOS)",
+     "originalName": "BR: STAR + 1    PPV (SOMENTE EM DIAS DE JOGOS)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "966409",
+     "name": "BR:  ESPN 6 ●",
+     "originalName": "BR:  ESPN 6 ●",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "eventos-tv",
+   "name": "Eventos TV",
+   "order": 21,
+   "sourceGroup": "⭐EVENTOS TV⭐",
+   "dynamic": true,
+   "channels": []
+  },
+  {
+   "id": "eventos-encoder",
+   "name": "Eventos Encoder",
+   "order": 22,
+   "sourceGroup": "⭐ EVENTOS ENCODER ⭐",
+   "dynamic": true,
+   "channels": []
+  },
+  {
+   "id": "evento-exclusivo",
+   "name": "Evento Exclusivo",
+   "order": 23,
+   "sourceGroup": "⚽EVENTO EXCLUSIVO⚽",
+   "dynamic": true,
+   "channels": []
+  },
+  {
+   "id": "evento",
+   "name": "Evento",
+   "order": 24,
+   "sourceGroup": "⚽⚽EVENTO⚽⚽",
+   "dynamic": true,
+   "channels": []
+  },
+  {
+   "id": "nba-nfl-nhl-mlb-mls-eventos",
+   "name": "NBA - NFL - NHL - MLB - MLS (Eventos)",
+   "order": 25,
+   "sourceGroup": "⭐ NBA - NFL - NHL - MLB - MLS (EVENTOS)",
+   "dynamic": true,
+   "channels": []
+  },
+  {
+   "id": "eventos-disney",
+   "name": "Eventos Disney+",
+   "order": 26,
+   "sourceGroup": "⭐EVENTOS DISNEY+⭐",
+   "dynamic": true,
+   "channels": []
+  },
+  {
+   "id": "eventos-netflix",
+   "name": "Eventos Netflix",
+   "order": 27,
+   "sourceGroup": "⭐EVENTOS NETFLIX⭐",
+   "dynamic": true,
+   "channels": []
+  },
+  {
+   "id": "cine-premium",
+   "name": "Cine Premium",
+   "order": 28,
+   "sourceGroup": "⭐CINE PREMIUM",
+   "channels": [
+    {
+     "id": "240856",
+     "name": "PREMIUM | SPACE HD",
+     "originalName": "PREMIUM | SPACE HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240855",
+     "name": "PREMIUM | SPACE FHD",
+     "originalName": "PREMIUM | SPACE FHD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240833",
+     "name": "PREMIUM | CINECANAL HD -",
+     "originalName": "PREMIUM | CINECANAL HD -",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240832",
+     "name": "PREMIUM | CINECANAL FHD",
+     "originalName": "PREMIUM | CINECANAL FHD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240837",
+     "name": "PREMIUM | CINEMAX HD",
+     "originalName": "PREMIUM | CINEMAX HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240836",
+     "name": "PREMIUM | CINEMAX FHD",
+     "originalName": "PREMIUM | CINEMAX FHD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240864",
+     "name": "PREMIUM | TNT FHD",
+     "originalName": "PREMIUM | TNT FHD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240865",
+     "name": "PREMIUM | TNT HD",
+     "originalName": "PREMIUM | TNT HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240844",
+     "name": "PREMIUM | FX HD",
+     "originalName": "PREMIUM | FX HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240843",
+     "name": "PREMIUM | FX FHD",
+     "originalName": "PREMIUM | FX FHD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240824",
+     "name": "PREMIUM | A&E FHD -",
+     "originalName": "PREMIUM | A&E FHD -",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240825",
+     "name": "PREMIUM | A&E HD",
+     "originalName": "PREMIUM | A&E HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240826",
+     "name": "PREMIUM | AMC FHD",
+     "originalName": "PREMIUM | AMC FHD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240827",
+     "name": "PREMIUM | ATRESERIES -",
+     "originalName": "PREMIUM | ATRESERIES -",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240828",
+     "name": "PREMIUM | ATRESERIES HQ",
+     "originalName": "PREMIUM | ATRESERIES HQ",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240830",
+     "name": "PREMIUM | AXN FHD",
+     "originalName": "PREMIUM | AXN FHD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240829",
+     "name": "PREMIUM | AXN HD",
+     "originalName": "PREMIUM | AXN HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240831",
+     "name": "PREMIUM | CINE LATINO",
+     "originalName": "PREMIUM | CINE LATINO",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240834",
+     "name": "PREMIUM | CINEMA DINAMITA HD",
+     "originalName": "PREMIUM | CINEMA DINAMITA HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240835",
+     "name": "PREMIUM | CINEMA DINAMITA HQ",
+     "originalName": "PREMIUM | CINEMA DINAMITA HQ",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240838",
+     "name": "PREMIUM | DE PELICULA PLUS",
+     "originalName": "PREMIUM | DE PELICULA PLUS",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240839",
+     "name": "PREMIUM | DE PELICULAS CLASICO FHD",
+     "originalName": "PREMIUM | DE PELICULAS CLASICO FHD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240840",
+     "name": "PREMIUM | DHE FHD",
+     "originalName": "PREMIUM | DHE FHD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240841",
+     "name": "PREMIUM | DHE HD",
+     "originalName": "PREMIUM | DHE HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240842",
+     "name": "PREMIUM | FILM & ARTS FHD",
+     "originalName": "PREMIUM | FILM & ARTS FHD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240845",
+     "name": "PREMIUM | GOLDEN EDGE FHD",
+     "originalName": "PREMIUM | GOLDEN EDGE FHD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240846",
+     "name": "PREMIUM | GOLDEN EDGE HQ",
+     "originalName": "PREMIUM | GOLDEN EDGE HQ",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240847",
+     "name": "PREMIUM | GOLDEN FHD",
+     "originalName": "PREMIUM | GOLDEN FHD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240848",
+     "name": "PREMIUM | GOLDEN HD",
+     "originalName": "PREMIUM | GOLDEN HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240849",
+     "name": "PREMIUM | GOLDEN PLUS",
+     "originalName": "PREMIUM | GOLDEN PLUS",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240850",
+     "name": "PREMIUM | GOLDEN PLUS FHD -",
+     "originalName": "PREMIUM | GOLDEN PLUS FHD -",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240851",
+     "name": "PREMIUM | GOLDEN PREMIER HD",
+     "originalName": "PREMIUM | GOLDEN PREMIER HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240852",
+     "name": "PREMIUM | GOLDEN PREMIER HQ",
+     "originalName": "PREMIUM | GOLDEN PREMIER HQ",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240880",
+     "name": "PREMIUM | Multipremier",
+     "originalName": "PREMIUM | Multipremier",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240892",
+     "name": "PREMIUM | PANICO",
+     "originalName": "PREMIUM | PANICO",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240853",
+     "name": "PREMIUM | PARAMOUNT HD -",
+     "originalName": "PREMIUM | PARAMOUNT HD -",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240854",
+     "name": "PREMIUM | SHOWTIME EXTREME HQ",
+     "originalName": "PREMIUM | SHOWTIME EXTREME HQ",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240858",
+     "name": "PREMIUM | STAR CHANNEL HD",
+     "originalName": "PREMIUM | STAR CHANNEL HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240857",
+     "name": "PREMIUM | STAR CHANNEL HD",
+     "originalName": "PREMIUM | STAR CHANNEL HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240859",
+     "name": "PREMIUM | STARZ ENCORE ACTION",
+     "originalName": "PREMIUM | STARZ ENCORE ACTION",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240860",
+     "name": "PREMIUM | SYFY FHD",
+     "originalName": "PREMIUM | SYFY FHD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240861",
+     "name": "PREMIUM | TBS",
+     "originalName": "PREMIUM | TBS",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240862",
+     "name": "PREMIUM | TCM FHD",
+     "originalName": "PREMIUM | TCM FHD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240863",
+     "name": "PREMIUM | TCM HQ",
+     "originalName": "PREMIUM | TCM HQ",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240866",
+     "name": "PREMIUM | TNT SERIES • 01",
+     "originalName": "PREMIUM | TNT SERIES • 01",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240867",
+     "name": "PREMIUM | TNT SERIES • 02",
+     "originalName": "PREMIUM | TNT SERIES • 02",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240869",
+     "name": "PREMIUM | WARNER CHANNEL FHD",
+     "originalName": "PREMIUM | WARNER CHANNEL FHD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240868",
+     "name": "PREMIUM | WARNER CHANNEL HD",
+     "originalName": "PREMIUM | WARNER CHANNEL HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240881",
+     "name": "CINE | CINEMAX 2",
+     "originalName": "CINE | CINEMAX 2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240875",
+     "name": "CINE | DE PELICULA CLASICO",
+     "originalName": "CINE | DE PELICULA CLASICO",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240877",
+     "name": "CINE | DE PELICULA FHD",
+     "originalName": "CINE | DE PELICULA FHD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240876",
+     "name": "CINE | DE PELICULA HD",
+     "originalName": "CINE | DE PELICULA HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240878",
+     "name": "CINE | DE PELICULA PLUS",
+     "originalName": "CINE | DE PELICULA PLUS",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240882",
+     "name": "CINE | FILM & ART",
+     "originalName": "CINE | FILM & ART",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240883",
+     "name": "CINE | MOVIEMAX LATINO",
+     "originalName": "CINE | MOVIEMAX LATINO",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240884",
+     "name": "CINE | MULTICINEMA",
+     "originalName": "CINE | MULTICINEMA",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240885",
+     "name": "CINE | MULTIPREMIER",
+     "originalName": "CINE | MULTIPREMIER",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240871",
+     "name": "CINE | SONY HD",
+     "originalName": "CINE | SONY HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240870",
+     "name": "CINE | SONY MAX",
+     "originalName": "CINE | SONY MAX",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240872",
+     "name": "CINE | SONY MOVIES",
+     "originalName": "CINE | SONY MOVIES",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240886",
+     "name": "CINE | STARZ CINEMA LATINO",
+     "originalName": "CINE | STARZ CINEMA LATINO",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240887",
+     "name": "CINE | STARZ LATINO",
+     "originalName": "CINE | STARZ LATINO",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240889",
+     "name": "CINE | TNT NOVELAS",
+     "originalName": "CINE | TNT NOVELAS",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240888",
+     "name": "CINE | TNT NOVELAS",
+     "originalName": "CINE | TNT NOVELAS",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240873",
+     "name": "SONY MOVIE HD",
+     "originalName": "SONY MOVIE HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240874",
+     "name": "SONY MOVIES",
+     "originalName": "SONY MOVIES",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "240823",
+     "name": "STAR Channel FHD",
+     "originalName": "STAR Channel FHD",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "max",
+   "name": "Max",
+   "order": 29,
+   "sourceGroup": "⭐MAX",
+   "channels": [
+    {
+     "id": "1171153",
+     "name": "Max Anime",
+     "originalName": "Max Anime",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1149523",
+     "name": "CINE PREMIUN",
+     "originalName": "CINE PREMIUN",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1149526",
+     "name": "CINE FAMILIAR",
+     "originalName": "CINE FAMILIAR",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1149529",
+     "name": "CINE HISPANO",
+     "originalName": "CINE HISPANO",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "hbo-premium",
+   "name": "HBO Premium",
+   "order": 30,
+   "sourceGroup": "⭐HBO PREMIUM",
+   "channels": [
+    {
+     "id": "204",
+     "name": "HBO OP1",
+     "originalName": "HBO OP1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "205",
+     "name": "HBO OP2",
+     "originalName": "HBO OP2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "206",
+     "name": "HBO 2 OP1",
+     "originalName": "HBO 2 OP1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "207",
+     "name": "HBO 2 OP2",
+     "originalName": "HBO 2 OP2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "208",
+     "name": "HBO Family OP1",
+     "originalName": "HBO Family OP1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "209",
+     "name": "HBO Family OP2",
+     "originalName": "HBO Family OP2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "210",
+     "name": "HBO PLUS OP1",
+     "originalName": "HBO PLUS OP1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "211",
+     "name": "HBO PLUS OP2",
+     "originalName": "HBO PLUS OP2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "212",
+     "name": "HBO Xtreme OP1",
+     "originalName": "HBO Xtreme OP1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "213",
+     "name": "HBO Xtreme OP2",
+     "originalName": "HBO Xtreme OP2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "214",
+     "name": "HBO Signature OP1",
+     "originalName": "HBO Signature OP1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "215",
+     "name": "HBO Signature OP2",
+     "originalName": "HBO Signature OP2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "216",
+     "name": "HBO POP OP1",
+     "originalName": "HBO POP OP1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "217",
+     "name": "HBO POP OP2",
+     "originalName": "HBO POP OP2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "218",
+     "name": "HBO Mundi OP1",
+     "originalName": "HBO Mundi OP1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "219",
+     "name": "HBO Mundi OP2",
+     "originalName": "HBO Mundi OP2",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "universal",
+   "name": "Universal+",
+   "order": 31,
+   "sourceGroup": "⭐UNIVERSAL+",
+   "channels": [
+    {
+     "id": "198",
+     "name": "UNiversal Cinema HD",
+     "originalName": "UNiversal Cinema HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "197",
+     "name": "Universal Channel HD",
+     "originalName": "Universal Channel HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "199",
+     "name": "UNiversal Comedy HD",
+     "originalName": "UNiversal Comedy HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "200",
+     "name": "Universal Crime HD",
+     "originalName": "Universal Crime HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "201",
+     "name": "Universal Premiere HD",
+     "originalName": "Universal Premiere HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "202",
+     "name": "UNiversal Reality HD",
+     "originalName": "UNiversal Reality HD",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "espn-premium",
+   "name": "ESPN Premium",
+   "order": 32,
+   "sourceGroup": "⭐ ESPN PREMIUM",
+   "channels": [
+    {
+     "id": "994573",
+     "name": "ESPN 1 SD",
+     "originalName": "ESPN 1 SD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "994574",
+     "name": "E$PN 1 HD",
+     "originalName": "E$PN 1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "994575",
+     "name": "ESPN 2 SD",
+     "originalName": "ESPN 2 SD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "994576",
+     "name": "E$PN 2 HD",
+     "originalName": "E$PN 2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "994577",
+     "name": "ESPN 3 SD",
+     "originalName": "ESPN 3 SD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "994578",
+     "name": "E$PN 3 HD",
+     "originalName": "E$PN 3 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "994579",
+     "name": "ESPN 4 SD",
+     "originalName": "ESPN 4 SD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "994580",
+     "name": "E$PN 4 HD",
+     "originalName": "E$PN 4 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "994581",
+     "name": "ESPN 5 SD",
+     "originalName": "ESPN 5 SD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "994582",
+     "name": "E$PN 5 HD",
+     "originalName": "E$PN 5 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "994583",
+     "name": "ESPN 6 SD",
+     "originalName": "ESPN 6 SD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "994584",
+     "name": "E$PN 6 HD",
+     "originalName": "E$PN 6 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "994585",
+     "name": "ESPN 7 SD",
+     "originalName": "ESPN 7 SD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "994586",
+     "name": "E$PN 7 HD",
+     "originalName": "E$PN 7 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "994731",
+     "name": "ESPN DEPORTES",
+     "originalName": "ESPN DEPORTES",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "deportes-premium",
+   "name": "Deportes Premium",
+   "order": 33,
+   "sourceGroup": "⭐ DEPORTES PREMIUM",
+   "channels": [
+    {
+     "id": "184259",
+     "name": "EUrosport 1 HD",
+     "originalName": "EUrosport 1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184260",
+     "name": "EUrosport 2 HD",
+     "originalName": "EUrosport 2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184262",
+     "name": "DHD | ESPN 1 MX HD",
+     "originalName": "DHD | ESPN 1 MX HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184263",
+     "name": "DHD | ESPN 2 MX HD",
+     "originalName": "DHD | ESPN 2 MX HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184264",
+     "name": "DHD | ESPN 3 MX HD",
+     "originalName": "DHD | ESPN 3 MX HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184265",
+     "name": "DHD | ESPN 4 MX HD",
+     "originalName": "DHD | ESPN 4 MX HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184266",
+     "name": "DHD | ESPN 1 ARG HD",
+     "originalName": "DHD | ESPN 1 ARG HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184268",
+     "name": "DHD | ESPN 3 ARG HD",
+     "originalName": "DHD | ESPN 3 ARG HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184320",
+     "name": "DHD | Redbull TV USA HD",
+     "originalName": "DHD | Redbull TV USA HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184296",
+     "name": "DHD | TUDN MX HD",
+     "originalName": "DHD | TUDN MX HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184297",
+     "name": "DHD | TUDN USA HD",
+     "originalName": "DHD | TUDN USA HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184303",
+     "name": "DHD | BEIN Sports Extra USA HD",
+     "originalName": "DHD | BEIN Sports Extra USA HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184318",
+     "name": "DHD | TYC Sports HD",
+     "originalName": "DHD | TYC Sports HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184308",
+     "name": "DHD | TYC Internacional HD",
+     "originalName": "DHD | TYC Internacional HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184307",
+     "name": "DHD | MLB Network HD",
+     "originalName": "DHD | MLB Network HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184306",
+     "name": "DHD | NFL Network HD",
+     "originalName": "DHD | NFL Network HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184305",
+     "name": "DHD | GOLF Channel USA HD",
+     "originalName": "DHD | GOLF Channel USA HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184321",
+     "name": "DHD | NBA TV HD",
+     "originalName": "DHD | NBA TV HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184267",
+     "name": "DHD | ESPN 2 ARG HD",
+     "originalName": "DHD | ESPN 2 ARG HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184322",
+     "name": "WIN Sports HD",
+     "originalName": "WIN Sports HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184324",
+     "name": "RED BULL TV HD",
+     "originalName": "RED BULL TV HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184325",
+     "name": "NFL Network HD",
+     "originalName": "NFL Network HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184326",
+     "name": "AYM Sport HD",
+     "originalName": "AYM Sport HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184327",
+     "name": "CLaro Sports (HD)",
+     "originalName": "CLaro Sports (HD)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184284",
+     "name": "DIrecTV Sports + HD",
+     "originalName": "DIrecTV Sports + HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184261",
+     "name": "DHD | ESPN Deportes USA HD",
+     "originalName": "DHD | ESPN Deportes USA HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184277",
+     "name": "DHD | ESPN 2 USA HD",
+     "originalName": "DHD | ESPN 2 USA HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184283",
+     "name": "Dir3cTV Sports HD",
+     "originalName": "Dir3cTV Sports HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184281",
+     "name": "DHD | SKY Sports",
+     "originalName": "DHD | SKY Sports",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184278",
+     "name": "DHD | ESPN NEWS USA HD",
+     "originalName": "DHD | ESPN NEWS USA HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184276",
+     "name": "DHD | ESPN 1 USA HD",
+     "originalName": "DHD | ESPN 1 USA HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184269",
+     "name": "DHD | ESPN 5 ARG HD",
+     "originalName": "DHD | ESPN 5 ARG HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184274",
+     "name": "DHD | ESPN 3 COL HD",
+     "originalName": "DHD | ESPN 3 COL HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184273",
+     "name": "DHD | ESPN 2 COL HD",
+     "originalName": "DHD | ESPN 2 COL HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184272",
+     "name": "HD | ESPN 1 COL",
+     "originalName": "HD | ESPN 1 COL",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184271",
+     "name": "DHD | ESPN Premium HD",
+     "originalName": "DHD | ESPN Premium HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184270",
+     "name": "DHD | ESPN 4 ARG HD",
+     "originalName": "DHD | ESPN 4 ARG HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184319",
+     "name": "DHD | WWE Network",
+     "originalName": "DHD | WWE Network",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "directv-premium",
+   "name": "DirecTV Premium",
+   "order": 34,
+   "sourceGroup": "⭐ DIRECTV PREMIUM",
+   "channels": [
+    {
+     "id": "638256",
+     "name": "DSPORTS | 1 PE HD1",
+     "originalName": "DSPORTS | 1 PE HD1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "638255",
+     "name": "DSPORTS | 1 PE ***",
+     "originalName": "DSPORTS | 1 PE ***",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "638253",
+     "name": "DSPORTS | 1 COL ***",
+     "originalName": "DSPORTS | 1 COL ***",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "638251",
+     "name": "DSPORTS | 1 ARG ***",
+     "originalName": "DSPORTS | 1 ARG ***",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "638254",
+     "name": "DSPORTS | 1 ECU HD",
+     "originalName": "DSPORTS | 1 ECU HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "638257",
+     "name": "DSPORTS | 1 UR HD",
+     "originalName": "DSPORTS | 1 UR HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "638252",
+     "name": "DSPORTS | 1 CH HD",
+     "originalName": "DSPORTS | 1 CH HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "638263",
+     "name": "DSPORTS | 2 PE HD",
+     "originalName": "DSPORTS | 2 PE HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "638262",
+     "name": "DSPORTS | 2 PE",
+     "originalName": "DSPORTS | 2 PE",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "638260",
+     "name": "DSPORTS | 2 COL",
+     "originalName": "DSPORTS | 2 COL",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "638259",
+     "name": "DSPORTS | 2 ARG",
+     "originalName": "DSPORTS | 2 ARG",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "638261",
+     "name": "DSPORTS | 2 ECU FHD",
+     "originalName": "DSPORTS | 2 ECU FHD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "638267",
+     "name": "DSPORTS | PLUS PE",
+     "originalName": "DSPORTS | PLUS PE",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "fox-sport",
+   "name": "Fox Sport",
+   "order": 35,
+   "sourceGroup": "⭐ FOX SPORT",
+   "channels": [
+    {
+     "id": "184192",
+     "name": "D | Fox One 1",
+     "originalName": "D | Fox One 1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184193",
+     "name": "D | Fox One 2",
+     "originalName": "D | Fox One 2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184195",
+     "name": "D | Fox Sports OP1",
+     "originalName": "D | Fox Sports OP1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184196",
+     "name": "D | Fox Sports 1 OP2",
+     "originalName": "D | Fox Sports 1 OP2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184197",
+     "name": "D| Fox Sports 2 OP1",
+     "originalName": "D| Fox Sports 2 OP1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184198",
+     "name": "D| Fox Sports 2 OP2",
+     "originalName": "D| Fox Sports 2 OP2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184199",
+     "name": "D | Fox Sports 3 OP1",
+     "originalName": "D | Fox Sports 3 OP1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184200",
+     "name": "D | Fox Sports 3 OP2",
+     "originalName": "D | Fox Sports 3 OP2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184201",
+     "name": "D | Fox Sports Premium",
+     "originalName": "D | Fox Sports Premium",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184202",
+     "name": "D| FOX Sports Premium HD",
+     "originalName": "D| FOX Sports Premium HD",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "tnt-sports",
+   "name": "TNT Sports",
+   "order": 36,
+   "sourceGroup": "⭐ TNT SPORTS",
+   "channels": [
+    {
+     "id": "685102",
+     "name": "TNT SPORTS 1",
+     "originalName": "TNT SPORTS 1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "685103",
+     "name": "TNT SPORTS 2",
+     "originalName": "TNT SPORTS 2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "685104",
+     "name": "TNT SPORTS 3",
+     "originalName": "TNT SPORTS 3",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "685105",
+     "name": "TNT SPORTS 4",
+     "originalName": "TNT SPORTS 4",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "la-liga-espa-ola",
+   "name": "La Liga Española",
+   "order": 37,
+   "sourceGroup": "⭐ LA LIGA ESPAÑOLA",
+   "channels": [
+    {
+     "id": "534497",
+     "name": "LA LIGA TV OP1",
+     "originalName": "LA LIGA TV OP1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "534502",
+     "name": "LIGA DE CAMPEONES M+ HD",
+     "originalName": "LIGA DE CAMPEONES M+ HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "534501",
+     "name": "LIGA DE CAMPEONES M+ FHD",
+     "originalName": "LIGA DE CAMPEONES M+ FHD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "534513",
+     "name": "LA LIGA TV POR M+ FHD",
+     "originalName": "LA LIGA TV POR M+ FHD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "534496",
+     "name": "SKY LA LIGA",
+     "originalName": "SKY LA LIGA",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "534505",
+     "name": "DAZN LA LIGA HD",
+     "originalName": "DAZN LA LIGA HD",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "premier-league",
+   "name": "Premier League",
+   "order": 38,
+   "sourceGroup": "⭐ PREMIER LEAGUE",
+   "channels": [
+    {
+     "id": "1125406",
+     "name": "PREMIER L: S IK Y  Sports Premier",
+     "originalName": "PREMIER L: S IK Y  Sports Premier",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1125407",
+     "name": "PREMIER L: ESPN 1 (Latino)",
+     "originalName": "PREMIER L: ESPN 1 (Latino)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1125408",
+     "name": "PREMIER L: S IK Y  Sports Pr3mler Leagu3 (Ukranla)",
+     "originalName": "PREMIER L: S IK Y  Sports Pr3mler Leagu3 (Ukranla)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1125409",
+     "name": "PREMIER L: ESPN 2 (Latino)",
+     "originalName": "PREMIER L: ESPN 2 (Latino)",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "tudn-xtra-hd",
+   "name": "TUDN & Xtra HD",
+   "order": 39,
+   "sourceGroup": "⭐ TUDN & XTRA HD",
+   "channels": [
+    {
+     "id": "285521",
+     "name": "TUDN MX HD",
+     "originalName": "TUDN MX HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "285522",
+     "name": "TUDN USA HD",
+     "originalName": "TUDN USA HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "285523",
+     "name": "D | Tudnxtra",
+     "originalName": "D | Tudnxtra",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "285524",
+     "name": "D | Tudnxtra 1",
+     "originalName": "D | Tudnxtra 1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "285525",
+     "name": "D | Tudnxtra 2",
+     "originalName": "D | Tudnxtra 2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "285526",
+     "name": "D | Tudnxtra 3",
+     "originalName": "D | Tudnxtra 3",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "dazn-premium",
+   "name": "DAZN Premium",
+   "order": 40,
+   "sourceGroup": "⭐ DAZN PREMIUM",
+   "channels": [
+    {
+     "id": "856410",
+     "name": "ES: MOVISTAR DAZN 1 HD",
+     "originalName": "ES: MOVISTAR DAZN 1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "856412",
+     "name": "ES: MOVISTAR DAZN 2 HD",
+     "originalName": "ES: MOVISTAR DAZN 2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "856417",
+     "name": "ES | DAZN 1",
+     "originalName": "ES | DAZN 1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "856420",
+     "name": "DAZN LA LIGA SD",
+     "originalName": "DAZN LA LIGA SD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "856422",
+     "name": "DAZN LA LIGA HD",
+     "originalName": "DAZN LA LIGA HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "856423",
+     "name": "LA LIGA TV",
+     "originalName": "LA LIGA TV",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "bein-sports",
+   "name": "beIN Sports",
+   "order": 41,
+   "sourceGroup": "⭐ BEIN SPORTS",
+   "channels": [
+    {
+     "id": "963660",
+     "name": "beIN Sport USA OP2",
+     "originalName": "beIN Sport USA OP2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "963661",
+     "name": "beIN Sport USA",
+     "originalName": "beIN Sport USA",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "963662",
+     "name": "beIN Sports Xtra",
+     "originalName": "beIN Sports Xtra",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "963663",
+     "name": "beIN Sports Ñ OP2",
+     "originalName": "beIN Sports Ñ OP2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "963665",
+     "name": "beIN Sports XTRA",
+     "originalName": "beIN Sports XTRA",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "963666",
+     "name": "beIN Sports XTRA En Español",
+     "originalName": "beIN Sports XTRA En Español",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "963669",
+     "name": "USA | Bein sports 2",
+     "originalName": "USA | Bein sports 2",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "ufc-boxeo-wwe",
+   "name": "UFC - Boxeo - WWE",
+   "order": 42,
+   "sourceGroup": "⭐UFC - BOXEO - WWE",
+   "channels": [
+    {
+     "id": "965702",
+     "name": "PPV BOXING EVENTS 001 (Funciona en evento)",
+     "originalName": "PPV BOXING EVENTS 001 (Funciona en evento)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965703",
+     "name": "PPV BOXING EVENTS 002 (Funciona en evento)",
+     "originalName": "PPV BOXING EVENTS 002 (Funciona en evento)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965704",
+     "name": "UFC PASS EVENTS 001 (Funciona en evento)",
+     "originalName": "UFC PASS EVENTS 001 (Funciona en evento)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965705",
+     "name": "UFC PASS EVENTS 002 (Funciona en evento)",
+     "originalName": "UFC PASS EVENTS 002 (Funciona en evento)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965706",
+     "name": "UFC | WWE Network ...",
+     "originalName": "UFC | WWE Network ...",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965707",
+     "name": "UFC REPLAYS  ●",
+     "originalName": "UFC REPLAYS  ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965708",
+     "name": "UFC - Fight Channel  - BOX - PASS",
+     "originalName": "UFC - Fight Channel  - BOX - PASS",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965709",
+     "name": "UFC: THE FIGHT NETWORK / Box",
+     "originalName": "UFC: THE FIGHT NETWORK / Box",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965710",
+     "name": "PPV BOXING EVENTS Fite AEW BBKF",
+     "originalName": "PPV BOXING EVENTS Fite AEW BBKF",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965711",
+     "name": "PPV BOXING LUCHA LIBRE CMLL AAA MX",
+     "originalName": "PPV BOXING LUCHA LIBRE CMLL AAA MX",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965712",
+     "name": "DAZN COMBATE @",
+     "originalName": "DAZN COMBATE @",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965713",
+     "name": "ESPN 4 Latino",
+     "originalName": "ESPN 4 Latino",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965714",
+     "name": "USA :  TITAN TV MMATV ●",
+     "originalName": "USA :  TITAN TV MMATV ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965715",
+     "name": "USA :  EUROPLAYER 01 MMATV 002 ● @ (Solo eventos)",
+     "originalName": "USA :  EUROPLAYER 01 MMATV 002 ● @ (Solo eventos)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965716",
+     "name": "FOX SPORTS PREMIUM (UFC- BOX ) Ingles",
+     "originalName": "FOX SPORTS PREMIUM (UFC- BOX ) Ingles",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965717",
+     "name": "FOX SPORTS PREMIUM (UFC-BOX)  Latino",
+     "originalName": "FOX SPORTS PREMIUM (UFC-BOX)  Latino",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965718",
+     "name": "DIRECTV Sports Fight",
+     "originalName": "DIRECTV Sports Fight",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965719",
+     "name": "BR_ COMBATE",
+     "originalName": "BR_ COMBATE",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965720",
+     "name": "USA: UFC Fight Pass .",
+     "originalName": "USA: UFC Fight Pass .",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965721",
+     "name": "USA - UFC FITE   // ● BOX",
+     "originalName": "USA - UFC FITE   // ● BOX",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "f1-car-racing-motores",
+   "name": "F1 Car Racing - Motores",
+   "order": 43,
+   "sourceGroup": "⭐ F1 CAR RACING - MOTORES",
+   "channels": [
+    {
+     "id": "965725",
+     "name": "F1:  DAZN F1  [ES] ˢᵈ@ Formula 1",
+     "originalName": "F1:  DAZN F1  [ES] ˢᵈ@ Formula 1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965726",
+     "name": "F1:  DAZN F1  [ES] ᴴᴰ OP 1",
+     "originalName": "F1:  DAZN F1  [ES] ᴴᴰ OP 1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965727",
+     "name": "F1: Fox Sports 3  LATINO",
+     "originalName": "F1: Fox Sports 3  LATINO",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965728",
+     "name": "RACING S k y Sports Ukrania ⓧ",
+     "originalName": "RACING S k y Sports Ukrania ⓧ",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965729",
+     "name": "F1: DAZN F1 [ES] ᴴᴰ OP 2",
+     "originalName": "F1: DAZN F1 [ES] ᴴᴰ OP 2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965730",
+     "name": "TELEDEPORTE",
+     "originalName": "TELEDEPORTE",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965731",
+     "name": "Hipica TV ● ᴴᴰ  (HPI  CABALLOS HOURSE )",
+     "originalName": "Hipica TV ● ᴴᴰ  (HPI  CABALLOS HOURSE )",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965732",
+     "name": "MOTOR Sports Channel ●",
+     "originalName": "MOTOR Sports Channel ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965733",
+     "name": "RACING  DUBAI  2 / Caballos horses",
+     "originalName": "RACING  DUBAI  2 / Caballos horses",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965734",
+     "name": "DSPORTS MOTOR",
+     "originalName": "DSPORTS MOTOR",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965735",
+     "name": "MOTO SPORTS ●",
+     "originalName": "MOTO SPORTS ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965736",
+     "name": "DISCOVERY TURBO BR",
+     "originalName": "DISCOVERY TURBO BR",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965737",
+     "name": "RACING MOTOGP  CANAL+",
+     "originalName": "RACING MOTOGP  CANAL+",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965738",
+     "name": "F1:  REPLAY Formula 1  ●",
+     "originalName": "F1:  REPLAY Formula 1  ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965739",
+     "name": "F1:  S IK Y  SPORT F1 Italia",
+     "originalName": "F1:  S IK Y  SPORT F1 Italia",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965740",
+     "name": "F1:  S K Y SPORTS F1 Ukrania ●",
+     "originalName": "F1:  S K Y SPORTS F1 Ukrania ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965741",
+     "name": "RACING MOTOGP Replays",
+     "originalName": "RACING MOTOGP Replays",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965742",
+     "name": "F1TV Cams: 1 - 100 Formula 1 Camaras ●  (Solo Evento)",
+     "originalName": "F1TV Cams: 1 - 100 Formula 1 Camaras ●  (Solo Evento)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965743",
+     "name": "F1TV Cams: 2 - 100 Formula 1 Camaras ● @ (Solo Evento)",
+     "originalName": "F1TV Cams: 2 - 100 Formula 1 Camaras ● @ (Solo Evento)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "965744",
+     "name": "F1TV Cams: 3 - 100 Formula 1 Camaras ● @ (Solo Evento)",
+     "originalName": "F1TV Cams: 3 - 100 Formula 1 Camaras ● @ (Solo Evento)",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "infantiles",
+   "name": "Infantiles",
+   "order": 44,
+   "sourceGroup": "⭐INFANTILES",
+   "channels": [
+    {
+     "id": "296507",
+     "name": "NIÑos | BABY TV OP1 HD",
+     "originalName": "NIÑos | BABY TV OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "296508",
+     "name": "NIÑos | BABY TV OP2 HD",
+     "originalName": "NIÑos | BABY TV OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "296511",
+     "name": "NIÑos | NICK JR OP1 HD",
+     "originalName": "NIÑos | NICK JR OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "296512",
+     "name": "NIÑos | NICK JR OP2 HD",
+     "originalName": "NIÑos | NICK JR OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "296509",
+     "name": "NIÑos | Nickelodeon OP1 HD",
+     "originalName": "NIÑos | Nickelodeon OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "296510",
+     "name": "NIÑos | Nickelodeon OP2 HD",
+     "originalName": "NIÑos | Nickelodeon OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "296513",
+     "name": "NIÑos | TEEN NICK OP1 HD",
+     "originalName": "NIÑos | TEEN NICK OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "296514",
+     "name": "NIÑos | TEEN NICK OP2 HD",
+     "originalName": "NIÑos | TEEN NICK OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "296515",
+     "name": "NIÑos | Disney JR OP1 HD",
+     "originalName": "NIÑos | Disney JR OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "296516",
+     "name": "NIÑos | Disney JR OP2 HD",
+     "originalName": "NIÑos | Disney JR OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "296517",
+     "name": "NIÑos | Disney Channel OP1 HD",
+     "originalName": "NIÑos | Disney Channel OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "296518",
+     "name": "NIÑos | Disney Channel OP2 HD",
+     "originalName": "NIÑos | Disney Channel OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "296519",
+     "name": "NIÑos | Discovery KIDS OP1 HD",
+     "originalName": "NIÑos | Discovery KIDS OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "296520",
+     "name": "NIÑos | Discovery KIDS OP2 HD",
+     "originalName": "NIÑos | Discovery KIDS OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "296521",
+     "name": "NIÑos | Tooncast OP1 HD",
+     "originalName": "NIÑos | Tooncast OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "296522",
+     "name": "NIÑos | Tooncast OP2 HD",
+     "originalName": "NIÑos | Tooncast OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "296524",
+     "name": "NIÑos | Cartoon Network OP1 HD",
+     "originalName": "NIÑos | Cartoon Network OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "296525",
+     "name": "NIÑos | Cartoon Network OP2 HD",
+     "originalName": "NIÑos | Cartoon Network OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "296526",
+     "name": "NIÑos | Cartoonito HD",
+     "originalName": "NIÑos | Cartoonito HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "296523",
+     "name": "NIÑos | Boomerang HD",
+     "originalName": "NIÑos | Boomerang HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "296527",
+     "name": "NIÑos | Semillitas HD",
+     "originalName": "NIÑos | Semillitas HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "296528",
+     "name": "NIÑos | Adult SWIM HD",
+     "originalName": "NIÑos | Adult SWIM HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "296529",
+     "name": "BAbyfirstTV OP1 HD",
+     "originalName": "BAbyfirstTV OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "296530",
+     "name": "BAby first OP2 HD",
+     "originalName": "BAby first OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "296531",
+     "name": "BItme HD",
+     "originalName": "BItme HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "296535",
+     "name": "PLIM PLIM HD",
+     "originalName": "PLIM PLIM HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "296534",
+     "name": "Zoomoo HD",
+     "originalName": "Zoomoo HD",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "cultura",
+   "name": "Cultura",
+   "order": 45,
+   "sourceGroup": "⭐CULTURA",
+   "channels": [
+    {
+     "id": "184346",
+     "name": "HGTV HD",
+     "originalName": "HGTV HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184348",
+     "name": "NAT GEO HD",
+     "originalName": "NAT GEO HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184349",
+     "name": "NAT GEO HD",
+     "originalName": "NAT GEO HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184350",
+     "name": "NAT GEO Mundo HD",
+     "originalName": "NAT GEO Mundo HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184351",
+     "name": "Discovery Channel HD",
+     "originalName": "Discovery Channel HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184352",
+     "name": "Discovery Channel HD",
+     "originalName": "Discovery Channel HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184375",
+     "name": "Discovery Channel OP1 HD",
+     "originalName": "Discovery Channel OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184376",
+     "name": "Discovery Channel OP2 HD",
+     "originalName": "Discovery Channel OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184353",
+     "name": "Discovery Familia OP1 HD",
+     "originalName": "Discovery Familia OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184354",
+     "name": "Discovery Familia OP2 HD",
+     "originalName": "Discovery Familia OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184385",
+     "name": "Discovery Investigation HD",
+     "originalName": "Discovery Investigation HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184383",
+     "name": "Discovery Investigation HD",
+     "originalName": "Discovery Investigation HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184384",
+     "name": "Discovery Investigation HD",
+     "originalName": "Discovery Investigation HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184378",
+     "name": "Discovery SCI HD",
+     "originalName": "Discovery SCI HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184379",
+     "name": "Discovery SCI SD",
+     "originalName": "Discovery SCI SD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184380",
+     "name": "Animal Planet OP1 HD",
+     "originalName": "Animal Planet OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184381",
+     "name": "Animal Planet OP2 HD",
+     "originalName": "Animal Planet OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184382",
+     "name": "Animal Planet OP3 HD",
+     "originalName": "Animal Planet OP3 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184363",
+     "name": "Discovery Theater",
+     "originalName": "Discovery Theater",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184364",
+     "name": "Discovery Theater HD",
+     "originalName": "Discovery Theater HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184365",
+     "name": "Discovery Theater FHD",
+     "originalName": "Discovery Theater FHD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184366",
+     "name": "Discovery H&H HD",
+     "originalName": "Discovery H&H HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184367",
+     "name": "Discovery H&H opc1",
+     "originalName": "Discovery H&H opc1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184368",
+     "name": "Discovery H&H OP2 HD",
+     "originalName": "Discovery H&H OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184369",
+     "name": "Discovery Turbo OP1 HD",
+     "originalName": "Discovery Turbo OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184370",
+     "name": "Discovery Turbo OP2 HD",
+     "originalName": "Discovery Turbo OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184371",
+     "name": "Discovery World HD",
+     "originalName": "Discovery World HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184372",
+     "name": "Discovery World OP1 HD",
+     "originalName": "Discovery World OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184373",
+     "name": "Discovery World OP2 HD",
+     "originalName": "Discovery World OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184386",
+     "name": "EL Gourmet HD",
+     "originalName": "EL Gourmet HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184387",
+     "name": "EL Gourmet HD",
+     "originalName": "EL Gourmet HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184388",
+     "name": "EL Gourmet HD",
+     "originalName": "EL Gourmet HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184389",
+     "name": "WOBI OP1 HD",
+     "originalName": "WOBI OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184390",
+     "name": "WOBI OP2 HD",
+     "originalName": "WOBI OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184356",
+     "name": "History HD",
+     "originalName": "History HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184347",
+     "name": "History Channel",
+     "originalName": "History Channel",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184357",
+     "name": "History OP1 HD",
+     "originalName": "History OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184355",
+     "name": "History EN Español HD",
+     "originalName": "History EN Español HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184358",
+     "name": "History 2 HD",
+     "originalName": "History 2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184359",
+     "name": "HIstory 2 HD",
+     "originalName": "HIstory 2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184392",
+     "name": "FOOD Network HD",
+     "originalName": "FOOD Network HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184393",
+     "name": "FOOD Network HD",
+     "originalName": "FOOD Network HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184360",
+     "name": "TLC HD",
+     "originalName": "TLC HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184361",
+     "name": "TLC OP1 HD",
+     "originalName": "TLC OP1 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184362",
+     "name": "TLC OP2 HD",
+     "originalName": "TLC OP2 HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184394",
+     "name": "LOVE Nature Español HD",
+     "originalName": "LOVE Nature Español HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184395",
+     "name": "Curiosity Stream HD",
+     "originalName": "Curiosity Stream HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "184396",
+     "name": "Sundance TV HD",
+     "originalName": "Sundance TV HD",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "novelas",
+   "name": "Novelas",
+   "order": 46,
+   "sourceGroup": "⭐NOVELAS",
+   "channels": [
+    {
+     "id": "370355",
+     "name": "TL Novelas HD",
+     "originalName": "TL Novelas HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "370356",
+     "name": "COrazón HD",
+     "originalName": "COrazón HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "370358",
+     "name": "TNT Novelas HD",
+     "originalName": "TNT Novelas HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "370359",
+     "name": "RCN Novelas HD",
+     "originalName": "RCN Novelas HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "370360",
+     "name": "PAsiones HD",
+     "originalName": "PAsiones HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "370361",
+     "name": "MX| Canal DE LAS Estrellas HD",
+     "originalName": "MX| Canal DE LAS Estrellas HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "370362",
+     "name": "MX| Univision Novelas",
+     "originalName": "MX| Univision Novelas",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "370363",
+     "name": "Kanal D Drama HD",
+     "originalName": "Kanal D Drama HD",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "telemundo",
+   "name": "Telemundo",
+   "order": 47,
+   "sourceGroup": "⭐ TELEMUNDO",
+   "channels": [
+    {
+     "id": "241003",
+     "name": "TELEMUNDO CHICAGO",
+     "originalName": "TELEMUNDO CHICAGO",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "241016",
+     "name": "TELEMUNDO HOUSTON",
+     "originalName": "TELEMUNDO HOUSTON",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "241026",
+     "name": "TELEMUNDO ATLANTA",
+     "originalName": "TELEMUNDO ATLANTA",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "241025",
+     "name": "TELEMUNDO TAMPA",
+     "originalName": "TELEMUNDO TAMPA",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "241024",
+     "name": "TELEMUNDO SAN DIEGO",
+     "originalName": "TELEMUNDO SAN DIEGO",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "241022",
+     "name": "TELEMUNDO DENVER COLORADO",
+     "originalName": "TELEMUNDO DENVER COLORADO",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "241021",
+     "name": "TELEMUNDO PHILADELPHIA",
+     "originalName": "TELEMUNDO PHILADELPHIA",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "241020",
+     "name": "TELEMUNDO SAN FRANSISCO",
+     "originalName": "TELEMUNDO SAN FRANSISCO",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "241019",
+     "name": "TELEMUNDO Puerto Rico",
+     "originalName": "TELEMUNDO Puerto Rico",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "241018",
+     "name": "TELEMUNDO LOS ANGELES.",
+     "originalName": "TELEMUNDO LOS ANGELES.",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "241017",
+     "name": "TELEMUNDO LAS VEGAS",
+     "originalName": "TELEMUNDO LAS VEGAS",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "241015",
+     "name": "TELEMUNDO FRESNO",
+     "originalName": "TELEMUNDO FRESNO",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "241004",
+     "name": "TELEMUNDO MIAMI",
+     "originalName": "TELEMUNDO MIAMI",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "241014",
+     "name": "TELEMUNDO LOS ÁNGELES",
+     "originalName": "TELEMUNDO LOS ÁNGELES",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "241013",
+     "name": "TELEMUNDO BOSTON",
+     "originalName": "TELEMUNDO BOSTON",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "241011",
+     "name": "TELEMUNDO ORLANDO",
+     "originalName": "TELEMUNDO ORLANDO",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "241010",
+     "name": "TELEMUNDO WASHINGTON",
+     "originalName": "TELEMUNDO WASHINGTON",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "241009",
+     "name": "TELEMUNDO 47",
+     "originalName": "TELEMUNDO 47",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "241007",
+     "name": "TELEMUNDO INTERNACIONAL",
+     "originalName": "TELEMUNDO INTERNACIONAL",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "241006",
+     "name": "TELEMUNDO DALLAS",
+     "originalName": "TELEMUNDO DALLAS",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "241005",
+     "name": "TELEMUNDO NY New York",
+     "originalName": "TELEMUNDO NY New York",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "241027",
+     "name": "TELEMUNDO SAN FRANCISCO",
+     "originalName": "TELEMUNDO SAN FRANCISCO",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "univision",
+   "name": "Univision",
+   "order": 48,
+   "sourceGroup": "⭐ UNIVISION",
+   "channels": [
+    {
+     "id": "241029",
+     "name": "UNI | UNIVISION",
+     "originalName": "UNI | UNIVISION",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "241030",
+     "name": "UNI | UNIVISION TLENOVELAS",
+     "originalName": "UNI | UNIVISION TLENOVELAS",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "241032",
+     "name": "UNI | UNIVISION CHICAGO",
+     "originalName": "UNI | UNIVISION CHICAGO",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "241033",
+     "name": "UNI | UNIVISION DALLAS",
+     "originalName": "UNI | UNIVISION DALLAS",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "241034",
+     "name": "UNI | UNIVISION HOUSTON",
+     "originalName": "UNI | UNIVISION HOUSTON",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "241035",
+     "name": "UNI | UNIVISION LOS ANGELES",
+     "originalName": "UNI | UNIVISION LOS ANGELES",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "241036",
+     "name": "UNI | UNIVISION MIAMI",
+     "originalName": "UNI | UNIVISION MIAMI",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "241037",
+     "name": "UNI | UNIVISION NUEVA YORK",
+     "originalName": "UNI | UNIVISION NUEVA YORK",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "241038",
+     "name": "UNI | UNIVISION ORLANDO",
+     "originalName": "UNI | UNIVISION ORLANDO",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "241041",
+     "name": "UNI | UNIVISION SAN FRANCISCO",
+     "originalName": "UNI | UNIVISION SAN FRANCISCO",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "241043",
+     "name": "UNI | UNIVISION DENVER",
+     "originalName": "UNI | UNIVISION DENVER",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "241044",
+     "name": "UNI | UNIVISION ATLANTA",
+     "originalName": "UNI | UNIVISION ATLANTA",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "tv-noticias",
+   "name": "TV Noticias",
+   "order": 49,
+   "sourceGroup": "⭐ TV NOTICIAS",
+   "channels": [
+    {
+     "id": "638373",
+     "name": "CNN En Español",
+     "originalName": "CNN En Español",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "638374",
+     "name": "CNN MX",
+     "originalName": "CNN MX",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "638375",
+     "name": "NOTI | CNN INGLES",
+     "originalName": "NOTI | CNN INGLES",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "638377",
+     "name": "NOTI | RT EN ESPANOL",
+     "originalName": "NOTI | RT EN ESPANOL",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "638378",
+     "name": "NOTI | CNN INTERNACIONAL",
+     "originalName": "NOTI | CNN INTERNACIONAL",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "638380",
+     "name": "NO | CNN International",
+     "originalName": "NO | CNN International",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "845464",
+     "name": "DW En Esp",
+     "originalName": "DW En Esp",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "845465",
+     "name": "IMAGEN",
+     "originalName": "IMAGEN",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "tv-religiosos",
+   "name": "TV Religiosos",
+   "order": 50,
+   "sourceGroup": "⭐ TV RELIGIOSOS",
+   "channels": [
+    {
+     "id": "638383",
+     "name": "LA VOZ DE MARIA",
+     "originalName": "LA VOZ DE MARIA",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "845471",
+     "name": "NUEVO TIEMPO",
+     "originalName": "NUEVO TIEMPO",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "638386",
+     "name": "R| 3ABN Latino",
+     "originalName": "R| 3ABN Latino",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "638387",
+     "name": "Candelita TV",
+     "originalName": "Candelita TV",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "tv-musica",
+   "name": "TV Musica",
+   "order": 51,
+   "sourceGroup": "⭐ TV MUSICA",
+   "channels": [
+    {
+     "id": "973929",
+     "name": "MU | Music TV",
+     "originalName": "MU | Music TV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "638389",
+     "name": "MU | HTV",
+     "originalName": "MU | HTV",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "638390",
+     "name": "MU | MTV HD",
+     "originalName": "MU | MTV HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "638391",
+     "name": "MU | BANDAMAX",
+     "originalName": "MU | BANDAMAX",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "638398",
+     "name": "MU | LA KALLE",
+     "originalName": "MU | LA KALLE",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "638400",
+     "name": "MU | MTV SD",
+     "originalName": "MU | MTV SD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "638401",
+     "name": "MU | TELEHIT HD",
+     "originalName": "MU | TELEHIT HD",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "24-7-cine-peliculas",
+   "name": "24/7 - Cine Peliculas",
+   "order": 52,
+   "sourceGroup": "24/7 - CINE PELICULAS ►",
+   "channels": [
+    {
+     "id": "873219",
+     "name": "24/7: MARVEL  Channel ⁽ᴴᴰ⁾",
+     "originalName": "24/7: MARVEL  Channel ⁽ᴴᴰ⁾",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873220",
+     "name": "24/7:  TERROR Channel ●  ⁽ᴴᴰ⁾",
+     "originalName": "24/7:  TERROR Channel ●  ⁽ᴴᴰ⁾",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873221",
+     "name": "24/7: CINE ZONE ⁽ᴴᴰ⁾ ●",
+     "originalName": "24/7: CINE ZONE ⁽ᴴᴰ⁾ ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873222",
+     "name": "24/7: NETFLIX Peliculas ⁽ᴴᴰ⁾ ●",
+     "originalName": "24/7: NETFLIX Peliculas ⁽ᴴᴰ⁾ ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873223",
+     "name": "24/7: DISNEY Peliculas ⁽ᴴᴰ⁾",
+     "originalName": "24/7: DISNEY Peliculas ⁽ᴴᴰ⁾",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873224",
+     "name": "24/7: AMAZON PRIME VIDEO Peliculas ⁽ᴴᴰ⁾",
+     "originalName": "24/7: AMAZON PRIME VIDEO Peliculas ⁽ᴴᴰ⁾",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873225",
+     "name": "24/7: DRAGON Ball Zone ⁽ᴴᴰ⁾ ●",
+     "originalName": "24/7: DRAGON Ball Zone ⁽ᴴᴰ⁾ ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873226",
+     "name": "24/7: AVENTURA movies ⁽ᴴᴰ⁾",
+     "originalName": "24/7: AVENTURA movies ⁽ᴴᴰ⁾",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873227",
+     "name": "24/7: ACCION Movies ⁽ᴴᴰ⁾",
+     "originalName": "24/7: ACCION Movies ⁽ᴴᴰ⁾",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873228",
+     "name": "24/7: TEEN Channel ⁽ᴴᴰ⁾ ●",
+     "originalName": "24/7: TEEN Channel ⁽ᴴᴰ⁾ ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873229",
+     "name": "24/7: Harry Potter",
+     "originalName": "24/7: Harry Potter",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873230",
+     "name": "24/7: ROMANCE PLUS ●",
+     "originalName": "24/7: ROMANCE PLUS ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873231",
+     "name": "24/7:  CINE SANGRIENTO",
+     "originalName": "24/7:  CINE SANGRIENTO",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "24-7-series",
+   "name": "24/7 Series",
+   "order": 53,
+   "sourceGroup": "24/7 SERIES ►",
+   "channels": [
+    {
+     "id": "1056861",
+     "name": "24/7 | John Wick",
+     "originalName": "24/7 | John Wick",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056862",
+     "name": "24/7 | Adam sandler",
+     "originalName": "24/7 | Adam sandler",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056863",
+     "name": "24/7 | Futurama",
+     "originalName": "24/7 | Futurama",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056864",
+     "name": "24/7 Timon y Pumbaa",
+     "originalName": "24/7 Timon y Pumbaa",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056865",
+     "name": "24/7 Ben 10",
+     "originalName": "24/7 Ben 10",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056866",
+     "name": "24/7 Bluey",
+     "originalName": "24/7 Bluey",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056867",
+     "name": "24/7 Don Gato y Su Pandilla",
+     "originalName": "24/7 Don Gato y Su Pandilla",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056868",
+     "name": "24/7 | 100 Latinos Dijeron",
+     "originalName": "24/7 | 100 Latinos Dijeron",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056869",
+     "name": "24/7 | 1000 maneras de morir",
+     "originalName": "24/7 | 1000 maneras de morir",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056870",
+     "name": "24/7 | 40 y 20",
+     "originalName": "24/7 | 40 y 20",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056871",
+     "name": "24/7 | Acapulco Shore",
+     "originalName": "24/7 | Acapulco Shore",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056872",
+     "name": "24/7 | Alerta Aeropuerto",
+     "originalName": "24/7 | Alerta Aeropuerto",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056873",
+     "name": "24/7 | American Horror Story",
+     "originalName": "24/7 | American Horror Story",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056874",
+     "name": "24/7 | Backdoor",
+     "originalName": "24/7 | Backdoor",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056875",
+     "name": "24/7 | Better call Saul",
+     "originalName": "24/7 | Better call Saul",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056876",
+     "name": "24/7 | Betty la Fea",
+     "originalName": "24/7 | Betty la Fea",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056877",
+     "name": "24/7 | Black Mirror",
+     "originalName": "24/7 | Black Mirror",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056878",
+     "name": "24/7 | Breaking Bad",
+     "originalName": "24/7 | Breaking Bad",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056879",
+     "name": "24/7 | Bromas",
+     "originalName": "24/7 | Bromas",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056880",
+     "name": "24/7 | Caso Cerrado",
+     "originalName": "24/7 | Caso Cerrado",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056881",
+     "name": "24/7 | Cero en Conducta",
+     "originalName": "24/7 | Cero en Conducta",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056882",
+     "name": "24/7 | Club de Cuervos",
+     "originalName": "24/7 | Club de Cuervos",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056883",
+     "name": "24/7 | Cobra Kai",
+     "originalName": "24/7 | Cobra Kai",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056884",
+     "name": "24/7 | Como conocí a tu madre",
+     "originalName": "24/7 | Como conocí a tu madre",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056885",
+     "name": "24/7 | CSI",
+     "originalName": "24/7 | CSI",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056886",
+     "name": "24/7 | Dr. House",
+     "originalName": "24/7 | Dr. House",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056887",
+     "name": "24/7 | Drake y Josh",
+     "originalName": "24/7 | Drake y Josh",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056888",
+     "name": "24/7 | El Chapo",
+     "originalName": "24/7 | El Chapo",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056889",
+     "name": "24/7 | El Manual de Supervivencia de Ned",
+     "originalName": "24/7 | El Manual de Supervivencia de Ned",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056890",
+     "name": "24/7 | El Mentalista",
+     "originalName": "24/7 | El Mentalista",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056891",
+     "name": "24/7 | El principe del Rap",
+     "originalName": "24/7 | El principe del Rap",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056892",
+     "name": "24/7 | El Señor de los Cielos",
+     "originalName": "24/7 | El Señor de los Cielos",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056893",
+     "name": "24/7 | Escalofrios",
+     "originalName": "24/7 | Escalofrios",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056894",
+     "name": "24/7 | Friends",
+     "originalName": "24/7 | Friends",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056895",
+     "name": "24/7 | Game of Thrones",
+     "originalName": "24/7 | Game of Thrones",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056896",
+     "name": "24/7 | Grey Anatomy",
+     "originalName": "24/7 | Grey Anatomy",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056897",
+     "name": "24/7 | Guerra de Chistes",
+     "originalName": "24/7 | Guerra de Chistes",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056898",
+     "name": "24/7 | Hanna Montana",
+     "originalName": "24/7 | Hanna Montana",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056899",
+     "name": "24/7 | ICarly",
+     "originalName": "24/7 | ICarly",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056900",
+     "name": "24/7 | La casa de Papel",
+     "originalName": "24/7 | La casa de Papel",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056901",
+     "name": "24/7 | La Casa del Dragon",
+     "originalName": "24/7 | La Casa del Dragon",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056902",
+     "name": "24/7 | La Familia P. Luche",
+     "originalName": "24/7 | La Familia P. Luche",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056903",
+     "name": "24/7 | La Familia Peluche",
+     "originalName": "24/7 | La Familia Peluche",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056904",
+     "name": "24/7 | La hora Pico",
+     "originalName": "24/7 | La hora Pico",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056905",
+     "name": "24/7 | La ley y el Orden",
+     "originalName": "24/7 | La ley y el Orden",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056906",
+     "name": "24/7 | La Niñera",
+     "originalName": "24/7 | La Niñera",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056907",
+     "name": "24/7 | La rosa de guadalupe",
+     "originalName": "24/7 | La rosa de guadalupe",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056908",
+     "name": "24/7 | Lie to me",
+     "originalName": "24/7 | Lie to me",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056909",
+     "name": "24/7 | Malcolm  TEMP 1_4",
+     "originalName": "24/7 | Malcolm  TEMP 1_4",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056910",
+     "name": "24/7 | Malcolm TEMP 4_7",
+     "originalName": "24/7 | Malcolm TEMP 4_7",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056911",
+     "name": "24/7 | Mentes Criminales",
+     "originalName": "24/7 | Mentes Criminales",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056912",
+     "name": "24/7 | Mexicanicos",
+     "originalName": "24/7 | Mexicanicos",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056913",
+     "name": "24/7 | Modern Family",
+     "originalName": "24/7 | Modern Family",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056914",
+     "name": "24/7 | Mujeres Asesinas Mexico",
+     "originalName": "24/7 | Mujeres Asesinas Mexico",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056915",
+     "name": "24/7 | Narcos Colombia",
+     "originalName": "24/7 | Narcos Colombia",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056916",
+     "name": "24/7 | Narcos Mexico",
+     "originalName": "24/7 | Narcos Mexico",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056917",
+     "name": "24/7 | Nosotros los Guapos",
+     "originalName": "24/7 | Nosotros los Guapos",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056918",
+     "name": "24/7 | Rosario Tijeras",
+     "originalName": "24/7 | Rosario Tijeras",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056919",
+     "name": "24/7 | Sabrina la Bruja Adolecente",
+     "originalName": "24/7 | Sabrina la Bruja Adolecente",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056920",
+     "name": "24/7 | Se rentan cuartos",
+     "originalName": "24/7 | Se rentan cuartos",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056921",
+     "name": "24/7 | Sex and The City",
+     "originalName": "24/7 | Sex and The City",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056922",
+     "name": "24/7 | Shark Thank Mexico",
+     "originalName": "24/7 | Shark Thank Mexico",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056923",
+     "name": "24/7 | Simon Dice",
+     "originalName": "24/7 | Simon Dice",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056924",
+     "name": "24/7 | SmallVille",
+     "originalName": "24/7 | SmallVille",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056925",
+     "name": "24/7 | Spartacus",
+     "originalName": "24/7 | Spartacus",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056926",
+     "name": "24/7 | Stranger Things",
+     "originalName": "24/7 | Stranger Things",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056927",
+     "name": "24/7 | Supervivencia al desnudo",
+     "originalName": "24/7 | Supervivencia al desnudo",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056928",
+     "name": "24/7 | That 70's Show",
+     "originalName": "24/7 | That 70's Show",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056929",
+     "name": "24/7 | The Big Bang Theory",
+     "originalName": "24/7 | The Big Bang Theory",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056930",
+     "name": "24/7 | The Crown",
+     "originalName": "24/7 | The Crown",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056931",
+     "name": "24/7 | The Flash",
+     "originalName": "24/7 | The Flash",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056932",
+     "name": "24/7 | The Last of US",
+     "originalName": "24/7 | The Last of US",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056933",
+     "name": "24/7 | The office",
+     "originalName": "24/7 | The office",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056934",
+     "name": "24/7 | The Walking Dead",
+     "originalName": "24/7 | The Walking Dead",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056935",
+     "name": "24/7 | Two and a Half Men",
+     "originalName": "24/7 | Two and a Half Men",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056936",
+     "name": "24/7 | Una Familia de Diez",
+     "originalName": "24/7 | Una Familia de Diez",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056937",
+     "name": "24/7 | Vecinos",
+     "originalName": "24/7 | Vecinos",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056938",
+     "name": "24/7 | Vikingos",
+     "originalName": "24/7 | Vikingos",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056939",
+     "name": "24/7 | XHDRBZ",
+     "originalName": "24/7 | XHDRBZ",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056940",
+     "name": "24/7 | Zoey 101",
+     "originalName": "24/7 | Zoey 101",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056941",
+     "name": "24/7 Futurama T1",
+     "originalName": "24/7 Futurama T1",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056942",
+     "name": "24/7 Futurama T2 - T4",
+     "originalName": "24/7 Futurama T2 - T4",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056943",
+     "name": "24/7 Yellowstone T1-T2",
+     "originalName": "24/7 Yellowstone T1-T2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056944",
+     "name": "24/7 Alerta Aeropuerto T1 - T2",
+     "originalName": "24/7 Alerta Aeropuerto T1 - T2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056945",
+     "name": "24/7 | Drama Movies",
+     "originalName": "24/7 | Drama Movies",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056946",
+     "name": "24/7 | Dreamworks Movies (ENG)",
+     "originalName": "24/7 | Dreamworks Movies (ENG)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056947",
+     "name": "24/7 | Family Movies",
+     "originalName": "24/7 | Family Movies",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056948",
+     "name": "24/7 | Fantasy Movies",
+     "originalName": "24/7 | Fantasy Movies",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056949",
+     "name": "24/7 | Harry Potter Movies",
+     "originalName": "24/7 | Harry Potter Movies",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056950",
+     "name": "24/7 | History Movies",
+     "originalName": "24/7 | History Movies",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056951",
+     "name": "24/7 | Horror Movies",
+     "originalName": "24/7 | Horror Movies",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056952",
+     "name": "24/7 | Marvel Movies",
+     "originalName": "24/7 | Marvel Movies",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056953",
+     "name": "24/7 | Mistery Movies",
+     "originalName": "24/7 | Mistery Movies",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056954",
+     "name": "24/7 | Pixar Movies (ENG)",
+     "originalName": "24/7 | Pixar Movies (ENG)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056955",
+     "name": "24/7 | Religion Movies",
+     "originalName": "24/7 | Religion Movies",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056956",
+     "name": "24/7 | Romance Movies",
+     "originalName": "24/7 | Romance Movies",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056957",
+     "name": "24/7 | Science Fiction Movies",
+     "originalName": "24/7 | Science Fiction Movies",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056958",
+     "name": "24/7 | Suspense Movies",
+     "originalName": "24/7 | Suspense Movies",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056959",
+     "name": "24/7 | Halloween",
+     "originalName": "24/7 | Halloween",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056960",
+     "name": "24/7 | Accion",
+     "originalName": "24/7 | Accion",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056961",
+     "name": "24/7 | Animadas",
+     "originalName": "24/7 | Animadas",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056962",
+     "name": "24/7 | Artes Marciales",
+     "originalName": "24/7 | Artes Marciales",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056963",
+     "name": "24/7 | Aventura",
+     "originalName": "24/7 | Aventura",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056964",
+     "name": "24/7 | Batman (Saga de Nolan)",
+     "originalName": "24/7 | Batman (Saga de Nolan)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056965",
+     "name": "24/7 | Cantinflas",
+     "originalName": "24/7 | Cantinflas",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056966",
+     "name": "24/7 | Cincuenta Sombras",
+     "originalName": "24/7 | Cincuenta Sombras",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056967",
+     "name": "24/7 | Cine infantil",
+     "originalName": "24/7 | Cine infantil",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056968",
+     "name": "24/7 | Cinema Latino",
+     "originalName": "24/7 | Cinema Latino",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056969",
+     "name": "24/7 | Cinema Latino 2",
+     "originalName": "24/7 | Cinema Latino 2",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056970",
+     "name": "24/7 | Clasicos de Disney",
+     "originalName": "24/7 | Clasicos de Disney",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056971",
+     "name": "24/7 | Comedia",
+     "originalName": "24/7 | Comedia",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056972",
+     "name": "24/7 | Crepusculo",
+     "originalName": "24/7 | Crepusculo",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056973",
+     "name": "24/7 | Crimen",
+     "originalName": "24/7 | Crimen",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056974",
+     "name": "24/7 | Deportes",
+     "originalName": "24/7 | Deportes",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056975",
+     "name": "24/7 | Destino Final",
+     "originalName": "24/7 | Destino Final",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056976",
+     "name": "24/7 | Documental",
+     "originalName": "24/7 | Documental",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056977",
+     "name": "24/7 | Drama",
+     "originalName": "24/7 | Drama",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056978",
+     "name": "24/7 | Dreamworks",
+     "originalName": "24/7 | Dreamworks",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056979",
+     "name": "24/7 | Duro de Matar",
+     "originalName": "24/7 | Duro de Matar",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056980",
+     "name": "24/7 | El planeta de los simios",
+     "originalName": "24/7 | El planeta de los simios",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056981",
+     "name": "24/7 | El señor de los anillos",
+     "originalName": "24/7 | El señor de los anillos",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056982",
+     "name": "24/7 | Estrenos",
+     "originalName": "24/7 | Estrenos",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056983",
+     "name": "24/7 | Fantasia",
+     "originalName": "24/7 | Fantasia",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056984",
+     "name": "24/7 | Harry Potter",
+     "originalName": "24/7 | Harry Potter",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056985",
+     "name": "24/7 | James Bond 007",
+     "originalName": "24/7 | James Bond 007",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056986",
+     "name": "24/7 | Jim Carrey",
+     "originalName": "24/7 | Jim Carrey",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056987",
+     "name": "24/7 | Jurassic Park",
+     "originalName": "24/7 | Jurassic Park",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056988",
+     "name": "24/7 | Karate Kid",
+     "originalName": "24/7 | Karate Kid",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056989",
+     "name": "24/7 | Las leyendas de México",
+     "originalName": "24/7 | Las leyendas de México",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056990",
+     "name": "24/7 | Los Juegos del Hambre",
+     "originalName": "24/7 | Los Juegos del Hambre",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056991",
+     "name": "24/7 | MARVEL",
+     "originalName": "24/7 | MARVEL",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056992",
+     "name": "24/7 | Mi Pobre Angelito",
+     "originalName": "24/7 | Mi Pobre Angelito",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056993",
+     "name": "24/7 | MI vilano favorito (MInions)",
+     "originalName": "24/7 | MI vilano favorito (MInions)",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056994",
+     "name": "24/7 | Navidad",
+     "originalName": "24/7 | Navidad",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056995",
+     "name": "24/7 | Pedro Infante",
+     "originalName": "24/7 | Pedro Infante",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056996",
+     "name": "24/7 | Peliculas Subtituladas",
+     "originalName": "24/7 | Peliculas Subtituladas",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056997",
+     "name": "24/7 | Peliculas Subtituladas ||",
+     "originalName": "24/7 | Peliculas Subtituladas ||",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056998",
+     "name": "24/7 | Piratas del caribe",
+     "originalName": "24/7 | Piratas del caribe",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1056999",
+     "name": "24/7 | Pixar",
+     "originalName": "24/7 | Pixar",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057000",
+     "name": "24/7 | Rapido y furioso",
+     "originalName": "24/7 | Rapido y furioso",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057001",
+     "name": "24/7 | Rocky",
+     "originalName": "24/7 | Rocky",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057002",
+     "name": "24/7 | Romance",
+     "originalName": "24/7 | Romance",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057003",
+     "name": "24/7 | SAW",
+     "originalName": "24/7 | SAW",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057004",
+     "name": "24/7 | Shrek",
+     "originalName": "24/7 | Shrek",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057005",
+     "name": "24/7 | Spiderman",
+     "originalName": "24/7 | Spiderman",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057006",
+     "name": "24/7 | Star Wars",
+     "originalName": "24/7 | Star Wars",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057007",
+     "name": "24/7 | Superheroes",
+     "originalName": "24/7 | Superheroes",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057008",
+     "name": "24/7 | Suspenso",
+     "originalName": "24/7 | Suspenso",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057009",
+     "name": "24/7 | Terror",
+     "originalName": "24/7 | Terror",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057010",
+     "name": "24/7 | Tim Burton",
+     "originalName": "24/7 | Tim Burton",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057011",
+     "name": "24/7 | Toy Story",
+     "originalName": "24/7 | Toy Story",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057012",
+     "name": "24/7 | Volver al Futuro",
+     "originalName": "24/7 | Volver al Futuro",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057013",
+     "name": "24/7 | X MEN",
+     "originalName": "24/7 | X MEN",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "24-7-series-reality",
+   "name": "24/7 - Series Reality",
+   "order": 54,
+   "sourceGroup": "24/7 - SERIES Reality ►",
+   "channels": [
+    {
+     "id": "873169",
+     "name": "24/7: BLAZE zone",
+     "originalName": "24/7: BLAZE zone",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873170",
+     "name": "24/7: SABRINA ●",
+     "originalName": "24/7: SABRINA ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873171",
+     "name": "24/7: Caballeros del Zodiaco  ●",
+     "originalName": "24/7: Caballeros del Zodiaco  ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873172",
+     "name": "24/7  HALO",
+     "originalName": "24/7  HALO",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873173",
+     "name": "24/7:  Principe del Rap ●",
+     "originalName": "24/7:  Principe del Rap ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873174",
+     "name": "24/7:  MALCOLM",
+     "originalName": "24/7:  MALCOLM",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873175",
+     "name": "24/7: CSI Miami",
+     "originalName": "24/7: CSI Miami",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873176",
+     "name": "24/7:  Los Simpsons full",
+     "originalName": "24/7:  Los Simpsons full",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873177",
+     "name": "24/7: The Big Bang Theory ℗ ●",
+     "originalName": "24/7: The Big Bang Theory ℗ ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873178",
+     "name": "24/7: Two and a Half Men ●",
+     "originalName": "24/7: Two and a Half Men ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873179",
+     "name": "24/7 La Casa de Papel ●",
+     "originalName": "24/7 La Casa de Papel ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873180",
+     "name": "24/7 Viajeros",
+     "originalName": "24/7 Viajeros",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873181",
+     "name": "24/7 EL CHAPULIN COLORADO",
+     "originalName": "24/7 EL CHAPULIN COLORADO",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873182",
+     "name": "24/7 FULL HOUSE 3 X 3 ●",
+     "originalName": "24/7 FULL HOUSE 3 X 3 ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873183",
+     "name": "24-7: FRIENDS ●",
+     "originalName": "24-7: FRIENDS ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873184",
+     "name": "24/7 SERIES",
+     "originalName": "24/7 SERIES",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873185",
+     "name": "24/7 SMALLVILLE SUPERMAN ●",
+     "originalName": "24/7 SMALLVILLE SUPERMAN ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873186",
+     "name": "24/7: CSI Las Vegas ●",
+     "originalName": "24/7: CSI Las Vegas ●",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "24-7-series-animadas",
+   "name": "24/7 - Series Animadas",
+   "order": 55,
+   "sourceGroup": "24/7 - SERIES Animadas ►",
+   "channels": [
+    {
+     "id": "873187",
+     "name": "24/7  Thundercats ●",
+     "originalName": "24/7  Thundercats ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873188",
+     "name": "24/7: DRAGON Ball Zone ⁽ᴴᴰ⁾",
+     "originalName": "24/7: DRAGON Ball Zone ⁽ᴴᴰ⁾",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873189",
+     "name": "24/7:  LEGO  Zone ●",
+     "originalName": "24/7:  LEGO  Zone ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873190",
+     "name": "24/7:  Infantiles Kids Familiar ●",
+     "originalName": "24/7:  Infantiles Kids Familiar ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873191",
+     "name": "24/7:  Serie PACMAN",
+     "originalName": "24/7:  Serie PACMAN",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873192",
+     "name": "24/7:  SONIC full ●",
+     "originalName": "24/7:  SONIC full ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873193",
+     "name": "24/7: Futurama ●",
+     "originalName": "24/7: Futurama ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873194",
+     "name": "24/7 | Coraje El Perro Cobarde",
+     "originalName": "24/7 | Coraje El Perro Cobarde",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873195",
+     "name": "24/7  Variedad",
+     "originalName": "24/7  Variedad",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873196",
+     "name": "24/7  Lazy Town ●",
+     "originalName": "24/7  Lazy Town ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873197",
+     "name": "24/7 Rick y Morty ●",
+     "originalName": "24/7 Rick y Morty ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873198",
+     "name": "24/7  Infantiles peques ●",
+     "originalName": "24/7  Infantiles peques ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873199",
+     "name": "24/7 Dora la Exploradora ●",
+     "originalName": "24/7 Dora la Exploradora ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873200",
+     "name": "24/7: MIKE CRACK zone",
+     "originalName": "24/7: MIKE CRACK zone",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873201",
+     "name": "24/7: Garfield  serie ●",
+     "originalName": "24/7: Garfield  serie ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873202",
+     "name": "24/7: BLAZE serie ●",
+     "originalName": "24/7: BLAZE serie ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873203",
+     "name": "24/7:  Kids Familiar",
+     "originalName": "24/7:  Kids Familiar",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873204",
+     "name": "24/7  El Chapulin Colorado ●",
+     "originalName": "24/7  El Chapulin Colorado ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873205",
+     "name": "24/7:  PAW PATROL serie ●",
+     "originalName": "24/7:  PAW PATROL serie ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873206",
+     "name": "24/7: El Chavo del 8 Animado",
+     "originalName": "24/7: El Chavo del 8 Animado",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873207",
+     "name": "24/7 | Infantiles",
+     "originalName": "24/7 | Infantiles",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "24-7-infantiles",
+   "name": "24/7 - Infantiles",
+   "order": 56,
+   "sourceGroup": "24/7 - INFANTILES ►",
+   "channels": [
+    {
+     "id": "1057014",
+     "name": "24/7 Los Simpson",
+     "originalName": "24/7 Los Simpson",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057015",
+     "name": "24/7 Los Simpson HD",
+     "originalName": "24/7 Los Simpson HD",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057016",
+     "name": "24/7 PIM PLIM",
+     "originalName": "24/7 PIM PLIM",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057017",
+     "name": "Los nuevos detectives",
+     "originalName": "Los nuevos detectives",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057018",
+     "name": "Monster High",
+     "originalName": "Monster High",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057019",
+     "name": "iCarly",
+     "originalName": "iCarly",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057020",
+     "name": "24/7 Timon y Pumbaa",
+     "originalName": "24/7 Timon y Pumbaa",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057021",
+     "name": "24/7 Ben 10",
+     "originalName": "24/7 Ben 10",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057022",
+     "name": "24/7 Bluey",
+     "originalName": "24/7 Bluey",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057023",
+     "name": "24/7 Don Gato y Su Pandilla",
+     "originalName": "24/7 Don Gato y Su Pandilla",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057024",
+     "name": "24/7 | El Chavo Animado",
+     "originalName": "24/7 | El Chavo Animado",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057025",
+     "name": "24/7 | Beyblade",
+     "originalName": "24/7 | Beyblade",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057026",
+     "name": "24/7 | Bob Esponja",
+     "originalName": "24/7 | Bob Esponja",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057027",
+     "name": "24/7 | Candy Candy",
+     "originalName": "24/7 | Candy Candy",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057028",
+     "name": "24/7 | Capitan Planeta y los Planetarios",
+     "originalName": "24/7 | Capitan Planeta y los Planetarios",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057029",
+     "name": "24/7 | Castores Cascarrabias",
+     "originalName": "24/7 | Castores Cascarrabias",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057030",
+     "name": "24/7 | Chicas Superpoderosas",
+     "originalName": "24/7 | Chicas Superpoderosas",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057031",
+     "name": "24/7 | Chicos del Barrio",
+     "originalName": "24/7 | Chicos del Barrio",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057032",
+     "name": "24/7 | Dinosaurios",
+     "originalName": "24/7 | Dinosaurios",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057033",
+     "name": "24/7 | Dragon Ball Androides",
+     "originalName": "24/7 | Dragon Ball Androides",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057034",
+     "name": "24/7 | Dragon ball Saga Freezer",
+     "originalName": "24/7 | Dragon ball Saga Freezer",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057035",
+     "name": "24/7 | Dragon Ball Z | Saga de Cell",
+     "originalName": "24/7 | Dragon Ball Z | Saga de Cell",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057036",
+     "name": "24/7 | El Coyote y el Correcaminos",
+     "originalName": "24/7 | El Coyote y el Correcaminos",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057037",
+     "name": "24/7 | El pajaro loco",
+     "originalName": "24/7 | El pajaro loco",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057038",
+     "name": "24/7 | Garfield y sus Amigos",
+     "originalName": "24/7 | Garfield y sus Amigos",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057039",
+     "name": "24/7 | Halcones Galacticos",
+     "originalName": "24/7 | Halcones Galacticos",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057040",
+     "name": "24/7 | Heidi",
+     "originalName": "24/7 | Heidi",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057041",
+     "name": "24/7 | Hey Arnold",
+     "originalName": "24/7 | Hey Arnold",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057042",
+     "name": "24/7 | Hora de Aventura",
+     "originalName": "24/7 | Hora de Aventura",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057043",
+     "name": "24/7 | Jimmy Neutrón",
+     "originalName": "24/7 | Jimmy Neutrón",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057044",
+     "name": "24/7 | Johnny Bravo",
+     "originalName": "24/7 | Johnny Bravo",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057045",
+     "name": "24/7 | La Casa de los Dibujos",
+     "originalName": "24/7 | La Casa de los Dibujos",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057046",
+     "name": "24/7 | La Familia de Barrio",
+     "originalName": "24/7 | La Familia de Barrio",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057047",
+     "name": "24/7 | La Leyenda de Korra",
+     "originalName": "24/7 | La Leyenda de Korra",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057048",
+     "name": "24/7 | La Leyenda de Tarzan",
+     "originalName": "24/7 | La Leyenda de Tarzan",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057049",
+     "name": "24/7 | La liga de la justicia Animada",
+     "originalName": "24/7 | La liga de la justicia Animada",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057050",
+     "name": "24/7 | La Máscara: la serie animada",
+     "originalName": "24/7 | La Máscara: la serie animada",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057051",
+     "name": "24/7 | La vida moderna de Rocko",
+     "originalName": "24/7 | La vida moderna de Rocko",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057052",
+     "name": "24/7 | Las aventuras de Jackie Chan",
+     "originalName": "24/7 | Las aventuras de Jackie Chan",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057053",
+     "name": "24/7 | Las Macabras Aventuras de Billy y Mandy",
+     "originalName": "24/7 | Las Macabras Aventuras de Billy y Mandy",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057054",
+     "name": "24/7 | Las Tortugas Ninja",
+     "originalName": "24/7 | Las Tortugas Ninja",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057055",
+     "name": "24/7 | Los Padrinos Magicos",
+     "originalName": "24/7 | Los Padrinos Magicos",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057056",
+     "name": "24/7 | Los Picapiedra",
+     "originalName": "24/7 | Los Picapiedra",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057057",
+     "name": "24/7 | Los Pitufos",
+     "originalName": "24/7 | Los Pitufos",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057058",
+     "name": "24/7 | Los Simpsons",
+     "originalName": "24/7 | Los Simpsons",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057059",
+     "name": "24/7 | Los Simpsons Retro",
+     "originalName": "24/7 | Los Simpsons Retro",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057060",
+     "name": "24/7 | Los Supersonicos",
+     "originalName": "24/7 | Los Supersonicos",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057061",
+     "name": "24/7 | Mazinger Z",
+     "originalName": "24/7 | Mazinger Z",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057062",
+     "name": "24/7 | Mickey Mouse",
+     "originalName": "24/7 | Mickey Mouse",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057063",
+     "name": "24/7 | Miraculous: las aventuras de Ladybug",
+     "originalName": "24/7 | Miraculous: las aventuras de Ladybug",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057064",
+     "name": "24/7 | Monstruos",
+     "originalName": "24/7 | Monstruos",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057065",
+     "name": "24/7 | Mucha Lucha",
+     "originalName": "24/7 | Mucha Lucha",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057066",
+     "name": "24/7 | Naruto",
+     "originalName": "24/7 | Naruto",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057067",
+     "name": "24/7 | One Piece",
+     "originalName": "24/7 | One Piece",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057068",
+     "name": "24/7 | Padre de Familia",
+     "originalName": "24/7 | Padre de Familia",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057069",
+     "name": "24/7 | Pato Aventuras",
+     "originalName": "24/7 | Pato Aventuras",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057070",
+     "name": "24/7 | Phineas y Ferb",
+     "originalName": "24/7 | Phineas y Ferb",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057071",
+     "name": "24/7 | Pinguinos de Madagascar",
+     "originalName": "24/7 | Pinguinos de Madagascar",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057072",
+     "name": "24/7 | Pinky y Cerebro",
+     "originalName": "24/7 | Pinky y Cerebro",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057073",
+     "name": "24/7 | Pokemon",
+     "originalName": "24/7 | Pokemon",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057074",
+     "name": "24/7 | Popeye",
+     "originalName": "24/7 | Popeye",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057075",
+     "name": "24/7 | Power Rangers",
+     "originalName": "24/7 | Power Rangers",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057076",
+     "name": "24/7 | Recreo",
+     "originalName": "24/7 | Recreo",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057077",
+     "name": "24/7 | Ren y Stimpy",
+     "originalName": "24/7 | Ren y Stimpy",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057078",
+     "name": "24/7 | Rick y Morty",
+     "originalName": "24/7 | Rick y Morty",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057079",
+     "name": "24/7 | Rocket Power",
+     "originalName": "24/7 | Rocket Power",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057080",
+     "name": "24/7 | Rugrats",
+     "originalName": "24/7 | Rugrats",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057081",
+     "name": "24/7 | Sailor Moon",
+     "originalName": "24/7 | Sailor Moon",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057082",
+     "name": "24/7 | Scooby-Doo",
+     "originalName": "24/7 | Scooby-Doo",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057083",
+     "name": "24/7 | South Park",
+     "originalName": "24/7 | South Park",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057084",
+     "name": "24/7 | Soy la Comadreja",
+     "originalName": "24/7 | Soy la Comadreja",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057085",
+     "name": "24/7 | Spider-Man",
+     "originalName": "24/7 | Spider-Man",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057086",
+     "name": "24/7 | Steven Universe",
+     "originalName": "24/7 | Steven Universe",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057087",
+     "name": "24/7 | Super Campeones",
+     "originalName": "24/7 | Super Campeones",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057088",
+     "name": "24/7 | Super Mario Bros. Super Show",
+     "originalName": "24/7 | Super Mario Bros. Super Show",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057089",
+     "name": "24/7 | Superman",
+     "originalName": "24/7 | Superman",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057090",
+     "name": "24/7 | ThunderCats",
+     "originalName": "24/7 | ThunderCats",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057091",
+     "name": "24/7 | Tiny Toons",
+     "originalName": "24/7 | Tiny Toons",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057092",
+     "name": "24/7 | Tom y Jerry",
+     "originalName": "24/7 | Tom y Jerry",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057093",
+     "name": "24/7 | Transformers",
+     "originalName": "24/7 | Transformers",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057094",
+     "name": "24/7 | Ugly Americans",
+     "originalName": "24/7 | Ugly Americans",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057095",
+     "name": "24/7 | Un Show Mas",
+     "originalName": "24/7 | Un Show Mas",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057096",
+     "name": "24/7 | Winnie Pooh",
+     "originalName": "24/7 | Winnie Pooh",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "1057097",
+     "name": "24/7 | Yu-Gi-Oh",
+     "originalName": "24/7 | Yu-Gi-Oh",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "24-7-dibujos-animados",
+   "name": "24/7 - Dibujos Animados",
+   "order": 57,
+   "sourceGroup": "24/7 - DIBUJOS ANIMADOS ►",
+   "channels": [
+    {
+     "id": "873208",
+     "name": "24/7: MICKEY FULL ●",
+     "originalName": "24/7: MICKEY FULL ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873209",
+     "name": "24/7  Bob Esponja",
+     "originalName": "24/7  Bob Esponja",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873210",
+     "name": "24/7:  PAW PATROL zone",
+     "originalName": "24/7:  PAW PATROL zone",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873211",
+     "name": "24/7: Los Simpsons ●",
+     "originalName": "24/7: Los Simpsons ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873212",
+     "name": "24/7: Pokemon ●",
+     "originalName": "24/7: Pokemon ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873213",
+     "name": "24/7: MIKECRACK ●",
+     "originalName": "24/7: MIKECRACK ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873214",
+     "name": "24/7: El chavo del 8 ●",
+     "originalName": "24/7: El chavo del 8 ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873215",
+     "name": "24/7:  Historias Religion kids ●",
+     "originalName": "24/7:  Historias Religion kids ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873216",
+     "name": "24/7: Dragon ball Full",
+     "originalName": "24/7: Dragon ball Full",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873217",
+     "name": "24/7:  LEGO  Zone",
+     "originalName": "24/7:  LEGO  Zone",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873218",
+     "name": "24/7:  PACMAN ●",
+     "originalName": "24/7:  PACMAN ●",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "24-7-variados",
+   "name": "24/7 - Variados",
+   "order": 58,
+   "sourceGroup": "24/7 - VARIADOS ►  ✅",
+   "channels": [
+    {
+     "id": "873232",
+     "name": "24/7:  TERROR Channel  ⁽ᴴᴰ⁾",
+     "originalName": "24/7:  TERROR Channel  ⁽ᴴᴰ⁾",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873233",
+     "name": "24/7: CSI Miami ●",
+     "originalName": "24/7: CSI Miami ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873234",
+     "name": "24/7:  Two and a Half Men ⁽ᴴᴰ⁾ Dos hombes y medio",
+     "originalName": "24/7:  Two and a Half Men ⁽ᴴᴰ⁾ Dos hombes y medio",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873235",
+     "name": "24/7 | Los Simpson",
+     "originalName": "24/7 | Los Simpson",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873236",
+     "name": "24-7: FRIENDS",
+     "originalName": "24-7: FRIENDS",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873237",
+     "name": "24/7: The Big Bang Theory",
+     "originalName": "24/7: The Big Bang Theory",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873238",
+     "name": "24/7:  SANGRIENTAS ●",
+     "originalName": "24/7:  SANGRIENTAS ●",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873239",
+     "name": "24/7: FUTURAMA",
+     "originalName": "24/7: FUTURAMA",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873240",
+     "name": "24/7: DRAGON Ball Zone ⁽ᴴᴰ⁾",
+     "originalName": "24/7: DRAGON Ball Zone ⁽ᴴᴰ⁾",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873241",
+     "name": "24/7: El chavo del 8",
+     "originalName": "24/7: El chavo del 8",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873242",
+     "name": "24/7:  PAW PATROL full",
+     "originalName": "24/7:  PAW PATROL full",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873243",
+     "name": "24/7: ROMANCE PLUS",
+     "originalName": "24/7: ROMANCE PLUS",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873244",
+     "name": "24/7: Kids Movies",
+     "originalName": "24/7: Kids Movies",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873245",
+     "name": "24/7  full house",
+     "originalName": "24/7  full house",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873246",
+     "name": "24/7 Smallville",
+     "originalName": "24/7 Smallville",
+     "logo": "",
+     "hidden": false
+    },
+    {
+     "id": "873247",
+     "name": "24/7 La casa de papel",
+     "originalName": "24/7 La casa de papel",
+     "logo": "",
+     "hidden": false
+    }
+   ]
+  },
+  {
+   "id": "tennis-f1",
+   "name": "Tennis - F1",
+   "order": 59,
+   "sourceGroup": "✅ TENNIS - F1",
+   "dynamic": true,
+   "channels": []
+  },
+  {
+   "id": "nba",
+   "name": "NBA",
+   "order": 60,
+   "sourceGroup": "✅ NBA",
+   "dynamic": true,
+   "channels": []
+  },
+  {
+   "id": "mlb",
+   "name": "MLB",
+   "order": 61,
+   "sourceGroup": "✅ MLB",
+   "dynamic": true,
+   "channels": []
+  },
+  {
+   "id": "nhl",
+   "name": "NHL",
+   "order": 62,
+   "sourceGroup": "✅ NHL",
+   "dynamic": true,
+   "channels": []
+  },
+  {
+   "id": "nfl",
+   "name": "NFL",
+   "order": 63,
+   "sourceGroup": "✅ NFL",
+   "dynamic": true,
+   "channels": []
+  }
+ ]
+}
