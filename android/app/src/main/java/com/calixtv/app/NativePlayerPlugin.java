@@ -42,6 +42,7 @@ public class NativePlayerPlugin extends Plugin {
         intent.putExtra("url", url);
         intent.putExtra("title", call.getString("title", ""));
         intent.putExtra("startMs", call.getInt("startTime", 0));
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivityForResult(call, intent, "playerClosed");
     }
 

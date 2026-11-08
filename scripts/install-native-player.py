@@ -13,6 +13,7 @@ ACTIVITY_XML = '''
         <activity
             android:name=".PlayerActivity"
             android:exported="false"
+            android:launchMode="singleTop"
             android:screenOrientation="sensorLandscape"
             android:configChanges="orientation|screenSize|keyboardHidden|keyboard|navigation|smallestScreenSize|screenLayout|uiMode"
             android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />
@@ -71,7 +72,9 @@ if os.path.exists(gradle):
     def media3_version = "1.7.1"
     implementation "androidx.media3:media3-exoplayer:$media3_version"
     implementation "androidx.media3:media3-exoplayer-hls:$media3_version"
+    implementation "androidx.media3:media3-datasource-okhttp:$media3_version"
     implementation "androidx.media3:media3-ui:$media3_version"
+    implementation "com.squareup.okhttp3:okhttp:4.12.0"
     implementation "io.github.anilbeesetti:nextlib-media3ext:1.7.1-0.9.0"
 '''
         t = t.replace(anchor, anchor + media3_deps)

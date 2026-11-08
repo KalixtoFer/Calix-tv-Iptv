@@ -1,6 +1,7 @@
 package com.calixtv.app;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
@@ -8,6 +9,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
@@ -28,24 +30,33 @@ import androidx.media3.common.TrackGroup;
 import androidx.media3.common.TrackSelectionOverride;
 import androidx.media3.common.TrackSelectionParameters;
 import androidx.media3.common.Tracks;
-import androidx.media3.datasource.DefaultHttpDataSource;
+import androidx.media3.datasource.okhttp.OkHttpDataSource;
 import androidx.media3.exoplayer.DefaultLoadControl;
 import androidx.media3.exoplayer.DefaultRenderersFactory;
 import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.exoplayer.analytics.AnalyticsListener;
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
+import androidx.media3.extractor.DefaultExtractorsFactory;
+import androidx.media3.extractor.ts.DefaultTsPayloadReaderFactory;
 import androidx.media3.ui.PlayerView;
 
 import io.github.anilbeesetti.nextlib.media3ext.ffdecoder.NextRenderersFactory;
+import okhttp3.ConnectionPool;
+import okhttp3.OkHttpClient;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 /**
- * Reproductor nativo a pantalla completa basado en Media3 ExoPlayer + NextLib FFmpeg.
- * Soporta MKV, MP4, HLS (.m3u8), TS, HEVC, AC3/EAC3/DTS (vía FFmpeg fallback).
+ * Reproductor nativo de alta velocidad para Calix TV 2.0 (Android TV y dispositivos móviles).
+ * Optimizado con una sola instancia persistente de ExoPlayer, LoadControl de arranque rápido (1 s),
+ * extractor TS sin IDR estricto y conexiones HTTP persistentes con OkHttp ConnectionPool.
  */
 public class PlayerActivity extends Activity {
+
+    private static final String TAG = "CalixPlayer";
 
     private ExoPlayer player;
     private PlayerView playerView;
@@ -53,9 +64,11 @@ public class PlayerActivity extends Activity {
     private FrameLayout root;
     private LinearLayout topBar;
     private LinearLayout bottomBar;
+    private TextView titleView;
     private TextView timeView;
     private TextView durationView;
     private TextView errorView;
+    private TextView retryNoticeView;
     private TextView playBtn;
     private SeekBar seekBar;
     private ProgressBar spinner;
@@ -76,6 +89,20 @@ public class PlayerActivity extends Activity {
     private boolean controlsVisible = true;
     private boolean userSeeking = false;
     private boolean resumedOnce = false;
+
+    // Métricas de latencia de arranque
+    private long prepareStartTimeMs = 0;
+    private String lastReportedVideoDecoder = null;
+
+    // 3) FLAG DE ARRANQUE RÁPIDO CON PLAN B:
+    // Permite iniciar la decodificación inmediatamente en cualquier keyframe no-IDR para reducir latencia inicial.
+    // Si en algún equipo o stream específico aparecen cuadros verdes o pixelados al iniciar el canal,
+    // cambiar esta variable booleana a false para esperar obligatoriamente un IDR completo.
+    private static final boolean ENABLE_NON_IDR_KEYFRAMES_FAST_START = true;
+
+    // Control de reintentos en arranque y reconexión
+    private int startupRetryCount = 0;
+    private static final int MAX_STARTUP_RETRIES = 2;
     private int reconnectAttempts = 0;
     private static final int MAX_RECONNECT_ATTEMPTS = 5;
 
@@ -107,44 +134,156 @@ public class PlayerActivity extends Activity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        Intent in = getIntent();
-        url = in.getStringExtra("url");
-        title = in.getStringExtra("title");
-        startMs = in.getIntExtra("startMs", 0);
-
+        extractIntentData(getIntent());
         buildUi();
         setContentView(root);
+        initPlayer();
     }
 
+    private void extractIntentData(Intent in) {
+        if (in != null) {
+            url = in.getStringExtra("url");
+            title = in.getStringExtra("title");
+            startMs = in.getIntExtra("startMs", 0);
+        }
+    }
+
+    /**
+     * Reutilización de PlayerActivity: al cambiar de canal desde Capacitor / plugin,
+     * se recibe el nuevo Intent aquí sin recrear la Activity ni la vista ni el ExoPlayer.
+     */
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        extractIntentData(intent);
+        if (titleView != null) {
+            titleView.setText(title == null ? "" : title);
+        }
+        Log.d(TAG, "onNewIntent recibido -> cambiando canal a: " + title);
+        playCurrentMedia();
+    }
+
+    /**
+     * Regla 5: Usar la URL TS directa (output=ts); no convertir a HLS.
+     */
+    private String getEffectiveStreamUrl(String rawUrl) {
+        if (rawUrl == null) return "";
+        String u = rawUrl.trim();
+        // Si es canal en vivo de Xtream Codes, forzar TS directo para evitar latencia de playlist HLS
+        if (u.contains("/live/")) {
+            if (u.endsWith(".m3u8")) {
+                u = u.substring(0, u.length() - 5) + ".ts";
+            }
+            if (!u.contains(".ts") && !u.contains("output=")) {
+                u += (u.contains("?") ? "&" : "?") + "output=ts";
+            }
+        }
+        return u;
+    }
+
+    /**
+     * 1) UNA SOLA INSTANCIA DE PLAYER
+     * Configuración de ExoPlayer una sola vez con LoadControl adaptativo según memoria RAM,
+     * decodificación de hardware prioritaria, extractor TS sin IDR estricto y conexiones persistentes OkHttp.
+     */
     private void initPlayer() {
         if (player != null) return;
 
-        NextRenderersFactory renderersFactory = new NextRenderersFactory(this);
-        renderersFactory.setEnableDecoderFallback(true);
-        renderersFactory.setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON);
+        Log.d(TAG, "Inicializando instancia única de ExoPlayer");
 
-        DefaultHttpDataSource.Factory httpDataSourceFactory = new DefaultHttpDataSource.Factory()
-                .setAllowCrossProtocolRedirects(true)
-                .setConnectTimeoutMs(15000)
-                .setReadTimeoutMs(15000);
+        // 1) BUFFERS SEGÚN LA MEMORIA DEL EQUIPO (lowRam vs equipos normales)
+        ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        boolean lowRam = am != null && (am.isLowRamDevice() || am.getMemoryClass() <= 128);
+        int minBufferMs = lowRam ? 3_000 : 5_000;
+        int maxBufferMs = lowRam ? 15_000 : 25_000;
+        int bufferForPlaybackMs = 1_000;
+        int bufferForPlaybackAfterRebufferMs = 2_000;
 
-        DefaultMediaSourceFactory mediaSourceFactory = new DefaultMediaSourceFactory(httpDataSourceFactory);
+        Log.d(TAG, "Detección de memoria del equipo: lowRam=" + lowRam +
+                (am != null ? " [memoryClass=" + am.getMemoryClass() + "MB, isLowRamDevice=" + am.isLowRamDevice() + "]" : "") +
+                " -> Buffers: min=" + minBufferMs + "ms, max=" + maxBufferMs + "ms, playback=" + bufferForPlaybackMs + "ms, rebuffer=" + bufferForPlaybackAfterRebufferMs + "ms");
 
         DefaultLoadControl loadControl = new DefaultLoadControl.Builder()
-                // Películas y series: carga por delante mientras mirás (como YouTube).
-                // mínimo 50 s, máximo 120 s; arranca con 2,5 s y retoma tras un corte con 5 s.
-                .setBufferDurationsMs(50000, 120000, 2500, 5000)
-                // Guarda 20 s ya vistos para retroceder (-10 s / -30 s) sin volver a descargar.
-                .setBackBuffer(20000, false)
+                .setBufferDurationsMs(
+                        minBufferMs,
+                        maxBufferMs,
+                        bufferForPlaybackMs,
+                        bufferForPlaybackAfterRebufferMs
+                )
+                .setBackBuffer(0, false) // en vivo no hace falta buffer hacia atrás
+                .setPrioritizeTimeOverSizeThresholds(!lowRam)
                 .build();
 
+        // 2) DECODIFICACIÓN: HARDWARE PRIMERO PARA EL VIDEO (EXTENSION_RENDERER_MODE_ON)
+        // NextRenderersFactory extiende DefaultRenderersFactory y registra NextLib FFmpeg solo para audio (AC3/EAC3/DTS).
+        // El modo ON deja los decodificadores de hardware (MediaCodec) primero y la extensión de software solo como respaldo;
+        // nunca usar EXTENSION_RENDERER_MODE_PREFER.
+        NextRenderersFactory renderersFactory = new NextRenderersFactory(this);
+        renderersFactory.setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON);
+        renderersFactory.setEnableDecoderFallback(true);
+
+        // 3) EXTRACTOR DE TS CON FLAG DE ARRANQUE RÁPIDO Y PLAN B
+        int tsFlags = DefaultTsPayloadReaderFactory.FLAG_DETECT_ACCESS_UNITS;
+        if (ENABLE_NON_IDR_KEYFRAMES_FAST_START) {
+            tsFlags |= DefaultTsPayloadReaderFactory.FLAG_ALLOW_NON_IDR_KEYFRAMES;
+        }
+        DefaultExtractorsFactory extractorsFactory = new DefaultExtractorsFactory()
+                .setTsExtractorFlags(tsFlags);
+
+        // 4) HTTP CON CONEXIONES PERSISTENTES (OkHttp ConnectionPool)
+        OkHttpClient okHttp = new OkHttpClient.Builder()
+                .connectTimeout(8, TimeUnit.SECONDS)
+                .readTimeout(10, TimeUnit.SECONDS)
+                .connectionPool(new ConnectionPool(5, 5, TimeUnit.MINUTES))
+                .retryOnConnectionFailure(true)
+                .build();
+
+        OkHttpDataSource.Factory dataSourceFactory = new OkHttpDataSource.Factory(okHttp);
+        DefaultMediaSourceFactory mediaSourceFactory = new DefaultMediaSourceFactory(dataSourceFactory, extractorsFactory);
+
         player = new ExoPlayer.Builder(this, renderersFactory)
-                .setMediaSourceFactory(mediaSourceFactory)
                 .setLoadControl(loadControl)
+                .setMediaSourceFactory(mediaSourceFactory)
                 .build();
 
         playerView.setPlayer(player);
         player.addListener(playerListener);
+        player.addAnalyticsListener(analyticsListener);
+    }
+
+    /**
+     * Cambia el canal o contenido reutilizando la misma instancia de ExoPlayer (setMediaItem + prepare)
+     * sin destruir el player ni la vista.
+     */
+    private void playCurrentMedia() {
+        if (url == null || url.isEmpty()) {
+            showError("Falta la URL del contenido.");
+            return;
+        }
+
+        initPlayer();
+        resumedOnce = false;
+        startupRetryCount = 0;
+        lastReportedVideoDecoder = null;
+        setBuffering(true);
+        hideRetryNotice();
+        if (errorView != null) {
+            errorView.setVisibility(View.GONE);
+        }
+
+        String effectiveUrl = getEffectiveStreamUrl(url);
+        prepareStartTimeMs = System.currentTimeMillis();
+        Log.d(TAG, "playCurrentMedia -> prepare() llamado para URL: " + effectiveUrl + " (título: " + title + ")");
+
+        MediaItem mediaItem = MediaItem.fromUri(Uri.parse(effectiveUrl));
+        player.setMediaItem(mediaItem);
+        if (startMs > 0) {
+            player.seekTo(startMs);
+        }
+        player.prepare();
+        player.play();
+        startProgressUpdates();
     }
 
     private void handlePrematureDisconnect() {
@@ -152,11 +291,13 @@ public class PlayerActivity extends Activity {
             reconnectAttempts++;
             final long resumeTime = lastTime > 0 ? lastTime : (player != null ? player.getCurrentPosition() : startMs);
             setBuffering(true);
+            showRetryNotice("Reconectando señal en vivo (" + reconnectAttempts + "/" + MAX_RECONNECT_ATTEMPTS + ")...");
             ui.postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        if (player != null) {
+                        if (player != null && !isFinishing()) {
+                            prepareStartTimeMs = System.currentTimeMillis();
                             player.seekTo(resumeTime);
                             player.prepare();
                             player.play();
@@ -167,6 +308,7 @@ public class PlayerActivity extends Activity {
                 }
             }, 1000);
         } else {
+            hideRetryNotice();
             showError("La conexión con el servidor se interrumpió.\nRevisá la señal de tu proveedor de IPTV o la conexión a internet.");
         }
     }
@@ -174,22 +316,7 @@ public class PlayerActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
-        if (url == null || url.isEmpty()) {
-            showError("Falta la URL del contenido.");
-            return;
-        }
-        initPlayer();
-        resumedOnce = false;
-        setBuffering(true);
-
-        MediaItem mediaItem = MediaItem.fromUri(Uri.parse(url));
-        player.setMediaItem(mediaItem);
-        if (startMs > 0) {
-            player.seekTo(startMs);
-        }
-        player.prepare();
-        player.play();
-        startProgressUpdates();
+        playCurrentMedia();
     }
 
     @Override
@@ -201,9 +328,8 @@ public class PlayerActivity extends Activity {
             long dur = player.getDuration();
             if (dur > 0 && dur != C.TIME_UNSET) length = dur;
             startMs = lastTime;
-            player.stop();
-            player.release();
-            player = null;
+            // 4) Pausar el reproductor en onStop() para soltar el consumo de datos
+            player.pause();
         }
     }
 
@@ -213,6 +339,12 @@ public class PlayerActivity extends Activity {
         ui.removeCallbacksAndMessages(null);
         stopProgressUpdates();
         if (player != null) {
+            // 4) Liberar completamente ExoPlayer al destruir la Activity para soltar
+            // el decodificador de hardware y la conexión con el servidor IPTV
+            Log.d(TAG, "Liberando instancia de ExoPlayer al destruir Activity");
+            player.removeListener(playerListener);
+            player.removeAnalyticsListener(analyticsListener);
+            player.stop();
             player.release();
             player = null;
         }
@@ -251,10 +383,18 @@ public class PlayerActivity extends Activity {
                     setBuffering(true);
                     break;
                 case Player.STATE_READY:
+                    if (prepareStartTimeMs > 0) {
+                        long readyTimeMs = System.currentTimeMillis() - prepareStartTimeMs;
+                        Log.d(TAG, "Tiempo desde prepare() hasta STATE_READY: " + readyTimeMs + " ms");
+                    }
+                    startupRetryCount = 0;
                     reconnectAttempts = 0;
                     setBuffering(false);
-                    errorView.setVisibility(View.GONE);
-                    playBtn.setText(player != null && player.isPlaying() ? "Pausa" : "Play");
+                    hideRetryNotice();
+                    if (errorView != null) errorView.setVisibility(View.GONE);
+                    if (playBtn != null) {
+                        playBtn.setText(player != null && player.isPlaying() ? "Pausa" : "Play");
+                    }
                     if (player != null) {
                         long dur = player.getDuration();
                         if (dur > 0 && dur != C.TIME_UNSET) {
@@ -281,27 +421,102 @@ public class PlayerActivity extends Activity {
             }
         }
 
+        /**
+         * Regla 5: Registrar tiempo exacto desde prepare() hasta el primer cuadro renderizado.
+         */
+        @Override
+        public void onRenderedFirstFrame() {
+            if (prepareStartTimeMs > 0) {
+                long firstFrameTimeMs = System.currentTimeMillis() - prepareStartTimeMs;
+                Log.d(TAG, "Tiempo desde prepare() hasta onRenderedFirstFrame (primer cuadro): " + firstFrameTimeMs + " ms");
+            }
+            setBuffering(false);
+            hideRetryNotice();
+        }
+
         @Override
         public void onIsPlayingChanged(boolean isPlaying) {
-            playBtn.setText(isPlaying ? "Pausa" : "Play");
+            if (playBtn != null) {
+                playBtn.setText(isPlaying ? "Pausa" : "Play");
+            }
             if (isPlaying) {
                 setBuffering(false);
+                hideRetryNotice();
                 startProgressUpdates();
             } else {
                 stopProgressUpdates();
             }
         }
 
+        /**
+         * Regla 5: Reintento automático (hasta 2 veces) si falla el arranque, con aviso visual discreto.
+         */
         @Override
         public void onPlayerError(PlaybackException error) {
             setBuffering(false);
-            if (lastTime > 5000 && (length == 0 || lastTime < length - 15000)) {
+            Log.e(TAG, "onPlayerError en reproducción: " + error.getMessage(), error);
+
+            if (startupRetryCount < MAX_STARTUP_RETRIES) {
+                startupRetryCount++;
+                showRetryNotice("Reconectando canal (" + startupRetryCount + "/" + MAX_STARTUP_RETRIES + ")...");
+                Log.d(TAG, "Reintentando arranque de canal (" + startupRetryCount + "/" + MAX_STARTUP_RETRIES + ")");
+
+                ui.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (player != null && !isFinishing()) {
+                            prepareStartTimeMs = System.currentTimeMillis();
+                            String effectiveUrl = getEffectiveStreamUrl(url);
+                            MediaItem mediaItem = MediaItem.fromUri(Uri.parse(effectiveUrl));
+                            player.setMediaItem(mediaItem);
+                            if (startMs > 0) {
+                                player.seekTo(startMs);
+                            }
+                            player.prepare();
+                            player.play();
+                        }
+                    }
+                }, 800);
+            } else if (lastTime > 5000 && (length == 0 || lastTime < length - 15000)) {
                 handlePrematureDisconnect();
             } else {
-                showError("No se pudo reproducir este contenido.\nRevisá la conexión, el usuario/contraseña o el límite de conexiones del servidor.");
+                hideRetryNotice();
+                showError("No se pudo reproducir este canal.\nRevisá la conexión con tu proveedor o el límite de conexiones simultáneas.");
             }
         }
     };
+
+    // 2) DETECCIÓN Y LOG DEL DECODIFICADOR DE VIDEO (onVideoDecoderInitialized)
+    private final AnalyticsListener analyticsListener = new AnalyticsListener() {
+        @Override
+        public void onVideoDecoderInitialized(
+                AnalyticsListener.EventTime eventTime,
+                String decoderName,
+                long initializedTimestampMs,
+                long initializationDurationMs) {
+            logVideoDecoder(decoderName, initializationDurationMs);
+        }
+
+        @Override
+        public void onVideoDecoderInitialized(
+                AnalyticsListener.EventTime eventTime,
+                String decoderName,
+                long initializationDurationMs) {
+            logVideoDecoder(decoderName, initializationDurationMs);
+        }
+    };
+
+    private void logVideoDecoder(String decoderName, long durationMs) {
+        if (decoderName == null || decoderName.equals(lastReportedVideoDecoder)) return;
+        lastReportedVideoDecoder = decoderName;
+        // Si el nombre comienza con "c2.android" u "OMX.google" es software (CPU);
+        // si tiene marca del SoC ("OMX.qcom", "c2.mtk", "c2.aml", "OMX.Exynos", etc.) es hardware.
+        boolean isSoftware = decoderName.startsWith("c2.android") || decoderName.startsWith("OMX.google");
+        boolean isHardware = !isSoftware;
+        Log.d(TAG, "Decodificador de video en uso: " + decoderName +
+                (isHardware ? " (Hardware: " + decoderName + ")" : " (Software / CPU fallback: " + decoderName + ")") +
+                (durationMs > 0 ? " [inicializado en " + durationMs + " ms]" : ""));
+    }
 
     private void startProgressUpdates() {
         stopProgressUpdates();
@@ -364,6 +579,20 @@ public class PlayerActivity extends Activity {
         FrameLayout.LayoutParams spLp = new FrameLayout.LayoutParams(dp(56), dp(56), Gravity.CENTER);
         root.addView(spinner, spLp);
 
+        // Aviso visual discreto de reintento en segundo plano
+        retryNoticeView = new TextView(this);
+        retryNoticeView.setTextColor(0xFF22D3EE);
+        retryNoticeView.setTextSize(12);
+        retryNoticeView.setGravity(Gravity.CENTER);
+        retryNoticeView.setPadding(dp(16), dp(8), dp(16), dp(8));
+        retryNoticeView.setBackgroundColor(0xD90A0D14);
+        retryNoticeView.setVisibility(View.GONE);
+        FrameLayout.LayoutParams rnLp = new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT,
+                Gravity.TOP | Gravity.CENTER_HORIZONTAL);
+        rnLp.topMargin = dp(64);
+        root.addView(retryNoticeView, rnLp);
+
         errorView = new TextView(this);
         errorView.setTextColor(Color.WHITE);
         errorView.setTextSize(16);
@@ -386,7 +615,7 @@ public class PlayerActivity extends Activity {
             }
         });
         topBar.addView(closeBtn);
-        TextView titleView = new TextView(this);
+        titleView = new TextView(this);
         titleView.setText(title == null ? "" : title);
         titleView.setTextColor(Color.WHITE);
         titleView.setTextSize(16);
@@ -401,7 +630,7 @@ public class PlayerActivity extends Activity {
             public void onClick(View v) {
                 try {
                     Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setDataAndType(Uri.parse(url), "video/*");
+                    intent.setDataAndType(Uri.parse(getEffectiveStreamUrl(url)), "video/*");
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(Intent.createChooser(intent, "Abrir con reproductor de video..."));
                 } catch (Exception ex) {
@@ -526,6 +755,19 @@ public class PlayerActivity extends Activity {
         spinner.setVisibility(on ? View.VISIBLE : View.GONE);
     }
 
+    private void showRetryNotice(String message) {
+        if (retryNoticeView != null) {
+            retryNoticeView.setText(message);
+            retryNoticeView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void hideRetryNotice() {
+        if (retryNoticeView != null) {
+            retryNoticeView.setVisibility(View.GONE);
+        }
+    }
+
     private void showError(String msg) {
         errorView.setText(msg);
         errorView.setVisibility(View.VISIBLE);
@@ -648,18 +890,18 @@ public class PlayerActivity extends Activity {
         int nextIdx = selectedIdx + 1;
         if (nextIdx >= subOptions.size()) {
             TrackSelectionParameters newParams = player.getTrackSelectionParameters()
-                    .buildUpon()
-                    .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true)
-                    .build();
+                .buildUpon()
+                .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true)
+                .build();
             player.setTrackSelectionParameters(newParams);
             Toast.makeText(this, "Subtítulos: Desactivado", Toast.LENGTH_SHORT).show();
         } else {
             TrackOption target = subOptions.get(nextIdx);
             TrackSelectionParameters newParams = player.getTrackSelectionParameters()
-                    .buildUpon()
-                    .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false)
-                    .setOverrideForType(new TrackSelectionOverride(target.trackGroup, target.trackIndex))
-                    .build();
+                .buildUpon()
+                .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false)
+                .setOverrideForType(new TrackSelectionOverride(target.trackGroup, target.trackIndex))
+                .build();
             player.setTrackSelectionParameters(newParams);
             Toast.makeText(this, "Subtítulos: " + target.label, Toast.LENGTH_SHORT).show();
         }
