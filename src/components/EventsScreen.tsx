@@ -24,6 +24,7 @@ interface EventsScreenProps {
     type: 'live' | 'episode' | 'movie';
     poster?: string;
     category?: string;
+    alternateChannels?: LiveStream[];
   }) => void;
 }
 
@@ -67,7 +68,7 @@ interface CardProps {
   channels: any[];
   favs: string[];
   onFav: (t: SportTeam, sport: string) => void;
-  onPlayChannel: (ch: any) => void;
+  onPlayStream: (stream: any) => void;
   onStats: (ev: SportEvent) => void;
   onFind: (ev: SportEvent) => void;
 }
@@ -100,7 +101,22 @@ const TeamRow = React.memo(({ t, ev, fav, isTv, onFav }: { t: SportTeam; ev: Spo
   </div>
 ));
 
-const EventCard = React.memo(({ ev, channels, favs, onFav, onPlayChannel, onStats, onFind }: CardProps) => {
+const getBestChannel = (channels: any[]) => {
+  if (!channels || channels.length === 0) return null;
+  const priorities = ['espn', 'tyc', 'fox', 'dsports', 'tnt', 'vix', 'win', 'gol'];
+  // Prioridad 1: Coincidencia exacta de prioridad en el nombre
+  for (const p of priorities) {
+    const found = channels.find(c => c.name.toLowerCase().includes(p));
+    if (found) return found;
+  }
+  // Prioridad 2: Cualquier canal que tenga 'HD' o 'FHD'
+  const hd = channels.find(c => c.name.toUpperCase().includes('HD'));
+  if (hd) return hd;
+  // Prioridad 3: El primero de la lista
+  return channels[0];
+};
+
+const EventCard = React.memo(({ ev, channels, favs, onFav, onPlayStream, onStats, onFind }: CardProps) => {
   const live = ev.state === 'in';
   const isFav = (t: SportTeam) => favs.includes(`${ev.sport}:${t.id}`);
   const isTv = document.body.classList.contains('tv-overscan') || window.innerWidth > 1024;
@@ -108,9 +124,29 @@ const EventCard = React.memo(({ ev, channels, favs, onFav, onPlayChannel, onStat
   const [isLongPressing, setIsLongPressing] = useState(false);
   const timerRef = React.useRef<NodeJS.Timeout | null>(null);
 
+  const bestChannel = useMemo(() => getBestChannel(channels), [channels]);
+
+  const handleAction = () => {
+    if (bestChannel) {
+      onPlayStream({
+        streamId: bestChannel.stream_id,
+        title: adjustTime(bestChannel.name),
+        url: bestChannel.stream_url || iptvApi.buildStreamUrl('live', bestChannel.stream_id, 'm3u8', 'demo'), // username fallback
+        type: 'live',
+        poster: bestChannel.stream_icon,
+        category: 'Eventos',
+        alternateChannels: channels,
+      });
+    } else if (ev.state !== 'post') {
+      onFind(ev);
+    } else {
+      onStats(ev);
+    }
+  };
+
   const handleLongPress = () => {
     setIsLongPressing(true);
-    onFav(ev.home, ev.sport); // Toggle favorite for home team as representative
+    onFav(ev.home, ev.sport); // Toggle favorite
     setTimeout(() => setIsLongPressing(false), 1200);
   };
 
@@ -130,10 +166,7 @@ const EventCard = React.memo(({ ev, channels, favs, onFav, onPlayChannel, onStat
       if (timerRef.current) {
         clearTimeout(timerRef.current);
         timerRef.current = null;
-        // Normal click
-        if (channels.length === 1) onPlayChannel(channels[0]);
-        else if (channels.length > 1) onStats(ev);
-        else onFind(ev);
+        handleAction();
       }
     }
   };
@@ -170,9 +203,7 @@ const EventCard = React.memo(({ ev, channels, favs, onFav, onPlayChannel, onStat
       onMouseLeave={onTouchEnd}
       onClick={() => {
         if (!isTv) {
-          if (channels.length === 1) onPlayChannel(channels[0]);
-          else if (channels.length > 1) onStats(ev);
-          else onFind(ev);
+          handleAction();
         }
       }}
       className={`tv-focusable group relative bg-[#111418] border border-[#1c2128] rounded-xl p-2.5 cursor-pointer transition-all outline-none 
@@ -220,31 +251,38 @@ const EventCard = React.memo(({ ev, channels, favs, onFav, onPlayChannel, onStat
       </div>
 
       {/* Footer Info */}
-      <div className="flex items-center justify-end gap-2 mt-1.5 pt-1.5 border-t border-[#1c2128]/30 group-hover:border-[#1c2128]">
-        {channels.length > 0 && (
-          <div className="flex items-center gap-1 mr-auto">
-             <Tv className="w-3 h-3 text-[#00c2e0]" />
-             <span className="text-[9px] font-bold text-[#00c2e0]">{channels.length} {channels.length === 1 ? 'canal' : 'canales'}</span>
-          </div>
-        )}
+      <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-[#1c2128]/30 group-hover:border-[#1c2128]">
+        <div className="flex items-center gap-1.5">
+           {channels.length > 0 ? (
+             <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-cyan-950/50 border border-cyan-800/30">
+                <Tv className="w-2.5 h-2.5 text-[#00c2e0]" />
+                <span className="text-[9px] font-black text-[#00c2e0] uppercase">Signal OK</span>
+             </div>
+           ) : ev.state !== 'post' ? (
+             <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800">
+                <Info className="w-2.5 h-2.5 text-zinc-500" />
+                <span className="text-[9px] font-black text-zinc-500 uppercase">Sin señal</span>
+             </div>
+           ) : null}
+        </div>
         
-        {isTv ? (
-           <div className="flex items-center gap-2 opacity-40 group-focus:opacity-100 transition-opacity">
-              { (isFav(ev.home) || isFav(ev.away)) && <Star className="w-3 h-3 text-[#00c2e0] fill-[#00c2e0]" /> }
-              <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">OK: Detalles</span>
-           </div>
-        ) : (
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
               onStats(ev);
             }}
-            className="text-[10px] font-black text-[#00c2e0] uppercase px-2 py-0.5 rounded bg-[#00c2e0]/5 border border-transparent hover:border-[#00c2e0]/30 transition"
+            className="text-[9px] font-black text-[#00c2e0] uppercase px-2 py-0.5 rounded bg-[#00c2e0]/5 border border-[#00c2e0]/20 hover:bg-[#00c2e0]/10 transition"
           >
             Detalles
           </button>
-        )}
+          {isTv && (
+            <div className="flex items-center gap-1 opacity-40 group-focus:opacity-100 transition-opacity">
+               <span className="text-[9px] font-black text-zinc-500 uppercase">OK: Play</span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -482,7 +520,7 @@ export const EventsScreen: React.FC<EventsScreenProps> = ({ username, onBack, on
                       channels={channelsFor[e.id] || []} 
                       favs={favs} 
                       onFav={toggleFav} 
-                      onPlayChannel={playChannel} 
+                      onPlayStream={onPlayStream} 
                       onStats={openStats} 
                       onFind={findChannel} 
                     />
@@ -609,7 +647,18 @@ export const EventsScreen: React.FC<EventsScreenProps> = ({ username, onBack, on
                     {(channelsFor[statsEv.id] || []).map(ch => (
                       <button 
                         key={ch.stream_id}
-                        onClick={() => { playChannel(ch); setStatsEv(null); }}
+                        onClick={() => { 
+                          onPlayStream({
+                            streamId: ch.stream_id,
+                            title: adjustTime(ch.name),
+                            url: ch.stream_url || iptvApi.buildStreamUrl('live', ch.stream_id, 'm3u8', username),
+                            type: 'live',
+                            poster: ch.stream_icon,
+                            category: 'Eventos',
+                            alternateChannels: channelsFor[statsEv.id]
+                          });
+                          setStatsEv(null); 
+                        }}
                         className="tv-focusable flex items-center justify-between p-3 rounded-xl bg-[#00c2e0]/10 border border-[#00c2e0]/30 hover:bg-[#00c2e0]/20 text-left transition-colors"
                       >
                          <div className="flex items-center gap-3">

@@ -7,6 +7,7 @@ import {
   XtreamAuthResponse,
   XtreamUserInfo,
   SeriesItem,
+  LiveStream,
 } from './types/iptv';
 import { iptvApi, StoredSession } from './services/iptvApi';
 import { useRemoteControl, RemoteKey } from './hooks/useRemoteControl';
@@ -160,6 +161,9 @@ export default function App() {
     type: 'live' | 'movie' | 'episode';
     poster?: string;
     category?: string;
+    channels?: LiveStream[];
+    alternateChannels?: LiveStream[];
+    initialChannelIndex?: number;
   }) => {
     setActivePlayback({
       streamId: stream.streamId,
@@ -168,6 +172,9 @@ export default function App() {
       type: stream.type,
       poster: stream.poster,
       category: stream.category,
+      channels: stream.channels,
+      alternateChannels: stream.alternateChannels,
+      initialChannelIndex: stream.initialChannelIndex,
     });
   }, []);
 
@@ -404,6 +411,7 @@ export default function App() {
           onOpenApkGuide={() => setIsApkGuideOpen(true)}
           onLogout={handleLogout}
           onHomeClick={() => setActiveSection('home')}
+          onNavigate={(sec) => setActiveSection(sec)}
         />
       )}
 
@@ -499,6 +507,7 @@ export default function App() {
             onClose={() => setActivePlayback(null)}
             className="w-full h-full"
             channels={activePlayback.channels}
+            alternateChannels={activePlayback.alternateChannels}
             initialChannelIndex={activePlayback.initialChannelIndex}
             username={session?.username}
             viewMode={viewMode}

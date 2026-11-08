@@ -19,6 +19,7 @@ import {
   Loader2,
   Copy,
   ExternalLink,
+  X,
 } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { ScreenOrientation } from '@capacitor/screen-orientation';
@@ -64,6 +65,8 @@ export interface VideoPlayerProps {
   viewMode?: DeviceViewMode;
   onChannelChange?: (stream: LiveStream, index: number) => void;
   onOpenCategories?: () => void;
+  alternateChannels?: LiveStream[];
+  onSelectAlternateChannel?: (ch: LiveStream) => void;
 }
 
 const getExt = (u: string): string => {
@@ -120,6 +123,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   viewMode,
   onChannelChange,
   onOpenCategories,
+  alternateChannels,
+  onSelectAlternateChannel,
 }) => {
   // En el APK la URL siempre debe ser la directa al servidor IPTV (el proxy /api/iptv/stream solo existe en el servidor web)
   const baseParsedUrl = (() => {
@@ -955,6 +960,19 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
           {/* Bottom Bar: Timeline (if VOD) + Controls */}
           <div className="space-y-3">
+            {/* Otras señales button (Sports context) */}
+            {alternateChannels && alternateChannels.length > 1 && (
+               <div className="flex justify-center pb-2">
+                  <button 
+                    onClick={() => setShowCategoryList(true)}
+                    className="tv-focusable flex items-center gap-2 px-4 py-2 bg-cyan-950/80 border-2 border-cyan-500/50 hover:border-cyan-400 rounded-full text-xs font-black uppercase tracking-widest text-cyan-400 transition-all cursor-pointer shadow-lg"
+                  >
+                    <Tv className="w-4 h-4" />
+                    <span>Otras señales ({alternateChannels.length})</span>
+                  </button>
+               </div>
+            )}
+
             {/* Scrubber slider for Movies / Series episodes */}
             {type !== 'live' && duration > 0 && (
               <div className="space-y-1">
@@ -1044,47 +1062,84 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         </div>
       )}
 
-      {/* TV Zapping Overlay */}
-      {viewMode === 'tv' && type === 'live' && (showOverlay || directNumberInput) && (
-        <div className="absolute top-6 left-6 z-50 bg-[#080a12]/90 border border-zinc-700/60 rounded-2xl p-4 flex items-center gap-4 shadow-2xl transition-opacity duration-300 pointer-events-none select-none">
-          <div className="w-14 h-14 rounded-xl bg-white flex items-center justify-center overflow-hidden shrink-0 border border-zinc-600">
-            {poster ? (
-              <img src={poster} className="w-full h-full object-contain p-1" alt="" />
-            ) : (
-              <Tv className="w-7 h-7 text-zinc-800" />
+      {/* Alternate signals / Channel List Modal */}
+      {(showCategoryList || (viewMode === 'tv' && type === 'live' && (showOverlay || directNumberInput))) && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm pointer-events-none">
+          <div className="w-full max-w-sm bg-[#080a12]/95 border border-zinc-700 rounded-3xl overflow-hidden shadow-2xl pointer-events-auto">
+            <div className="bg-zinc-900 px-4 py-3 flex items-center justify-between border-b border-zinc-800">
+               <span className="text-xs font-black text-cyan-400 uppercase tracking-widest flex items-center gap-2">
+                  <Tv className="w-4 h-4" /> 
+                  {alternateChannels && alternateChannels.length > 0 ? 'Otras señales' : 'Zapping'}
+               </span>
+               <button 
+                onClick={() => { setShowCategoryList(false); setShowOverlay(false); }}
+                className="tv-focusable p-1.5 hover:bg-white/10 rounded-lg text-zinc-500 cursor-pointer"
+               >
+                 <X className="w-4 h-4" />
+               </button>
+            </div>
+
+            <div className="p-2 max-h-[60vh] overflow-y-auto custom-scrollbar">
+              {alternateChannels && alternateChannels.length > 0 ? (
+                /* Caso Deportes: Lista de señales alternativas */
+                <div className="space-y-1">
+                  {alternateChannels.map((ch) => (
+                    <button
+                      key={ch.stream_id}
+                      onClick={() => {
+                        const newU = ch.stream_url || iptvApi.buildStreamUrl('live', ch.stream_id, 'm3u8', username || 'demo');
+                        setCurrentUrl(newU);
+                        setActiveTitle(adjustTime(ch.name));
+                        setActivePoster(ch.stream_icon);
+                        setShowCategoryList(false);
+                      }}
+                      className={`w-full text-left px-3 py-3 rounded-xl text-xs font-black uppercase flex items-center justify-between transition cursor-pointer ${
+                        currentUrl.includes(ch.stream_id.toString())
+                          ? 'bg-cyan-500 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]'
+                          : 'text-zinc-300 hover:bg-zinc-800 border border-transparent hover:border-zinc-700'
+                      }`}
+                    >
+                      <span className="truncate">{adjustTime(ch.name)}</span>
+                      {currentUrl.includes(ch.stream_id.toString()) ? (
+                        <div className="w-2 h-2 rounded-full bg-black animate-pulse" />
+                      ) : (
+                        <Play className="w-3.5 h-3.5 text-cyan-500 opacity-0 group-hover:opacity-100" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              ) : channelsList.length > 0 ? (
+                /* Caso TV en Vivo: Lista de canales de la categoría actual */
+                <div className="space-y-1">
+                  {channelsList.map((ch, idx) => (
+                    <button
+                      key={ch.stream_id}
+                      onClick={() => {
+                        changeChannelByIndex(idx);
+                        setShowCategoryList(false);
+                        setShowOverlay(false);
+                      }}
+                      className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold truncate flex items-center justify-between transition cursor-pointer ${
+                        idx === currentIdx ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40' : 'text-zinc-300 hover:bg-zinc-800/60'
+                      }`}
+                    >
+                      <span className="font-mono text-zinc-500 mr-2">{idx + 1}.</span>
+                      <span className="truncate flex-1">{adjustTime(ch.name)}</span>
+                      {idx === currentIdx && <span className="text-[9px] bg-cyan-500 text-black px-1.5 py-0.5 rounded font-black ml-1">ACTUAL</span>}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-8 text-center text-zinc-500 text-xs font-bold uppercase">Sin señales disponibles</div>
+              )}
+            </div>
+
+            {directNumberInput && (
+              <div className="bg-cyan-500 p-3 text-center">
+                 <span className="text-2xl font-black text-black tracking-widest">{directNumberInput}</span>
+              </div>
             )}
           </div>
-          <div>
-            <div className="text-cyan-400 font-mono font-extrabold text-sm">
-              CANAL #{directNumberInput || currentIdx + 1}
-            </div>
-            <div className="text-white font-black text-lg tracking-tight max-w-md truncate">
-              {title}
-            </div>
-          </div>
-          {showCategoryList && channelsList.length > 0 && (
-            <div className="absolute top-full left-0 mt-2 w-80 max-h-72 bg-[#080a12]/95 border border-zinc-700 rounded-2xl overflow-y-auto p-2 pointer-events-auto custom-scrollbar shadow-2xl">
-              <div className="text-[11px] font-black text-cyan-400 uppercase tracking-widest px-2 py-1 mb-1 border-b border-zinc-800">
-                Lista de Canales ({channelsList.length})
-              </div>
-              {channelsList.map((ch, idx) => (
-                <button
-                  key={ch.stream_id}
-                  onClick={() => {
-                    changeChannelByIndex(idx);
-                    setShowCategoryList(false);
-                  }}
-                  className={`w-full text-left px-2.5 py-2 rounded-xl text-xs font-bold truncate flex items-center justify-between transition cursor-pointer ${
-                    idx === currentIdx ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40' : 'text-zinc-300 hover:bg-zinc-800/60'
-                  }`}
-                >
-                  <span className="font-mono text-zinc-500 mr-2">{idx + 1}.</span>
-                  <span className="truncate flex-1">{adjustTime(ch.name)}</span>
-                  {idx === currentIdx && <span className="text-[9px] bg-cyan-500 text-black px-1.5 py-0.5 rounded font-black ml-1">ACTUAL</span>}
-                </button>
-              ))}
-            </div>
-          )}
         </div>
       )}
     </div>

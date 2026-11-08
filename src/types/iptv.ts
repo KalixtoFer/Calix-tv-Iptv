@@ -206,5 +206,6 @@ export interface PlaybackState {
   category?: string;
   currentTime?: number;
   channels?: LiveStream[];
+  alternateChannels?: LiveStream[];
   initialChannelIndex?: number;
 }

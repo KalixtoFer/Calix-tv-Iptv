@@ -12,7 +12,7 @@ import React, { useState, useEffect } from 'react';
   Radio,
   FileCode,
 } from 'lucide-react';
-import { DeviceViewMode, XtreamUserInfo } from '../types/iptv';
+import { ActiveSection, DeviceViewMode, XtreamUserInfo } from '../types/iptv';
 
 interface HeaderProps {
   appName?: string;
@@ -28,6 +28,7 @@ interface HeaderProps {
   onOpenApkGuide: () => void;
   onLogout: () => void;
   onHomeClick?: () => void;
+  onNavigate?: (section: ActiveSection) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -44,6 +45,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenApkGuide,
   onLogout,
   onHomeClick,
+  onNavigate,
 }) => {
   const [currentTimeStr, setCurrentTimeStr] = useState<string>('');
   const [currentDateStr, setCurrentDateStr] = useState<string>('');
@@ -127,20 +129,33 @@ export const Header: React.FC<HeaderProps> = ({
         </button>
       </div>
 
-      {/* Right: Status, Clock, Mode Switcher, Admin Settings */}
-      <div className="flex items-center gap-2 sm:gap-3">
-        {/* Connection status badge */}
-        <div className="hidden lg:flex items-center gap-2 px-3 py-1 bg-zinc-900/80 border border-zinc-800 rounded-lg text-xs">
-          <Wifi className={`w-3.5 h-3.5 ${isOnline ? 'text-emerald-400' : 'text-rose-400'}`} />
-          <span className="font-mono text-zinc-300">
-            {isOnline ? 'ONLINE' : 'OFFLINE'}
-          </span>
-          <span className="text-zinc-400">|</span>
-          <span className="text-zinc-400 truncate max-w-[140px]">
-            {serverUrl ? serverUrl.replace(/^https?:\/\//, '') : 'Xtream Proxy'}
-          </span>
-        </div>
+      {/* Center: Navigation Shortcuts (TV & Web) */}
+      <div className="hidden lg:flex items-center gap-1.5 mx-4">
+        <button
+          onClick={() => onNavigate && onNavigate('live')}
+          className="tv-focusable px-3 py-2 rounded-xl flex items-center gap-2 text-xs font-black uppercase tracking-wider text-zinc-400 hover:text-cyan-400 hover:bg-cyan-500/10 transition-all cursor-pointer"
+        >
+          <Radio className="w-4 h-4 text-cyan-500" />
+          <span>TV en Vivo</span>
+        </button>
+        <button
+          onClick={() => onNavigate && onNavigate('movies')}
+          className="tv-focusable px-3 py-2 rounded-xl flex items-center gap-2 text-xs font-black uppercase tracking-wider text-zinc-400 hover:text-blue-400 hover:bg-blue-500/10 transition-all cursor-pointer"
+        >
+          <Monitor className="w-4 h-4 text-blue-500" />
+          <span>Películas</span>
+        </button>
+        <button
+          onClick={() => onNavigate && onNavigate('series')}
+          className="tv-focusable px-3 py-2 rounded-xl flex items-center gap-2 text-xs font-black uppercase tracking-wider text-zinc-400 hover:text-purple-400 hover:bg-purple-500/10 transition-all cursor-pointer"
+        >
+          <Tv className="w-4 h-4 text-purple-500" />
+          <span>Series</span>
+        </button>
+      </div>
 
+      {/* Right: Status, Clock, Admin Settings */}
+      <div className="flex items-center gap-2 sm:gap-3">
         {/* Live Clock & Date */}
         <div className="flex items-center gap-2 px-2.5 sm:px-3 py-1 bg-zinc-900/90 border border-zinc-800/80 rounded-lg">
           <Clock className="w-3.5 h-3.5 text-cyan-400" />
@@ -154,59 +169,23 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Device View Mode Toggle (Celular y Android TV) */}
-        <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-lg p-0.5 text-xs font-semibold">
+        {/* Remote Control HUD Toggle (Solo si hay onOpenRemote) */}
+        {onOpenRemote && (
           <button
-            onClick={() => (onChangeViewMode ? onChangeViewMode('mobile') : onToggleViewMode && onToggleViewMode())}
-            className={`px-2 py-1 rounded-md flex items-center gap-1 transition cursor-pointer ${
-              viewMode === 'mobile'
-                ? 'bg-cyan-500 text-black font-bold shadow'
-                : 'text-zinc-400 hover:text-white'
-            }`}
-            title="Modo Celular (Táctil)"
+            onClick={onOpenRemote}
+            className="tv-focusable p-2 bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700/60 text-zinc-300 hover:text-cyan-400 rounded-lg transition cursor-pointer flex items-center gap-1"
+            title="Abrir Control Remoto Virtual"
           >
-            <Smartphone className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">Celular</span>
+            <Radio className="w-4 h-4 text-cyan-400" />
+            <span className="hidden xl:inline text-xs font-medium">Control</span>
           </button>
-          <button
-            onClick={() => (onChangeViewMode ? onChangeViewMode('tv') : onToggleViewMode && onToggleViewMode())}
-            className={`px-2 py-1 rounded-md flex items-center gap-1 transition cursor-pointer ${
-              viewMode === 'tv'
-                ? 'bg-cyan-500 text-black font-bold shadow'
-                : 'text-zinc-400 hover:text-white'
-            }`}
-            title="Modo Android TV (Control Remoto)"
-          >
-            <Tv className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">Android TV</span>
-          </button>
-        </div>
-
-        {/* Remote Control HUD Toggle */}
-        <button
-          onClick={onOpenRemote}
-          className="tv-focusable p-2 bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700/60 text-zinc-300 hover:text-cyan-400 rounded-lg transition cursor-pointer flex items-center gap-1"
-          title="Abrir Control Remoto Virtual de TV Box"
-        >
-          <Radio className="w-4 h-4 text-cyan-400" />
-          <span className="hidden xl:inline text-xs font-medium">Control Remoto</span>
-        </button>
-
-        {/* APK Generation Guide */}
-        <button
-          onClick={onOpenApkGuide}
-          className="tv-focusable hidden sm:flex items-center gap-1 px-2.5 py-1.5 bg-gradient-to-r from-emerald-950 to-teal-950 hover:from-emerald-900 hover:to-teal-900 border border-emerald-700/50 text-emerald-300 rounded-lg text-xs font-semibold cursor-pointer shadow-sm transition"
-          title="Guía de compilación de APK para Android TV"
-        >
-          <FileCode className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Guía APK</span>
-        </button>
+        )}
 
         {/* Admin Settings Button */}
         <button
           onClick={onOpenSettings}
           className="tv-focusable p-2 bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700/60 text-zinc-300 hover:text-white rounded-lg transition cursor-pointer"
-          title="Panel de Administración Centralizado (Configuración de Servidor)"
+          title="Administración"
         >
           <Settings className="w-4 h-4 text-zinc-300 hover:text-cyan-400" />
         </button>
@@ -216,7 +195,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={onLogout}
             className="tv-focusable px-2.5 py-1.5 bg-rose-950/80 hover:bg-rose-900/90 border border-rose-800/80 text-rose-300 hover:text-white rounded-lg transition cursor-pointer flex items-center gap-1.5 text-xs font-bold shadow-md"
-            title="Cerrar Sesión"
+            title="Salir"
           >
             <LogOut className="w-4 h-4 text-rose-400" />
             <span className="hidden sm:inline">Salir</span>
