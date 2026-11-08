@@ -457,6 +457,20 @@ export default function App() {
             autoPlay={true}
             onClose={() => setActivePlayback(null)}
             className="w-full h-full"
+            channels={activePlayback.channels}
+            initialChannelIndex={activePlayback.initialChannelIndex}
+            username={session?.username}
+            viewMode={viewMode}
+            onChannelChange={(stream, idx) => {
+              setActivePlayback({
+                ...activePlayback,
+                streamId: stream.stream_id,
+                title: stream.name,
+                url: stream.stream_url || iptvApi.buildStreamUrl('live', stream.stream_id, 'm3u8', session?.username || 'demo'),
+                poster: stream.stream_icon,
+                initialChannelIndex: idx,
+              });
+            }}
           />
         </div>
       )}

@@ -33,6 +33,8 @@ interface LiveTVScreenProps {
     type: 'live';
     poster?: string;
     category?: string;
+    channels?: LiveStream[];
+    initialChannelIndex?: number;
   }) => void;
 }
 
@@ -188,6 +190,8 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
         type: 'live',
         poster: selectedStream.stream_icon,
         category: selectedCategoryId,
+        channels: filteredStreams,
+        initialChannelIndex: filteredStreams.findIndex((s) => s.stream_id === selectedStream.stream_id),
       });
     }
   };

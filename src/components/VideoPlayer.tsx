@@ -24,6 +24,25 @@ import { Capacitor } from '@capacitor/core';
 import { ScreenOrientation } from '@capacitor/screen-orientation';
 import { NativePlayer, canUseNativePlayer } from '../services/nativePlayer';
 
+import { DeviceViewMode, LiveStream } from '../types/iptv';
+import { iptvApi } from '../services/iptvApi';
+
+const adjustTime = (text: string | undefined): string => {
+  if (!text) return '';
+  let result = text.replace(/\b([0-1]?\d|2[0-3])[:.hH]([0-5]\d)\b/g, (match, hh, mm) => {
+    let h = parseInt(hh, 10);
+    h = (h + 2) % 24;
+    const sep = match.includes(':') ? ':' : match.includes('.') ? '.' : 'h';
+    return `${h.toString().padStart(2, '0')}${sep}${mm}`;
+  });
+  result = result.replace(/\b([0-1]?\d|2[0-3])\s*(hs|hrs|h)\b/gi, (_match, hh, unit) => {
+    let h = parseInt(hh, 10);
+    h = (h + 2) % 24;
+    return `${h.toString().padStart(2, '0')} ${unit}`;
+  });
+  return result;
+};
+
 export interface VideoPlayerProps {
   url: string;
   title: string;
@@ -39,6 +58,12 @@ export interface VideoPlayerProps {
   className?: string;
   isMiniPlayer?: boolean;
   onExpand?: () => void;
+  channels?: LiveStream[];
+  initialChannelIndex?: number;
+  username?: string;
+  viewMode?: DeviceViewMode;
+  onChannelChange?: (stream: LiveStream, index: number) => void;
+  onOpenCategories?: () => void;
 }
 
 const getExt = (u: string): string => {
@@ -76,10 +101,10 @@ type AspectRatioMode = 'cover' | 'contain' | 'fill' | 'scale-down';
 
 export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   url: urlProp,
-  title,
+  title: titleProp,
   subtitle,
   type = 'live',
-  poster,
+  poster: posterProp,
   autoPlay = true,
   onClose,
   onNextChannel,
@@ -89,9 +114,15 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   className = '',
   isMiniPlayer = false,
   onExpand,
+  channels,
+  initialChannelIndex,
+  username,
+  viewMode,
+  onChannelChange,
+  onOpenCategories,
 }) => {
   // En el APK la URL siempre debe ser la directa al servidor IPTV (el proxy /api/iptv/stream solo existe en el servidor web)
-  const url = (() => {
+  const baseParsedUrl = (() => {
     if (Capacitor.isNativePlatform() && urlProp.startsWith('/api/iptv/stream')) {
       try {
         return new URL(urlProp, 'http://localhost').searchParams.get('u') || urlProp;
@@ -101,6 +132,171 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     }
     return urlProp;
   })();
+
+  const [currentUrl, setCurrentUrl] = useState<string>(baseParsedUrl);
+  const [activeTitle, setActiveTitle] = useState<string>(titleProp);
+  const [activePoster, setActivePoster] = useState<string | undefined>(posterProp);
+
+  useEffect(() => {
+    let u = urlProp;
+    if (Capacitor.isNativePlatform() && u.startsWith('/api/iptv/stream')) {
+      try {
+        u = new URL(u, 'http://localhost').searchParams.get('u') || u;
+      } catch {}
+    }
+    setCurrentUrl(u);
+    setActiveTitle(titleProp);
+    setActivePoster(posterProp);
+  }, [urlProp, titleProp, posterProp]);
+
+  const [channelsList] = useState<LiveStream[]>(channels || []);
+  const [currentIdx, setCurrentIdx] = useState<number>(initialChannelIndex ?? 0);
+
+  const [showOverlay, setShowOverlay] = useState<boolean>(false);
+  const [showCategoryList, setShowCategoryList] = useState<boolean>(false);
+  const [directNumberInput, setDirectNumberInput] = useState<string>('');
+
+  const numberTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const overlayTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastChannelRef = useRef<{ stream: LiveStream; index: number } | null>(null);
+
+  const changeChannelByIndex = useCallback((targetIdx: number) => {
+    if (!channelsList || channelsList.length === 0) return;
+    const normIdx = (targetIdx + channelsList.length) % channelsList.length;
+    const nextStream = channelsList[normIdx];
+
+    if (channelsList[currentIdx]) {
+      lastChannelRef.current = { stream: channelsList[currentIdx], index: currentIdx };
+    }
+
+    setCurrentIdx(normIdx);
+    setActiveTitle(adjustTime(nextStream.name));
+    setActivePoster(nextStream.stream_icon);
+
+    setShowOverlay(true);
+    if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current);
+    overlayTimerRef.current = setTimeout(() => {
+      setShowOverlay(false);
+    }, 3000);
+
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    debounceTimerRef.current = setTimeout(() => {
+      const newU = nextStream.stream_url || iptvApi.buildStreamUrl('live', nextStream.stream_id, 'm3u8', username || 'demo');
+      setCurrentUrl(newU);
+      if (onChannelChange) onChannelChange(nextStream, normIdx);
+    }, 300);
+  }, [channelsList, currentIdx, username, onChannelChange]);
+
+  useEffect(() => {
+    if (viewMode !== 'tv' || type !== 'live') return;
+
+    const handleKeyDown = (e: KeyboardEvent | CustomEvent) => {
+      const detail = (e as CustomEvent).detail;
+      const keyCode = detail?.keyCode ?? (e as KeyboardEvent).keyCode ?? (e as KeyboardEvent).which;
+      const key = (e as KeyboardEvent).key;
+
+      console.log('TV Key received:', keyCode, key);
+
+      const isUp = keyCode === 19 || key === 'ArrowUp' || keyCode === 38;
+      const isDown = keyCode === 20 || key === 'ArrowDown' || keyCode === 40;
+      const isLeft = keyCode === 21 || key === 'ArrowLeft' || keyCode === 37;
+      const isRight = keyCode === 22 || key === 'ArrowRight' || keyCode === 39;
+      const isOk = keyCode === 23 || keyCode === 66 || key === 'Enter';
+      const isBack = keyCode === 4 || key === 'Escape' || key === 'Backspace';
+      const isChannelUp = keyCode === 92 || keyCode === 427 || key === 'PageUp';
+      const isChannelDown = keyCode === 93 || keyCode === 428 || key === 'PageDown';
+      const isRecall = keyCode === 89 || keyCode === 8;
+
+      const numMatch = key >= '0' && key <= '9' ? parseInt(key, 10) : (keyCode >= 7 && keyCode <= 16 ? keyCode - 7 : (keyCode >= 144 && keyCode <= 153 ? keyCode - 144 : null));
+
+      if (isUp || isChannelUp) {
+        e.preventDefault();
+        changeChannelByIndex(currentIdx + 1);
+        return;
+      }
+      if (isDown || isChannelDown) {
+        e.preventDefault();
+        changeChannelByIndex(currentIdx - 1);
+        return;
+      }
+      if (isLeft || isRight) {
+        if (onOpenCategories) {
+          e.preventDefault();
+          onOpenCategories();
+        }
+        return;
+      }
+      if (isOk) {
+        e.preventDefault();
+        if (showOverlay) {
+          setShowCategoryList((prev) => !prev);
+        } else {
+          setShowOverlay(true);
+          setShowCategoryList(true);
+          if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current);
+          overlayTimerRef.current = setTimeout(() => {
+            setShowOverlay(false);
+            setShowCategoryList(false);
+          }, 5000);
+        }
+        return;
+      }
+      if (isBack) {
+        e.preventDefault();
+        if (showCategoryList || showOverlay) {
+          setShowCategoryList(false);
+          setShowOverlay(false);
+        } else if (onClose) {
+          onClose();
+        }
+        return;
+      }
+      if (isRecall) {
+        e.preventDefault();
+        if (lastChannelRef.current) {
+          const { stream, index } = lastChannelRef.current;
+          lastChannelRef.current = { stream: channelsList[currentIdx], index: currentIdx };
+          setCurrentIdx(index);
+          setActiveTitle(adjustTime(stream.name));
+          setActivePoster(stream.stream_icon);
+          const newU = stream.stream_url || iptvApi.buildStreamUrl('live', stream.stream_id, 'm3u8', username || 'demo');
+          setCurrentUrl(newU);
+          setShowOverlay(true);
+          setTimeout(() => setShowOverlay(false), 3000);
+        }
+        return;
+      }
+      if (numMatch !== null && numMatch >= 0 && numMatch <= 9) {
+        e.preventDefault();
+        const nextDigits = directNumberInput + numMatch;
+        setDirectNumberInput(nextDigits);
+        setShowOverlay(true);
+        if (numberTimerRef.current) clearTimeout(numberTimerRef.current);
+        numberTimerRef.current = setTimeout(() => {
+          const chNum = parseInt(nextDigits, 10);
+          setDirectNumberInput('');
+          setShowOverlay(false);
+          if (channelsList.length > 0) {
+            const targetIdx = Math.max(0, Math.min(channelsList.length - 1, chNum - 1));
+            changeChannelByIndex(targetIdx);
+          }
+        }, 1500);
+        return;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown as EventListener);
+    window.addEventListener('android-tv-key', handleKeyDown as EventListener);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown as EventListener);
+      window.removeEventListener('android-tv-key', handleKeyDown as EventListener);
+    };
+  }, [viewMode, type, currentIdx, channelsList, directNumberInput, showOverlay, showCategoryList, changeChannelByIndex, onClose, onOpenCategories, username]);
+
+  const url = currentUrl;
+  const title = activeTitle;
+  const poster = activePoster;
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -204,7 +400,17 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     retryCountRef.current = 0;
     fallbackAttemptedRef.current = false;
 
-    // Clean up previous HLS instance safely
+    // Reuse HLS instance if active for fast zapping
+    if (hlsRef.current && (url.includes('.m3u8') || type === 'live')) {
+      hlsRef.current.loadSource(url);
+      hlsRef.current.startLoad();
+      if (autoPlay) {
+        video.play().catch(() => {});
+      }
+      setIsLoading(false);
+      return;
+    }
+
     if (hlsRef.current) {
       hlsRef.current.destroy();
       hlsRef.current = null;
@@ -835,6 +1041,50 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* TV Zapping Overlay */}
+      {viewMode === 'tv' && type === 'live' && (showOverlay || directNumberInput) && (
+        <div className="absolute top-6 left-6 z-50 bg-[#080a12]/90 border border-zinc-700/60 rounded-2xl p-4 flex items-center gap-4 shadow-2xl transition-opacity duration-300 pointer-events-none select-none">
+          <div className="w-14 h-14 rounded-xl bg-white flex items-center justify-center overflow-hidden shrink-0 border border-zinc-600">
+            {poster ? (
+              <img src={poster} className="w-full h-full object-contain p-1" alt="" />
+            ) : (
+              <Tv className="w-7 h-7 text-zinc-800" />
+            )}
+          </div>
+          <div>
+            <div className="text-cyan-400 font-mono font-extrabold text-sm">
+              CANAL #{directNumberInput || currentIdx + 1}
+            </div>
+            <div className="text-white font-black text-lg tracking-tight max-w-md truncate">
+              {title}
+            </div>
+          </div>
+          {showCategoryList && channelsList.length > 0 && (
+            <div className="absolute top-full left-0 mt-2 w-80 max-h-72 bg-[#080a12]/95 border border-zinc-700 rounded-2xl overflow-y-auto p-2 pointer-events-auto custom-scrollbar shadow-2xl">
+              <div className="text-[11px] font-black text-cyan-400 uppercase tracking-widest px-2 py-1 mb-1 border-b border-zinc-800">
+                Lista de Canales ({channelsList.length})
+              </div>
+              {channelsList.map((ch, idx) => (
+                <button
+                  key={ch.stream_id}
+                  onClick={() => {
+                    changeChannelByIndex(idx);
+                    setShowCategoryList(false);
+                  }}
+                  className={`w-full text-left px-2.5 py-2 rounded-xl text-xs font-bold truncate flex items-center justify-between transition cursor-pointer ${
+                    idx === currentIdx ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40' : 'text-zinc-300 hover:bg-zinc-800/60'
+                  }`}
+                >
+                  <span className="font-mono text-zinc-500 mr-2">{idx + 1}.</span>
+                  <span className="truncate flex-1">{adjustTime(ch.name)}</span>
+                  {idx === currentIdx && <span className="text-[9px] bg-cyan-500 text-black px-1.5 py-0.5 rounded font-black ml-1">ACTUAL</span>}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

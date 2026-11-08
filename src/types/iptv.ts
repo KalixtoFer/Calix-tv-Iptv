@@ -180,4 +180,6 @@ export interface PlaybackState {
   subtitle?: string;
   category?: string;
   currentTime?: number;
+  channels?: LiveStream[];
+  initialChannelIndex?: number;
 }
