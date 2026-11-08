@@ -267,6 +267,61 @@ class IptvApiService {
     localStorage.removeItem(STORAGE_SESSION_KEY);
   }
 
+  // Helper to get a stable ID from a category name
+  normalizeCategoryName(name: string): string {
+    return name
+      .toLowerCase()
+      .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1F3FB}-\u{1F3FF}\u{200D}\u{200C}\u{AD}\u{FE0F}]/gu, '') // Remove emojis
+      .replace(/[⭐🌟✨💫🔥💥]/g, '') // Remove specific characters common in IPTV lists
+      .trim();
+  }
+
+  // Apply order, renaming and visibility to categories
+  applyCategoryManagement(
+    type: 'live' | 'vod' | 'series',
+    rawCategories: any[]
+  ): any[] {
+    if (!this.activeConfig?.categoriesConfig) return rawCategories;
+    
+    const config = this.activeConfig.categoriesConfig[type];
+    if (!config || !Array.isArray(config) || config.length === 0) return rawCategories;
+
+    // 1. Index config by normalized ID
+    const configMap = new Map<string, any>();
+    config.forEach((item) => configMap.set(item.id, item));
+
+    // 2. Prepare items
+    const result = rawCategories.map(cat => {
+      const normId = this.normalizeCategoryName(cat.category_name);
+      const conf = configMap.get(normId);
+      
+      return {
+        ...cat,
+        _normId: normId,
+        _managed: !!conf,
+        managedName: conf?.displayName || cat.category_name,
+        isHidden: conf?.hidden || false,
+        isPinned: conf?.pinned || false,
+        sortOrder: conf?.order ?? 9999
+      };
+    });
+
+    // 3. Filter hidden
+    const visible = result.filter(cat => !cat.isHidden);
+
+    // 4. Sort: Pinned first, then by defined order, then alphabetically for new ones
+    return visible.sort((a, b) => {
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+      
+      if (a.sortOrder !== b.sortOrder) {
+        return a.sortOrder - b.sortOrder;
+      }
+      
+      return a.category_name.localeCompare(b.category_name);
+    });
+  }
+
   // 4. Fetch Categories (Direct + Proxy fallback + Memory Cache)
   async getCategories(
     type: 'live' | 'vod' | 'series',
@@ -288,6 +343,8 @@ class IptvApiService {
     const base = this.activeConfig?.serverUrl || 'https://sneoplus.net:8443';
     const cleanBase = base.endsWith('/') ? base.slice(0, -1) : base;
 
+    let rawData: any[] = [];
+
     // 1. Direct call
     try {
       const directUrl = `${cleanBase}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(effectivePass)}&action=${action}`;
@@ -297,8 +354,7 @@ class IptvApiService {
         if (text.trim().startsWith('[')) {
           const data = JSON.parse(text);
           if (Array.isArray(data)) {
-            this.categoryCache.set(type, data);
-            return data;
+            rawData = data;
           }
         }
       }
@@ -306,24 +362,32 @@ class IptvApiService {
       // Fallback to proxy
     }
 
-    // 2. Proxy call fallback
-    try {
-      const res = await fetch(
-        `/api/iptv/proxy?action=${action}&username=${encodeURIComponent(username)}&password=${encodeURIComponent(effectivePass)}`
-      );
-      if (res.ok) {
-        const text = await res.text();
-        if (text.trim().startsWith('[')) {
-          const data = JSON.parse(text);
-          if (Array.isArray(data)) {
-            this.categoryCache.set(type, data);
-            return data;
+    // 2. Proxy call fallback if direct failed
+    if (rawData.length === 0) {
+      try {
+        const res = await fetch(
+          `/api/iptv/proxy?action=${action}&username=${encodeURIComponent(username)}&password=${encodeURIComponent(effectivePass)}`
+        );
+        if (res.ok) {
+          const text = await res.text();
+          if (text.trim().startsWith('[')) {
+            const data = JSON.parse(text);
+            if (Array.isArray(data)) {
+              rawData = data;
+            }
           }
         }
+      } catch (e) {
+        console.error(`Error loading ${type} categories:`, e);
       }
-    } catch (e) {
-      console.error(`Error loading ${type} categories:`, e);
     }
+
+    if (rawData.length > 0) {
+      const managed = this.applyCategoryManagement(type, rawData);
+      this.categoryCache.set(type, managed);
+      return managed;
+    }
+
     return [];
   }
 

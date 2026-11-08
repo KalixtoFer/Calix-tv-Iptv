@@ -34,6 +34,9 @@ export interface LiveCategory {
   category_id: string;
   category_name: string;
   parent_id?: number;
+  managedName?: string;
+  isHidden?: boolean;
+  isPinned?: boolean;
 }
 
 export interface LiveStream {
@@ -58,6 +61,9 @@ export interface VodCategory {
   category_id: string;
   category_name: string;
   parent_id?: number;
+  managedName?: string;
+  isHidden?: boolean;
+  isPinned?: boolean;
 }
 
 export interface VodStream {
@@ -85,6 +91,9 @@ export interface SeriesCategory {
   category_id: string;
   category_name: string;
   parent_id?: number;
+  managedName?: string;
+  isHidden?: boolean;
+  isPinned?: boolean;
 }
 
 export interface SeriesItem {
@@ -146,6 +155,21 @@ export interface AppUpdateConfig {
   publishedAt?: string;
 }
 
+export interface CategoryManagedItem {
+  id: string; // normalized original name
+  originalName: string;
+  displayName: string;
+  hidden: boolean;
+  pinned: boolean;
+  order: number;
+}
+
+export interface CategoriesConfig {
+  live?: CategoryManagedItem[];
+  vod?: CategoryManagedItem[];
+  series?: CategoryManagedItem[];
+}
+
 export interface CentralizedConfig {
   serverUrl: string;
   serverPort: string;
@@ -166,6 +190,7 @@ export interface CentralizedConfig {
   };
   demoModeEnabled: boolean;
   appUpdate?: AppUpdateConfig;
+  categoriesConfig?: CategoriesConfig;
 }
 
 export type ActiveSection = 'home' | 'live' | 'series' | 'movies' | 'events';

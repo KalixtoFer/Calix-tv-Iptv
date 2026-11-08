@@ -235,8 +235,9 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
                     isSelected ? 'border-rose-600 bg-rose-600/5 text-rose-500' : 'border-transparent text-zinc-500'
                   }`}
                 >
-                  <span className={`text-[10px] font-black uppercase tracking-tighter leading-tight ${isSelected ? 'opacity-100' : 'opacity-80'}`}>
-                    • {cat.category_name}
+                  <span className={`text-[10px] font-black uppercase tracking-tighter leading-tight ${isSelected ? 'opacity-100' : 'opacity-80'} flex items-center gap-1`}>
+                    • {cat.managedName || cat.category_name}
+                    {cat.isPinned && <Star className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />}
                   </span>
                   <span className="text-[9px] opacity-40 ml-2 font-bold">
                     {Math.floor(Math.random() * 100) + 10} canales
@@ -348,8 +349,9 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
                     <span className="text-base shrink-0">
                       {isArgentina ? '🇦🇷' : isDeportes ? '⚽' : isInfantiles ? '🦖' : '📺'}
                     </span>
-                    <span className="text-[11px] font-extrabold truncate uppercase tracking-tight">
-                      {cat.category_name}
+                    <span className="text-[11px] font-extrabold truncate uppercase tracking-tight flex items-center gap-1.5">
+                      {cat.managedName || cat.category_name}
+                      {cat.isPinned && <Star className="w-3 h-3 fill-amber-500 text-amber-500 shrink-0" />}
                     </span>
                   </div>
                   <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-bold font-mono shrink-0 ml-1 ${

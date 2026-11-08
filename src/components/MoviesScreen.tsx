@@ -234,7 +234,10 @@ export const MoviesScreen: React.FC<MoviesScreenProps> = ({
                       : 'text-zinc-300 hover:bg-zinc-800/70 hover:text-white'
                   }`}
                 >
-                  <span className="truncate">{cat.category_name}</span>
+                  <span className="truncate flex items-center gap-1.5">
+                    {cat.managedName || cat.category_name}
+                    {cat.isPinned && <Star className="w-3 h-3 fill-amber-400 text-amber-400 shrink-0" />}
+                  </span>
                 </button>
               );
             })}

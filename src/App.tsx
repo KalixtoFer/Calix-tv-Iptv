@@ -25,7 +25,6 @@ import { UserProfileModal } from './components/UserProfileModal';
 import { VideoPlayer } from './components/VideoPlayer';
 import { VirtualRemote } from './components/VirtualRemote';
 import { ApkExportGuideModal } from './components/ApkExportGuideModal';
-import { AppUpdateModal } from './components/AppUpdateModal';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { Loader2 } from 'lucide-react';
 import { ScreenOrientation } from '@capacitor/screen-orientation';
@@ -68,13 +67,6 @@ export default function App() {
   const [isAdminOpen, setIsAdminOpen] = useState<boolean>(false);
   const [isRemoteOpen, setIsRemoteOpen] = useState<boolean>(false);
   const [isApkGuideOpen, setIsApkGuideOpen] = useState<boolean>(false);
-  const [availableUpdate, setAvailableUpdate] = useState<{
-    latestVersion: string;
-    currentVersion: string;
-    apkDownloadUrl: string;
-    releaseNotes: string;
-    forceUpdate: boolean;
-  } | null>(null);
 
   // Active Fullscreen Video Playback
   const [activePlayback, setActivePlayback] = useState<PlaybackState | null>(null);
@@ -86,28 +78,11 @@ export default function App() {
         const fetchedConfig = await iptvApi.fetchConfig();
         setConfig(fetchedConfig);
 
+
         // Check if URL specifies /admin or #admin
         if (typeof window !== 'undefined' && (window.location.pathname === '/admin' || window.location.hash === '#admin')) {
           setIsAdminOpen(true);
-        }
-
-        // Check for app updates (OTA)
-        const updateCheck = await iptvApi.checkAppUpdate('1.0');
-        if (updateCheck && updateCheck.hasUpdate) {
-          setAvailableUpdate(updateCheck);
-
-          // Prompt for notification permission and post Android system notification
-          if (canUseNativePlayer()) {
-            NativePlayer.requestNotificationPermission?.().catch(() => {});
-            NativePlayer.showNotification?.({
-              title: `Nueva Versión Calix TV v${updateCheck.latestVersion}`,
-              message: updateCheck.releaseNotes || 'Hay una nueva actualización lista para descargar e instalar.',
-              url: updateCheck.apkDownloadUrl || '/api/iptv/download-apk',
-            }).catch(() => {});
-          }
-        }
-
-        const savedSession = iptvApi.getSavedSession();
+        }        const savedSession = iptvApi.getSavedSession();
         if (savedSession) {
           setSession(savedSession);
         }
@@ -331,12 +306,6 @@ export default function App() {
           onOpenAdmin={() => setIsAdminOpen(true)}
           onEnterGuest={handleEnterGuestMode}
         />
-        {availableUpdate && (
-          <AppUpdateModal
-            updateInfo={availableUpdate}
-            onClose={() => setAvailableUpdate(null)}
-          />
-        )}
       </div>
     );
   }
@@ -507,13 +476,7 @@ export default function App() {
         <ApkExportGuideModal onClose={() => setIsApkGuideOpen(false)} />
       )}
 
-      {/* Over-The-Air (OTA) App Update Notification Modal */}
-      {availableUpdate && (
-        <AppUpdateModal
-          updateInfo={availableUpdate}
-          onClose={() => setAvailableUpdate(null)}
-        />
-      )}
+
     </div>
   );
 }

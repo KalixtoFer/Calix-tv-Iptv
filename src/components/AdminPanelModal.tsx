@@ -24,6 +24,13 @@ import {
   UserCheck,
   Sparkles,
   ExternalLink,
+  GripVertical,
+  ChevronUp,
+  ChevronDown,
+  Eye,
+  EyeOff,
+  Type,
+  ArrowUpToLine,
 } from 'lucide-react';
 import { CentralizedConfig, BannerItem } from '../types/iptv';
 import { iptvApi } from '../services/iptvApi';
@@ -48,7 +55,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
   const [adminUser, setAdminUser] = useState<{ username: string; email: string; name: string; role: string } | null>(null);
 
   // Tabs
-  const [activeTab, setActiveTab] = useState<'server' | 'update' | 'security' | 'banners' | 'featured' | 'notice'>('server');
+  const [activeTab, setActiveTab] = useState<'server' | 'update' | 'security' | 'banners' | 'featured' | 'notice' | 'categories'>('server');
   const [config, setConfig] = useState<CentralizedConfig>({
     ...initialConfig,
     appUpdate: initialConfig.appUpdate || {
@@ -106,6 +113,11 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
     latestVersion: string;
     apkDownloadUrl: string;
   } | null>(null);
+  
+  // Category Management state
+  const [catTab, setCatTab] = useState<'live' | 'vod' | 'series'>('live');
+  const [isFetchingCats, setIsFetchingCats] = useState(false);
+  const [currentCategories, setCurrentCategories] = useState<any[]>([]);
 
   const checkServerApkStatus = async () => {
     try {
@@ -118,7 +130,111 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
     if (activeTab === 'update') {
       checkServerApkStatus();
     }
-  }, [activeTab]);
+    if (activeTab === 'categories') {
+      loadCategoriesForManagement();
+    }
+  }, [activeTab, catTab]);
+
+  const loadCategoriesForManagement = async () => {
+    setIsFetchingCats(true);
+    try {
+      // Use "Invitado" or "demo" to fetch raw categories if no session is active in the admin portal
+      const session = iptvApi.getSavedSession();
+      const user = session?.username || 'demo';
+      const cats = await iptvApi.getCategories(catTab, user);
+      setCurrentCategories(cats);
+    } catch (e) {
+      console.warn('Failed to load categories:', e);
+    } finally {
+      setIsFetchingCats(false);
+    }
+  };
+
+  const handleCategoryAction = (normId: string, action: 'hide' | 'show' | 'pin' | 'unpin' | 'up' | 'down' | 'top' | 'rename', value?: string) => {
+    setConfig(prev => {
+      const current = [...(prev.categoriesConfig?.[catTab] || [])];
+      const idx = current.findIndex(c => c.id === normId);
+      
+      // If not in config yet, create it from currentCategories
+      let item = idx >= 0 ? { ...current[idx] } : null;
+      if (!item) {
+        const raw = currentCategories.find(c => iptvApi.normalizeCategoryName(c.category_name) === normId);
+        if (!raw) return prev;
+        item = {
+          id: normId,
+          originalName: raw.category_name,
+          displayName: raw.category_name,
+          hidden: false,
+          pinned: false,
+          order: current.length + 1
+        };
+      }
+
+      if (action === 'hide') item.hidden = true;
+      if (action === 'show') item.hidden = false;
+      if (action === 'pin') item.pinned = true;
+      if (action === 'unpin') item.pinned = false;
+      if (action === 'rename') item.displayName = value || item.originalName;
+
+      const newConfig = { ...prev.categoriesConfig };
+      const list = [...(newConfig[catTab] || [])];
+      
+      if (idx >= 0) {
+        list[idx] = item;
+      } else {
+        list.push(item);
+      }
+
+      // Reordering logic
+      if (action === 'up' || action === 'down' || action === 'top') {
+        // Ensure ALL categories are in the config list for stable sorting
+        const allManaged = currentCategories.map(c => {
+          const nid = iptvApi.normalizeCategoryName(c.category_name);
+          const found = list.find(l => l.id === nid);
+          return found || {
+            id: nid,
+            originalName: c.category_name,
+            displayName: c.category_name,
+            hidden: false,
+            pinned: false,
+            order: 9999
+          };
+        });
+
+        const targetIdx = allManaged.findIndex(c => c.id === normId);
+        if (targetIdx >= 0) {
+          if (action === 'top') {
+            const [moved] = allManaged.splice(targetIdx, 1);
+            allManaged.unshift(moved);
+          } else if (action === 'up' && targetIdx > 0) {
+            [allManaged[targetIdx - 1], allManaged[targetIdx]] = [allManaged[targetIdx], allManaged[targetIdx - 1]];
+          } else if (action === 'down' && targetIdx < allManaged.length - 1) {
+            [allManaged[targetIdx + 1], allManaged[targetIdx]] = [allManaged[targetIdx], allManaged[targetIdx + 1]];
+          }
+          
+          // Update orders
+          allManaged.forEach((c, i) => c.order = i + 1);
+          newConfig[catTab] = allManaged;
+        }
+      } else {
+        newConfig[catTab] = list;
+      }
+
+      return { ...prev, categoriesConfig: newConfig };
+    });
+  };
+
+  const resetCategories = () => {
+    if (confirm('¿Estás seguro de restablecer el orden y nombres originales de esta sección?')) {
+      setConfig(prev => ({
+        ...prev,
+        categoriesConfig: {
+          ...prev.categoriesConfig,
+          [catTab]: []
+        }
+      }));
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -483,6 +599,18 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
               >
                 <Tv className="w-3.5 h-3.5" />
                 <span>5. Canal Destacado</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('categories')}
+                className={`px-3.5 py-2 text-xs font-bold rounded-t-xl transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                  activeTab === 'categories'
+                    ? 'bg-zinc-950 text-cyan-400 border-t-2 border-cyan-400'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                <Sliders className="w-3.5 h-3.5" />
+                <span>6. Gestionar Categorías</span>
               </button>
             </div>
 
@@ -1102,6 +1230,148 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white text-xs font-mono focus:border-cyan-500 focus:outline-none"
                         />
                       </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ----------------------------------------------------
+                  TAB 6: Gestionar Categorías
+                 ---------------------------------------------------- */}
+              {activeTab === 'categories' && (
+                <div className="space-y-4">
+                  <div className="p-4 bg-zinc-900/60 border border-zinc-800 rounded-2xl space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div>
+                        <h4 className="font-bold text-white text-sm flex items-center gap-2">
+                          <Sliders className="w-4 h-4 text-cyan-400" />
+                          <span>Orden y Control de Categorías</span>
+                        </h4>
+                        <p className="text-xs text-zinc-400">
+                          Personaliza cómo se ven las carpetas en la app.
+                        </p>
+                      </div>
+                      
+                      <div className="flex items-center bg-zinc-950 p-1 rounded-xl border border-zinc-800">
+                        <button
+                          onClick={() => setCatTab('live')}
+                          className={`px-3 py-1.5 text-[10px] font-bold rounded-lg transition ${catTab === 'live' ? 'bg-cyan-500 text-black' : 'text-zinc-400'}`}
+                        >
+                          TV EN VIVO
+                        </button>
+                        <button
+                          onClick={() => setCatTab('vod')}
+                          className={`px-3 py-1.5 text-[10px] font-bold rounded-lg transition ${catTab === 'vod' ? 'bg-cyan-500 text-black' : 'text-zinc-400'}`}
+                        >
+                          PELÍCULAS
+                        </button>
+                        <button
+                          onClick={() => setCatTab('series')}
+                          className={`px-3 py-1.5 text-[10px] font-bold rounded-lg transition ${catTab === 'series' ? 'bg-cyan-500 text-black' : 'text-zinc-400'}`}
+                        >
+                          SERIES
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={resetCategories}
+                        className="text-[10px] font-bold text-zinc-400 hover:text-white flex items-center gap-1 transition"
+                      >
+                        <RotateCcw className="w-3 h-3" />
+                        <span>Restablecer orden original</span>
+                      </button>
+                    </div>
+
+                    <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1 custom-scrollbar">
+                      {isFetchingCats ? (
+                        <div className="py-20 flex flex-col items-center justify-center text-zinc-500 gap-2">
+                          <Loader2 className="w-8 h-8 animate-spin text-cyan-500" />
+                          <span className="text-xs font-medium uppercase tracking-widest">Cargando categorías...</span>
+                        </div>
+                      ) : currentCategories.length === 0 ? (
+                        <div className="py-20 text-center text-zinc-500 text-xs">
+                          No se encontraron categorías para esta sección.
+                        </div>
+                      ) : (
+                        currentCategories.map((cat, idx) => {
+                          const normId = iptvApi.normalizeCategoryName(cat.category_name);
+                          const conf = config.categoriesConfig?.[catTab]?.find(c => c.id === normId);
+                          const isHidden = conf?.hidden || false;
+                          const isPinned = conf?.pinned || false;
+                          const displayName = conf?.displayName || cat.category_name;
+
+                          return (
+                            <div
+                              key={normId}
+                              className={`flex items-center gap-3 p-2.5 rounded-xl border transition ${
+                                isHidden 
+                                  ? 'bg-zinc-900/30 border-zinc-800/50 opacity-60' 
+                                  : 'bg-zinc-900/60 border-zinc-800 hover:border-zinc-700'
+                              }`}
+                            >
+                              <div className="text-zinc-600 cursor-grab active:cursor-grabbing">
+                                <GripVertical className="w-4 h-4" />
+                              </div>
+                              
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    type="text"
+                                    value={displayName}
+                                    onChange={(e) => handleCategoryAction(normId, 'rename', e.target.value)}
+                                    className="bg-transparent border-none p-0 text-xs font-bold text-white focus:ring-0 focus:outline-none w-full truncate"
+                                  />
+                                </div>
+                                <div className="text-[9px] text-zinc-500 truncate">
+                                  Original: {cat.category_name}
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                <button
+                                  onClick={() => handleCategoryAction(normId, isHidden ? 'show' : 'hide')}
+                                  className={`p-1.5 rounded-lg border transition ${
+                                    isHidden 
+                                      ? 'bg-rose-500/10 border-rose-500/30 text-rose-400' 
+                                      : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-white'
+                                  }`}
+                                  title={isHidden ? "Mostrar" : "Ocultar"}
+                                >
+                                  {isHidden ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                </button>
+
+                                <button
+                                  onClick={() => handleCategoryAction(normId, 'top')}
+                                  disabled={idx === 0}
+                                  className="p-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-zinc-400 hover:text-cyan-400 transition disabled:opacity-30"
+                                  title="Mover al principio"
+                                >
+                                  <ArrowUpToLine className="w-3.5 h-3.5" />
+                                </button>
+
+                                <div className="flex flex-col gap-0.5">
+                                  <button
+                                    onClick={() => handleCategoryAction(normId, 'up')}
+                                    disabled={idx === 0}
+                                    className="p-0.5 bg-zinc-950 border border-zinc-800 rounded-t-lg text-zinc-400 hover:text-cyan-400 transition disabled:opacity-30"
+                                  >
+                                    <ChevronUp className="w-3 h-3" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleCategoryAction(normId, 'down')}
+                                    disabled={idx === currentCategories.length - 1}
+                                    className="p-0.5 bg-zinc-950 border border-zinc-800 rounded-b-lg text-zinc-400 hover:text-cyan-400 transition disabled:opacity-30"
+                                  >
+                                    <ChevronDown className="w-3 h-3" />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
                     </div>
                   </div>
                 </div>
