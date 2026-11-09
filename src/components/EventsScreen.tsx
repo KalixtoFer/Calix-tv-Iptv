@@ -411,16 +411,33 @@ export const EventsScreen: React.FC<EventsScreenProps> = ({ username, onBack, on
         
         const sc = seriesCats.find(has) || seriesCats[0];
         const [sportsChannelsArrays, rep] = await Promise.all([
-          Promise.all(sportsCatList.slice(0, 8).map((cat) => iptvApi.getStreams('live', username, cat.category_id))),
+          Promise.all(sportsCatList.slice(0, 12).map((cat) => iptvApi.getStreams('live', username, cat.category_id))),
           sc ? iptvApi.getStreams('series', username, sc.category_id) : Promise.resolve([]),
         ]);
 
-        const combinedSportsLive = sportsChannelsArrays.flat();
+        const fetchedStreams = sportsChannelsArrays.flat();
+        const sportsCatIds = new Set(matchingSportsCats.map((c: any) => String(c.category_id)));
+        const allMatching = (all || []).filter((s: any) =>
+          sportsCatIds.has(String(s.category_id)) ||
+          has(s) ||
+          kw.some((k) => String(s.category_name || s.group_title || s.name || '').toLowerCase().includes(k)) ||
+          String(s.name || '').toLowerCase().includes(' vs ') ||
+          String(s.name || '').toLowerCase().includes(' v ')
+        );
+
+        // Deduplicar por stream_id para tener todos los canales deportivos y de eventos disponibles
+        const streamsMap = new Map<string | number, any>();
+        for (const s of [...fetchedStreams, ...allMatching]) {
+          if (s && s.stream_id && !streamsMap.has(s.stream_id)) {
+            streamsMap.set(s.stream_id, s);
+          }
+        }
+        const combinedSportsLive = Array.from(streamsMap.values());
 
         if (alive) {
-          setAllLive(all);
-          setSportsLive(combinedSportsLive);
-          setReplays(rep);
+          setAllLive(all || []);
+          setSportsLive(combinedSportsLive.length > 0 ? combinedSportsLive : all || []);
+          setReplays(rep || []);
         }
       } catch (e) {
         console.warn('Eventos: no se pudieron cargar los canales', e);
@@ -430,6 +447,30 @@ export const EventsScreen: React.FC<EventsScreenProps> = ({ username, onBack, on
       alive = false;
     };
   }, [username]);
+
+  // Canales específicos de eventos y partidos del día desde el proveedor IPTV
+  const todayEventChannels = useMemo(() => {
+    const list = sportsLive.length > 0 ? sportsLive : allLive;
+    if (!list.length) return [];
+
+    return list.filter((s: any) => {
+      const n = (s.name || '').toLowerCase();
+      const cat = ((s as any).category_name || (s as any).group_title || '').toLowerCase();
+      const hasMatchPattern =
+        n.includes(' vs ') ||
+        n.includes(' v ') ||
+        /\b[0-2]?\d[:.][0-5]\d\b/.test(n) ||
+        n.includes(' hs') ||
+        n.includes(' hrs');
+      const isEventCat =
+        cat.includes('event') ||
+        cat.includes('exclusiv') ||
+        cat.includes('encoder') ||
+        cat.includes('disney') ||
+        cat.includes('netflix');
+      return hasMatchPattern || isEventCat;
+    });
+  }, [sportsLive, allLive]);
 
   const index = useMemo(() => buildChannelIndex(allLive.length ? allLive : sportsLive), [allLive, sportsLive]);
   const channelsFor = useMemo(() => {
@@ -620,33 +661,174 @@ export const EventsScreen: React.FC<EventsScreenProps> = ({ username, onBack, on
             </button>
           </div>
         ) : tab !== 'channels' ? (
-          groupedSections.length === 0 ? (
+          tab === 'live' && groupedSections.length === 0 ? (
+            /* En vivo pero sin partidos jugando en este segundo en ESPN */
+            <div className="space-y-5">
+              {todayEventChannels.length > 0 ? (
+                <>
+                  <div className="p-3.5 rounded-2xl bg-gradient-to-r from-cyan-950/40 via-zinc-900 to-zinc-900 border border-cyan-800/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg shadow-cyan-950/20">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400 shrink-0">
+                        <Tv className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-black uppercase text-white tracking-wider flex items-center gap-2">
+                          <span>Señales de Eventos de Hoy ({todayEventChannels.length})</span>
+                          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                        </h4>
+                        <p className="text-[11px] text-zinc-400">
+                          No hay partidos con marcador en vivo en este minuto. Acá tenés los canales activos de tu lista con las transmisiones de hoy:
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setTab('today')}
+                      className="tv-focusable shrink-0 px-3 py-1.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-black text-[10px] uppercase tracking-wider transition cursor-pointer"
+                    >
+                      Ver Agenda Completa
+                    </button>
+                  </div>
+
+                  {/* Canales de eventos de hoy */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 px-1">
+                      <h3 className="text-[11px] font-black uppercase tracking-[2px] text-cyan-400 flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+                        Canales con eventos de hoy
+                      </h3>
+                      <div className="flex-1 h-[1px] bg-[#1c2128]" />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-2.5">
+                      {todayEventChannels.map((s) => (
+                        <button
+                          key={s.stream_id}
+                          onClick={() => playChannel(s)}
+                          className="tv-focusable group flex items-center gap-3 p-2.5 rounded-xl bg-[#111418] border border-[#1c2128] text-left cursor-pointer hover:border-cyan-400 hover:bg-zinc-900 transition-all active:scale-98"
+                        >
+                          {s.stream_icon ? (
+                            <img src={s.stream_icon} alt="" loading="lazy" className="w-10 h-10 object-contain rounded-lg bg-black border border-zinc-800 shrink-0" />
+                          ) : (
+                            <div className="w-10 h-10 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center shrink-0 text-cyan-400">
+                              <Tv className="w-5 h-5" />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <span className="text-[11px] font-bold text-white uppercase leading-tight line-clamp-2 group-hover:text-cyan-300">
+                              {adjustTime(s.name)}
+                            </span>
+                            <span className="text-[9px] text-zinc-500 font-mono block mt-0.5 truncate">
+                              {s.category_name || s.group_title || 'Señal de Evento'}
+                            </span>
+                          </div>
+                          <div className="shrink-0 flex items-center gap-1 text-[9px] font-bold text-cyan-400 bg-cyan-950/60 border border-cyan-800/40 px-1.5 py-0.5 rounded">
+                            <Play className="w-2.5 h-2.5 fill-cyan-400" /> Ver
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Próximos partidos programados para hoy */}
+                  {events.filter(e => e.state === 'pre').length > 0 && (
+                    <div className="space-y-2 pt-2">
+                      <div className="flex items-center gap-2 px-1">
+                        <h3 className="text-[11px] font-black uppercase tracking-[2px] text-zinc-400">
+                          Próximos partidos programados ({events.filter(e => e.state === 'pre').length})
+                        </h3>
+                        <div className="flex-1 h-[1px] bg-[#1c2128]" />
+                      </div>
+                      <div className={gridClass}>
+                        {events.filter(e => e.state === 'pre').slice(0, 12).map((e) => (
+                          <EventCard
+                            key={e.id}
+                            ev={e}
+                            channels={channelsFor[e.id] || []}
+                            favs={favs}
+                            onFav={toggleFav}
+                            onPlayStream={onPlayStream}
+                            onStats={openStats}
+                            onFind={findChannel}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                empty('No hay partidos ni señales de eventos disponibles en este momento.')
+              )}
+            </div>
+          ) : groupedSections.length === 0 ? (
             empty(tab === 'mine' ? 'Seguí a tus equipos con la estrella para ver sus partidos acá.' : 'No hay partidos disponibles.')
           ) : (
-            groupedSections.map((sec) => (
-              <section key={sec.title} className="space-y-2">
-                <div className="flex items-center gap-2 px-1">
-                  <h3 className={`text-[11px] font-black uppercase tracking-[2px] ${sec.isLive ? 'text-[#ef4444]' : 'text-[#8a94a3]'}`}>
-                    {sec.title}
-                  </h3>
-                  <div className="flex-1 h-[1px] bg-[#1c2128]" />
-                </div>
-                <div className={gridClass}>
-                  {sec.events.map((e) => (
-                    <EventCard 
-                      key={e.id} 
-                      ev={e} 
-                      channels={channelsFor[e.id] || []} 
-                      favs={favs} 
-                      onFav={toggleFav} 
-                      onPlayStream={onPlayStream} 
-                      onStats={openStats} 
-                      onFind={findChannel} 
-                    />
-                  ))}
-                </div>
-              </section>
-            ))
+            <div className="space-y-6">
+              {groupedSections.map((sec) => (
+                <section key={sec.title} className="space-y-2">
+                  <div className="flex items-center gap-2 px-1">
+                    <h3 className={`text-[11px] font-black uppercase tracking-[2px] ${sec.isLive ? 'text-[#ef4444]' : 'text-[#8a94a3]'}`}>
+                      {sec.title}
+                    </h3>
+                    <div className="flex-1 h-[1px] bg-[#1c2128]" />
+                  </div>
+                  <div className={gridClass}>
+                    {sec.events.map((e) => (
+                      <EventCard 
+                        key={e.id} 
+                        ev={e} 
+                        channels={channelsFor[e.id] || []} 
+                        favs={favs} 
+                        onFav={toggleFav} 
+                        onPlayStream={onPlayStream} 
+                        onStats={openStats} 
+                        onFind={findChannel} 
+                      />
+                    ))}
+                  </div>
+                </section>
+              ))}
+
+              {/* Si estamos en En vivo y hay partidos jugando, también mostrar los canales de eventos abajo */}
+              {tab === 'live' && todayEventChannels.length > 0 && (
+                <section className="space-y-2 pt-2 border-t border-[#1c2128]/60">
+                  <div className="flex items-center gap-2 px-1">
+                    <h3 className="text-[11px] font-black uppercase tracking-[2px] text-cyan-400 flex items-center gap-2">
+                      <Tv className="w-3.5 h-3.5 text-cyan-400" />
+                      Canales de transmisión de eventos ({todayEventChannels.length})
+                    </h3>
+                    <div className="flex-1 h-[1px] bg-[#1c2128]" />
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-2.5">
+                    {todayEventChannels.slice(0, 15).map((s) => (
+                      <button
+                        key={s.stream_id}
+                        onClick={() => playChannel(s)}
+                        className="tv-focusable group flex items-center gap-3 p-2.5 rounded-xl bg-[#111418] border border-[#1c2128] text-left cursor-pointer hover:border-cyan-400 hover:bg-zinc-900 transition-all active:scale-98"
+                      >
+                        {s.stream_icon ? (
+                          <img src={s.stream_icon} alt="" loading="lazy" className="w-10 h-10 object-contain rounded-lg bg-black border border-zinc-800 shrink-0" />
+                        ) : (
+                          <div className="w-10 h-10 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center shrink-0 text-cyan-400">
+                            <Tv className="w-5 h-5" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <span className="text-[11px] font-bold text-white uppercase leading-tight line-clamp-2 group-hover:text-cyan-300">
+                            {adjustTime(s.name)}
+                          </span>
+                          <span className="text-[9px] text-zinc-500 font-mono block mt-0.5 truncate">
+                            {s.category_name || s.group_title || 'Señal de Evento'}
+                          </span>
+                        </div>
+                        <div className="shrink-0 flex items-center gap-1 text-[9px] font-bold text-cyan-400 bg-cyan-950/60 border border-cyan-800/40 px-1.5 py-0.5 rounded">
+                          <Play className="w-2.5 h-2.5 fill-cyan-400" /> Ver
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              )}
+            </div>
           )
         ) : (
           /* Pestaña de Canales */

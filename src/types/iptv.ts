@@ -48,6 +48,8 @@ export interface LiveStream {
   epg_channel_id?: string;
   added?: string;
   category_id: string;
+  category_name?: string;
+  group_title?: string;
   custom_sid?: string;
   tv_archive?: number;
   direct_source?: string;

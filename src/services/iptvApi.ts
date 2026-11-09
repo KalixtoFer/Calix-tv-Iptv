@@ -498,111 +498,144 @@ class IptvApiService {
     categoryId?: string,
     password?: string
   ): Promise<any[]> {
+    const isAll = !categoryId || categoryId === 'all';
     const cacheKey = `${type}_${categoryId || 'all'}`;
+
     if (this.streamCache.has(cacheKey)) {
       return this.streamCache.get(cacheKey)!;
     }
 
-    // 1. Identify if it is a managed category
+    // Preload global stream pool for the requested type if not already loaded
+    if (!isAll && !this.streamCache.has(`${type}_all`)) {
+      try {
+        await this.getStreams(type, username, 'all', password);
+      } catch (e) {
+        console.warn(`[IPTV] Warning preloading global ${type} pool:`, e);
+      }
+    }
+
+    // 1. Identify managed category configuration
     const cats = await this.getCategories(type, username, password);
-    const managed = cats.find(c => c.category_id === categoryId);
-    
+    const managed = cats.find((c) => c.category_id === categoryId);
     const isDynamic = managed?._managed?.dynamic === true;
     const channelsMap = managed?._managed?.channels;
     const providerCatId = managed?._providerCategoryId || categoryId;
 
-    const action =
-      type === 'live'
-        ? 'get_live_streams'
-        : type === 'vod'
-        ? 'get_vod_streams'
-        : 'get_series';
-
-    const effectivePass = this.getEffectivePassword(password);
-    const base = this.activeConfig?.serverUrl || 'https://sneoplus.net:8443';
-    const cleanBase = base.endsWith('/') ? base.slice(0, -1) : base;
-
-    let catParam = '';
-    if (providerCatId && providerCatId !== 'all') {
-      catParam = `&category_id=${encodeURIComponent(providerCatId)}`;
-    }
-
     let rawData: any[] = [];
 
-    // Fetch from Xtream API
-    try {
-      const directUrl = `${cleanBase}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(effectivePass)}&action=${action}${catParam}`;
-      const res = await fetch(directUrl);
-      if (res.ok) {
-        const text = await res.text();
-        if (text.trim().startsWith('[')) {
-          rawData = JSON.parse(text);
-        }
-      }
-    } catch {
-      // ignore
-    }
+    // If 'all' was requested or pool fetch needed
+    if (isAll) {
+      const action =
+        type === 'live'
+          ? 'get_live_streams'
+          : type === 'vod'
+          ? 'get_vod_streams'
+          : 'get_series';
 
-    if (rawData.length === 0) {
+      const effectivePass = this.getEffectivePassword(password);
+      const base = this.activeConfig?.serverUrl || 'https://sneoplus.net:8443';
+      const cleanBase = base.endsWith('/') ? base.slice(0, -1) : base;
+
+      // Direct fetch from Xtream Codes server
       try {
-        const proxyUrl = `/api/iptv/proxy?action=${action}&username=${encodeURIComponent(username)}&password=${encodeURIComponent(effectivePass)}${catParam}`;
-        const res = await fetch(proxyUrl);
+        const directUrl = `${cleanBase}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(effectivePass)}&action=${action}`;
+        const res = await fetch(directUrl);
         if (res.ok) {
           const text = await res.text();
           if (text.trim().startsWith('[')) {
             rawData = JSON.parse(text);
           }
         }
-      } catch (e) {
-        console.error(`Error loading ${type} streams:`, e);
+      } catch {
+        // ignore
       }
-    }
 
-    // 2. Manejo de carpetas dinámicas vs mapeadas
-    let result = rawData;
-
-    if (managed && isDynamic) {
-      // Regla: Si una categoría del mapa tiene "dynamic": true, ignorar su lista "channels" (viene vacía)
-      // y mostrar TODOS los canales de la lista del proveedor cuya carpeta coincida con "sourceGroup".
-      const sourceGroup = managed?._managed?.sourceGroup || managed?.category_name || '';
-      const normSource = norm(sourceGroup);
-
-      // Si la llamada directa por ID devolvió vacío, buscar en el pool global de streams en caché
-      if (!result || result.length === 0) {
-        const allPool = this.streamCache.get(`${type}_all`) || [];
-        if (allPool.length > 0) {
-          result = allPool.filter((s: any) =>
-            (providerCatId && String(s.category_id) === String(providerCatId)) ||
-            norm(s.category_name || '') === normSource ||
-            norm(s.group_title || '') === normSource
-          );
+      // Proxy fallback for dev environment
+      if (rawData.length === 0) {
+        try {
+          const proxyUrl = `/api/iptv/proxy?action=${action}&username=${encodeURIComponent(username)}&password=${encodeURIComponent(effectivePass)}`;
+          const res = await fetch(proxyUrl);
+          if (res.ok) {
+            const text = await res.text();
+            if (text.trim().startsWith('[')) {
+              rawData = JSON.parse(text);
+            }
+          }
+        } catch (e) {
+          console.error(`[IPTV] Error fetching all ${type} streams:`, e);
         }
       }
 
-      console.log(
-        `[EVENTOS] Canales entregados para carpeta dinámica "${sourceGroup}" (normalizado: "${normSource}"): ${result.length} canales.`
-      );
-    } else if (managed && !isDynamic && Array.isArray(channelsMap) && channelsMap.length > 0) {
-      result = rawData.filter(stream => {
-        return channelsMap.some(m => 
-          String(m.id) === String(stream.stream_id) || 
-          norm(m.originalName || '') === norm(stream.name)
-        );
-      });
-    }
-
-    if (!result || result.length === 0) {
-      result = this.getFallbackStreams(type);
-      if (isDynamic && managed?._providerCategoryId) {
-        // Enlazar con la categoría solicitada si estamos en fallback
-        result = result.map(s => ({ ...s, category_id: managed._providerCategoryId }));
+      if (rawData.length > 0) {
+        this.streamCache.set(`${type}_all`, rawData);
+        return rawData;
       }
     }
 
-    if (result.length > 0) {
+    // 2. Filter category from global streams pool
+    const allPool = this.streamCache.get(`${type}_all`) || rawData;
+    let result: any[] = [];
+
+    if (allPool.length > 0) {
+      if (managed && isDynamic) {
+        const sourceGroup = managed?._managed?.sourceGroup || managed?.category_name || '';
+        const normSource = norm(sourceGroup);
+
+        result = allPool.filter(
+          (s: any) =>
+            (providerCatId && String(s.category_id) === String(providerCatId)) ||
+            norm(s.category_name || '') === normSource ||
+            norm(s.group_title || '') === normSource
+        );
+
+        console.log(
+          `[EVENTOS] Canales filtrados para carpeta dinámica "${sourceGroup}": ${result.length} canales.`
+        );
+      } else if (managed && !isDynamic && Array.isArray(channelsMap) && channelsMap.length > 0) {
+        result = allPool.filter((stream) => {
+          return channelsMap.some(
+            (m) => String(m.id) === String(stream.stream_id) || norm(m.originalName || '') === norm(stream.name)
+          );
+        });
+      } else if (providerCatId && providerCatId !== 'all') {
+        result = allPool.filter((s: any) => String(s.category_id) === String(providerCatId));
+      } else {
+        result = allPool;
+      }
+    }
+
+    // Direct fallback fetch per category if allPool failed or yielded empty
+    if ((!result || result.length === 0) && providerCatId && providerCatId !== 'all' && !isDynamic) {
+      const action = type === 'live' ? 'get_live_streams' : type === 'vod' ? 'get_vod_streams' : 'get_series';
+      const effectivePass = this.getEffectivePassword(password);
+      const base = this.activeConfig?.serverUrl || 'https://sneoplus.net:8443';
+      const cleanBase = base.endsWith('/') ? base.slice(0, -1) : base;
+      const catParam = `&category_id=${encodeURIComponent(providerCatId)}`;
+
+      try {
+        const directUrl = `${cleanBase}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(effectivePass)}&action=${action}${catParam}`;
+        const res = await fetch(directUrl);
+        if (res.ok) {
+          const text = await res.text();
+          if (text.trim().startsWith('[')) {
+            result = JSON.parse(text);
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    if (!result || result.length === 0) {
+      const fallbacks = this.getFallbackStreams(type);
+      result = fallbacks;
+      if (providerCatId && providerCatId !== 'all') {
+        result = result.map((s) => ({ ...s, category_id: providerCatId }));
+      }
+    } else {
       this.streamCache.set(cacheKey, result);
     }
-    
+
     return result;
   }
 

@@ -185,7 +185,7 @@ export const norm = (s: string) =>
     .trim()
     .toLowerCase();
 const tokens = (t: SportTeam) =>
-  [...new Set(norm(t.name).split(' ').concat(norm(t.short).split(' ')))].filter((w) => w.length >= 4 && !STOP.has(w));
+  [...new Set(norm(t.name).split(' ').concat(norm(t.short).split(' ')))].filter((w) => w.length >= 3 && !STOP.has(w));
 
 export interface ChannelIndexItem {
   ch: any;
@@ -197,13 +197,27 @@ export const buildChannelIndex = (list: any[]): ChannelIndexItem[] =>
 export function findChannels(ev: SportEvent, idx: ChannelIndexItem[], max = 3): any[] {
   const th = tokens(ev.home);
   const ta = tokens(ev.away);
-  if (!th.length || !ta.length) return [];
+  if (!th.length && !ta.length) return [];
   const res: any[] = [];
+  
+  // 1. Coincidencia completa: ambos equipos en el nombre del canal
   for (const { ch, n } of idx) {
-    if (th.some((t) => n.includes(' ' + t)) && ta.some((t) => n.includes(' ' + t))) {
+    if (th.length && ta.length && th.some((t) => n.includes(' ' + t)) && ta.some((t) => n.includes(' ' + t))) {
       res.push(ch);
-      if (res.length >= max) break;
+      if (res.length >= max) return res;
     }
   }
+
+  // 2. Si no hubo coincidencia de ambos, buscar canales con 'vs' o 'v' que contengan al menos un equipo
+  if (res.length === 0) {
+    for (const { ch, n } of idx) {
+      const hasVersus = n.includes(' vs ') || n.includes(' v ') || n.includes(' contra ');
+      if (hasVersus && (th.some((t) => n.includes(' ' + t)) || ta.some((t) => n.includes(' ' + t)))) {
+        res.push(ch);
+        if (res.length >= max) break;
+      }
+    }
+  }
+
   return res;
 }
