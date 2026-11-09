@@ -720,7 +720,6 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
           <div className="flex-1 relative bg-black rounded-3xl overflow-hidden border border-zinc-800 shadow-[0_0_40px_rgba(0,0,0,0.8)] flex flex-col group min-h-0">
             {debouncedStream ? (
               <VideoPlayer
-                key={debouncedStream.stream_id}
                 url={
                   debouncedStream.stream_url ||
                   iptvApi.buildStreamUrl('live', debouncedStream.stream_id, 'm3u8', username)

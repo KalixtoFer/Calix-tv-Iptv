@@ -437,19 +437,24 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       const hls = new Hls({
         enableWorker: true,
         lowLatencyMode: false,
-        backBufferLength: 30,
-        // Colchón de carga para que no se corte: en vivo reproduce ~20 s por detrás del directo.
-        maxBufferLength: 40,
-        maxMaxBufferLength: 90,
-        liveSyncDuration: 20,
-        liveMaxLatencyDuration: 60,
+        // La vista previa de Android TV usa un buffer más corto para reducir
+        // memoria y acelerar el cambio entre señales. El modo móvil conserva
+        // los valores originales.
+        backBufferLength: isMiniPlayer ? 10 : 30,
+        maxBufferLength: isMiniPlayer ? 20 : 40,
+        maxMaxBufferLength: isMiniPlayer ? 30 : 90,
+        liveSyncDuration: isMiniPlayer ? 8 : 20,
+        liveMaxLatencyDuration: isMiniPlayer ? 24 : 60,
         manifestLoadingTimeOut: 15000,
         manifestLoadingMaxRetry: 5,
         levelLoadingTimeOut: 15000,
         levelLoadingMaxRetry: 5,
         fragLoadingTimeOut: 20000,
         fragLoadingMaxRetry: 6,
-        startLevel: -1,
+        // En la vista previa arrancar con una calidad más liviana y limitar
+        // la selección al tamaño real del reproductor.
+        startLevel: isMiniPlayer ? 0 : -1,
+        capLevelToPlayerSize: isMiniPlayer,
       });
       hlsRef.current = hls;
 
@@ -577,15 +582,21 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     };
   }, [isPlaying]);
 
+  // Cargar/cambiar la señal. No destruir HLS en cada cambio de URL:
+  // loadStream reutiliza la instancia existente para hacer zapping más rápido.
   useEffect(() => {
     loadStream();
+  }, [loadStream]);
+
+  // Destruir HLS únicamente cuando se desmonta el reproductor.
+  useEffect(() => {
     return () => {
       if (hlsRef.current) {
         hlsRef.current.destroy();
         hlsRef.current = null;
       }
     };
-  }, [loadStream]);
+  }, []);
 
   // Video listeners
   const handleTimeUpdate = () => {
