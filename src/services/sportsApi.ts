@@ -46,16 +46,43 @@ export const LEAGUES = [
 
 const BASE = 'https://site.api.espn.com/apis/site/v2/sports';
 
-// En el APK se usa el plugin HTTP nativo (sin problemas de CORS); en el navegador, fetch.
+// En el APK se usa el plugin HTTP nativo (sin problemas de CORS); en el navegador, fetch con fallback a proxy.
 async function getJson(url: string): Promise<any> {
-  if (Capacitor.isNativePlatform()) {
-    const r = await CapacitorHttp.get({ url, headers: { Accept: 'application/json' } });
-    if (r.status >= 400) throw new Error('HTTP ' + r.status);
-    return typeof r.data === 'string' ? JSON.parse(r.data) : r.data;
+  let status = 0;
+  try {
+    let data: any;
+    if (Capacitor.isNativePlatform()) {
+      const r = await CapacitorHttp.get({ url, headers: { Accept: 'application/json' } });
+      status = r.status;
+      if (status >= 400) {
+        console.error(`[EVENTOS] Error en URL: ${url} | Código: ${status}`);
+        throw new Error('HTTP ' + status);
+      }
+      data = typeof r.data === 'string' ? JSON.parse(r.data) : r.data;
+    } else {
+      let r: Response;
+      try {
+        r = await fetch(url);
+        status = r.status;
+      } catch (fetchErr: any) {
+        // Fallback al proxy local si el fetch directo falla por CORS o bloqueo de red
+        const proxyUrl = `/api/sports/proxy?url=${encodeURIComponent(url)}`;
+        r = await fetch(proxyUrl);
+        status = r.status;
+      }
+      if (!r.ok) {
+        console.error(`[EVENTOS] Error en URL: ${url} | Código: ${status}`);
+        throw new Error('HTTP ' + status);
+      }
+      data = await r.json();
+    }
+    const count = data?.events?.length || 0;
+    console.log(`[EVENTOS] URL consultada: ${url} | Código: ${status} | Partidos recibidos: ${count}`);
+    return data;
+  } catch (err: any) {
+    console.error(`[EVENTOS] Excepción consultando URL: ${url} | Código: ${status || 'N/A'} | Error: ${err.message || err}`);
+    throw err;
   }
-  const r = await fetch(url);
-  if (!r.ok) throw new Error('HTTP ' + r.status);
-  return r.json();
 }
 
 const mkTeam = (c: any): SportTeam => ({
@@ -106,6 +133,7 @@ export function parseScoreboard(json: any, league: { sport: string; id: string; 
 }
 
 export async function fetchAllEvents(): Promise<{ events: SportEvent[]; failed: number }> {
+  console.log(`[EVENTOS] Iniciando consulta de marcadores deportivos (${LEAGUES.length} ligas)...`);
   const results = await Promise.allSettled(
     LEAGUES.map(async (l) => parseScoreboard(await getJson(`${BASE}/${l.sport}/${l.id}/scoreboard`), l))
   );
@@ -114,6 +142,7 @@ export async function fetchAllEvents(): Promise<{ events: SportEvent[]; failed: 
   results.forEach((r) => (r.status === 'fulfilled' ? events.push(...r.value) : failed++));
   const rank = { in: 0, pre: 1, post: 2 } as const;
   events.sort((a, b) => rank[a.state] - rank[b.state] || (a.state === 'post' ? b.start - a.start : a.start - b.start));
+  console.log(`[EVENTOS] Consulta de red completada: ${events.length} partidos recibidos en total (${failed} ligas fallaron)`);
   return { events, failed };
 }
 
@@ -139,7 +168,12 @@ export async function fetchStats(ev: SportEvent): Promise<StatRow[]> {
 /* ---------- Relacionar partidos con canales de tu servidor (por nombre) ---------- */
 const STOP = new Set(['fc', 'cf', 'sc', 'ac', 'as', 'cd', 'ca', 'club', 'de', 'la', 'el', 'los', 'las', 'the', 'and', 'vs']);
 export const norm = (s: string) =>
-  (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+  (s || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .trim()
+    .toLowerCase();
 const tokens = (t: SportTeam) =>
   [...new Set(norm(t.name).split(' ').concat(norm(t.short).split(' ')))].filter((w) => w.length >= 4 && !STOP.has(w));
 

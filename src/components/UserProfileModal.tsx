@@ -10,8 +10,12 @@ import {
   Smartphone,
   Settings,
   CheckCircle2,
+  Trash2,
+  RefreshCw,
 } from 'lucide-react';
 import { XtreamUserInfo } from '../types/iptv';
+import { dbService } from '../services/db';
+import { iptvApi } from '../services/iptvApi';
 
 interface UserProfileModalProps {
   userInfo: XtreamUserInfo | null;
@@ -272,6 +276,44 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 <span>📺 Android TV</span>
               </button>
             </div>
+          </div>
+
+          {/* Borrar caché y recargar (Limpia IndexedDB y recarga todo) */}
+          <div className="setting-row p-3.5 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-2 shadow-inner">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-black text-white uppercase tracking-wider flex items-center gap-1.5">
+                <RefreshCw className="w-3.5 h-3.5 text-cyan-400" /> Memoria y Caché
+              </span>
+              <span className="text-[10px] text-zinc-500 font-mono">IndexedDB</span>
+            </div>
+            <button
+              tabIndex={0}
+              onClick={async () => {
+                try {
+                  await dbService.clear();
+                  iptvApi.clearCaches();
+                  localStorage.removeItem('nexus_iptv_streams_cache');
+                  localStorage.removeItem('calixtv_fav_teams');
+                } catch (e) {
+                  console.error('Error al limpiar caché:', e);
+                }
+                window.location.reload();
+              }}
+              onKeyDown={async (e) => {
+                if (e.key === 'Enter') {
+                  try {
+                    await dbService.clear();
+                    iptvApi.clearCaches();
+                  } catch {}
+                  window.location.reload();
+                }
+              }}
+              className="tv-focusable w-full py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-200 border border-zinc-700 hover:border-cyan-500/50 transition cursor-pointer active:scale-95 outline-none focus:ring-2 focus:ring-cyan-400"
+              title="Borrar caché de IndexedDB y recargar"
+            >
+              <Trash2 className="w-3.5 h-3.5 text-rose-400" />
+              <span>Borrar caché y recargar</span>
+            </button>
           </div>
 
           {/* Connection Security Status */}

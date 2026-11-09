@@ -39,6 +39,47 @@ export interface WatchHistoryRecord {
   updatedAt: number;
 }
 
+export const norm = (s: string) =>
+  (s || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .trim()
+    .toLowerCase();
+
+export function getTopSimilarFolderNames(target: string, candidateNames: string[], limit = 10): string[] {
+  const normTarget = norm(target);
+  const targetTokens = normTarget.split(' ').filter(Boolean);
+
+  const scored = candidateNames.map((name) => {
+    const normCand = norm(name);
+    let score = 0;
+    if (normCand === normTarget) {
+      score = 100;
+    } else if (normCand.includes(normTarget) || normTarget.includes(normCand)) {
+      score = 80;
+    } else {
+      const candTokens = normCand.split(' ').filter(Boolean);
+      const common = targetTokens.filter((t) => candTokens.includes(t));
+      if (common.length > 0) {
+        score = 40 + (common.length / Math.max(targetTokens.length, candTokens.length)) * 40;
+      } else {
+        const minLen = Math.min(normTarget.length, normCand.length);
+        let prefixMatch = 0;
+        for (let i = 0; i < minLen; i++) {
+          if (normTarget[i] === normCand[i]) prefixMatch++;
+          else break;
+        }
+        score = prefixMatch * 2;
+      }
+    }
+    return { name, score };
+  });
+
+  scored.sort((a, b) => b.score - a.score);
+  return scored.slice(0, limit).map((s) => s.name);
+}
+
 class IptvApiService {
   private activeConfig: CentralizedConfig | null = null;
   private activePassword = '';
@@ -275,64 +316,104 @@ class IptvApiService {
     localStorage.removeItem(STORAGE_SESSION_KEY);
   }
 
-  // Helper to get a stable ID from a category name
+  clearCaches(): void {
+    this.categoryCache.clear();
+    this.streamCache.clear();
+  }
+
+  // Normalización oficial: minúsculas, sin tildes/diacríticos y separando caracteres especiales/emojis con espacio
   normalizeName(name: string): string {
-    if (!name) return '';
-    return name
-      .toLowerCase()
-      .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Remove accents
-      .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1F3FB}-\u{1F3FF}\u{200D}\u{200C}\u{AD}\u{FE0F}]/gu, '') // Remove emojis
-      .replace(/[^a-z0-9]/g, '') // Remove all non-alphanumeric
-      .trim();
+    return norm(name);
   }
 
   normalizeCategoryName(name: string): string {
-    return this.normalizeName(name);
+    return norm(name);
   }
 
   // Apply order, renaming and visibility to categories
   applyCategoryManagement(
     type: 'live' | 'vod' | 'series',
-    rawCategories: any[]
+    rawCategories: any[],
+    allStreams?: any[]
   ): any[] {
     if (!this.activeConfig?.categoriesConfig) return rawCategories;
     
     const config = this.activeConfig.categoriesConfig[type];
     if (!config || !Array.isArray(config) || config.length === 0) return rawCategories;
 
-    const rawMap = new Map<string, any>();
-    rawCategories.forEach(cat => {
-      rawMap.set(this.normalizeName(cat.category_name), cat);
-    });
+    const rawNames = rawCategories.map((c) => c.category_name || '');
+    const streamsPool = allStreams || this.streamCache.get(`${type}_all`) || [];
 
-    const result = config.map(managed => {
-      // Search original category by fuzzy matching sourceGroup
-      const targetSearch = managed.sourceGroup || managed.name;
-      const normTarget = this.normalizeName(targetSearch);
-      
-      // Try to find the exact normalized match
-      let source = rawMap.get(normTarget);
-      
-      // Fallback: if not found, check if any category contains the name (fuzzy)
-      if (!source) {
-        source = rawCategories.find(c => this.normalizeName(c.category_name) === normTarget);
+    const result = config.map((managed) => {
+      const isDynamic = managed.dynamic === true;
+      const targetSearch = managed.sourceGroup || managed.name || '';
+      const normTarget = norm(targetSearch);
+
+      // Search original category by matching normalized name
+      let source = rawCategories.find((c) => norm(c.category_name || '') === normTarget);
+
+      // Fallback: check if includes or contained
+      if (!source && isDynamic) {
+        const normManagedName = norm(managed.name || '');
+        source = rawCategories.find((c) => norm(c.category_name || '') === normManagedName);
+      }
+      if (!source && isDynamic) {
+        source = rawCategories.find((c) => {
+          const n = norm(c.category_name || '');
+          return n.length > 3 && (n.includes(normTarget) || normTarget.includes(n));
+        });
       }
 
-      // Rule: if dynamic and doesn't exist, hide silently
-      if (managed.dynamic && !source) return null;
+      // DIAGNÓSTICO [EVENTOS] para categorías dinámicas:
+      if (isDynamic) {
+        let channelsCount = 0;
+        if (source) {
+          const provId = String(source.category_id);
+          if (streamsPool.length > 0) {
+            channelsCount = streamsPool.filter((s: any) =>
+              String(s.category_id) === provId ||
+              norm(s.category_name || '') === normTarget ||
+              norm(s.group_title || '') === normTarget
+            ).length;
+          } else if (source.channels_count !== undefined) {
+            channelsCount = source.channels_count;
+          } else {
+            // Si los streams aún no están cargados en memoria, verificamos si existe en el proveedor
+            channelsCount = 1;
+          }
+        }
+
+        console.log(
+          `[EVENTOS] Categoría dinámica: sourceGroup="${managed.sourceGroup || ''}" | normalizado="${normTarget}" | Canales encontrados: ${channelsCount}`
+        );
+
+        if (channelsCount === 0 || !source) {
+          const topSimilar = getTopSimilarFolderNames(managed.sourceGroup || managed.name || '', rawNames, 10);
+          console.log(
+            `[EVENTOS] Categoría dinámica "${managed.sourceGroup || ''}" sin canales en la lista original. 10 carpetas más parecidas:`,
+            topSimilar
+          );
+        }
+
+        // Regla: Si una carpeta dinámica no existe en la lista, ocultarla sin error
+        if (!source) {
+          return null;
+        }
+      }
 
       return {
         ...source,
-        category_id: managed.id, // We use the mapping ID as the stable ID in the UI
+        category_id: managed.id, // ID estable en la UI
         category_name: managed.name || source?.category_name,
         managedName: managed.name,
         isHidden: managed.hidden || false,
         isPinned: managed.pinned || false,
         sortOrder: managed.order,
         _managed: managed,
-        _providerCategoryId: source?.category_id || null
+        _providerCategoryId: source?.category_id || null,
+        _sourceGroup: managed.sourceGroup,
       };
-    }).filter(c => c !== null && !c.isHidden);
+    }).filter((c) => c !== null && !c.isHidden);
 
     // Respect order as defined in channel-map.json
     return result.sort((a, b) => a.sortOrder - b.sortOrder);
@@ -477,23 +558,45 @@ class IptvApiService {
       }
     }
 
-    // 2. Apply filtering if not dynamic and map exists
+    // 2. Manejo de carpetas dinámicas vs mapeadas
     let result = rawData;
-    if (managed && !isDynamic && Array.isArray(channelsMap) && channelsMap.length > 0) {
+
+    if (managed && isDynamic) {
+      // Regla: Si una categoría del mapa tiene "dynamic": true, ignorar su lista "channels" (viene vacía)
+      // y mostrar TODOS los canales de la lista del proveedor cuya carpeta coincida con "sourceGroup".
+      const sourceGroup = managed?._managed?.sourceGroup || managed?.category_name || '';
+      const normSource = norm(sourceGroup);
+
+      // Si la llamada directa por ID devolvió vacío, buscar en el pool global de streams en caché
+      if (!result || result.length === 0) {
+        const allPool = this.streamCache.get(`${type}_all`) || [];
+        if (allPool.length > 0) {
+          result = allPool.filter((s: any) =>
+            (providerCatId && String(s.category_id) === String(providerCatId)) ||
+            norm(s.category_name || '') === normSource ||
+            norm(s.group_title || '') === normSource
+          );
+        }
+      }
+
+      console.log(
+        `[EVENTOS] Canales entregados para carpeta dinámica "${sourceGroup}" (normalizado: "${normSource}"): ${result.length} canales.`
+      );
+    } else if (managed && !isDynamic && Array.isArray(channelsMap) && channelsMap.length > 0) {
       result = rawData.filter(stream => {
         return channelsMap.some(m => 
           String(m.id) === String(stream.stream_id) || 
-          this.normalizeName(m.originalName || '') === this.normalizeName(stream.name)
+          norm(m.originalName || '') === norm(stream.name)
         );
       });
-      
-      // Bonus: Sort by map order if possible? 
-      // The user didn't ask for channel sorting, but it's common. 
-      // For now, let's keep provider order.
     }
 
     if (!result || result.length === 0) {
       result = this.getFallbackStreams(type);
+      if (isDynamic && managed?._providerCategoryId) {
+        // Enlazar con la categoría solicitada si estamos en fallback
+        result = result.map(s => ({ ...s, category_id: managed._providerCategoryId }));
+      }
     }
 
     if (result.length > 0) {

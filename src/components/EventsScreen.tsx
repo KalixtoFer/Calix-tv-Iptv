@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { ArrowLeft, Search, Star, Tv, Play, X, RefreshCw, BarChart3, Info } from 'lucide-react';
+import { ArrowLeft, Search, Star, Tv, Play, X, RefreshCw, BarChart3, Info, AlertCircle } from 'lucide-react';
 import { LiveStream, SeriesItem } from '../types/iptv';
 import { iptvApi } from '../services/iptvApi';
+import { dbService } from '../services/db';
 import {
   SportEvent,
   SportTeam,
@@ -294,6 +295,10 @@ export const EventsScreen: React.FC<EventsScreenProps> = ({ username, onBack, on
   const [events, setEvents] = useState<SportEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [allFailed, setAllFailed] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [isRetrying, setIsRetrying] = useState(false);
+  const [usingCache, setUsingCache] = useState(false);
+  const [cacheAge, setCacheAge] = useState('');
   const [updated, setUpdated] = useState(0);
   const [favs, setFavs] = useState<string[]>(loadFavs);
   const [allLive, setAllLive] = useState<LiveStream[]>([]);
@@ -304,10 +309,76 @@ export const EventsScreen: React.FC<EventsScreenProps> = ({ username, onBack, on
   const [stats, setStats] = useState<StatRow[] | null>(null);
 
   const loadScores = useCallback(async () => {
-    const r = await fetchAllEvents();
-    setEvents(r.events);
-    setAllFailed(r.failed === LEAGUES.length);
-    setUpdated(Date.now());
+    setHasError(false);
+    let foundInCache = false;
+
+    // 1. Diagnóstico y lectura de caché IndexedDB: usar última respuesta guardada mientras tanto
+    try {
+      const cached = await dbService.getEvents();
+      if (cached && Array.isArray(cached.data) && cached.data.length > 0) {
+        foundInCache = true;
+        const ageMs = Date.now() - cached.timestamp;
+        const ageMin = Math.floor(ageMs / 60000);
+        const ageSec = Math.floor((ageMs % 60000) / 1000);
+        const ageStr = ageMin > 0 ? `${ageMin}m ${ageSec}s` : `${ageSec}s`;
+        console.log(
+          `[EVENTOS] Resultado obtenido de CACHÉ (IndexedDB): ${cached.data.length} partidos. Antigüedad: ${ageStr} (${Math.round(ageMs / 1000)}s)`
+        );
+        setEvents(cached.data);
+        setUsingCache(true);
+        setCacheAge(ageStr);
+        setUpdated(cached.timestamp);
+      }
+    } catch (err) {
+      console.warn('[EVENTOS] Error consultando caché IndexedDB:', err);
+    }
+
+    // 2. Consulta a la red con hasta 2 reintentos automáticos y espera creciente
+    const retryDelays = [0, 1200, 2500];
+    let networkSuccess = false;
+    let totalNetworkFailed = 0;
+
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (attempt > 0) {
+        setIsRetrying(true);
+        console.log(`[EVENTOS] Reintentando consulta de red (intento ${attempt + 1}/3 tras espera de ${retryDelays[attempt]}ms)...`);
+        await new Promise((resolve) => setTimeout(resolve, retryDelays[attempt]));
+      }
+
+      try {
+        const r = await fetchAllEvents();
+        totalNetworkFailed = r.failed;
+
+        if (r.events.length > 0) {
+          console.log(`[EVENTOS] Resultado obtenido de la RED: ${r.events.length} partidos.`);
+          setEvents(r.events);
+          setUsingCache(false);
+          setUpdated(Date.now());
+          setAllFailed(false);
+          setHasError(false);
+          networkSuccess = true;
+
+          // Regla: Guardar en caché solo si la carga devolvió > 0 elementos
+          await dbService.setEvents(r.events);
+          break;
+        } else if (r.failed < LEAGUES.length) {
+          // La red respondió sin errores críticos, pero no hay eventos en juego en este momento
+          console.log(`[EVENTOS] La red respondió pero no hay partidos activos en este momento (0 eventos). Se preserva la caché previa.`);
+          networkSuccess = true;
+          break;
+        }
+      } catch (err: any) {
+        console.error(`[EVENTOS] Intento ${attempt + 1} fallido:`, err.message || err);
+      }
+    }
+
+    setIsRetrying(false);
+
+    // Si falló la red y no tenemos ningún evento (ni en caché)
+    if (!networkSuccess && !foundInCache) {
+      setAllFailed(totalNetworkFailed === LEAGUES.length);
+      setHasError(true);
+    }
   }, []);
 
   // Marcadores: carga inicial + actualización cada 60 s
@@ -333,15 +404,22 @@ export const EventsScreen: React.FC<EventsScreenProps> = ({ username, onBack, on
         ]);
         const kw = ['deporte', 'event', 'fútbol', 'futbol', 'conmebol', 'liga', 'champions', 'boxing', 'ufc', 'f1', 'motogp', 'soccer', 'sports'];
         const has = (c: any) => kw.some((k) => String(c.category_name).toLowerCase().includes(k));
-        const lc = liveCats.find(has) || liveCats[0];
+        
+        // Cargar canales de TODAS las categorías de deportes y eventos para encontrar coincidencias
+        const matchingSportsCats = liveCats.filter(has);
+        const sportsCatList = matchingSportsCats.length > 0 ? matchingSportsCats : liveCats.slice(0, 3);
+        
         const sc = seriesCats.find(has) || seriesCats[0];
-        const [live, rep] = await Promise.all([
-          lc ? iptvApi.getStreams('live', username, lc.category_id) : Promise.resolve([]),
+        const [sportsChannelsArrays, rep] = await Promise.all([
+          Promise.all(sportsCatList.slice(0, 8).map((cat) => iptvApi.getStreams('live', username, cat.category_id))),
           sc ? iptvApi.getStreams('series', username, sc.category_id) : Promise.resolve([]),
         ]);
+
+        const combinedSportsLive = sportsChannelsArrays.flat();
+
         if (alive) {
           setAllLive(all);
-          setSportsLive(live);
+          setSportsLive(combinedSportsLive);
           setReplays(rep);
         }
       } catch (e) {
@@ -487,19 +565,60 @@ export const EventsScreen: React.FC<EventsScreenProps> = ({ username, onBack, on
 
       <div className="flex-1 overflow-y-auto px-3 py-3 space-y-4 custom-scrollbar">
         {updated > 0 && tab !== 'channels' && (
-          <div className="flex items-center gap-2 px-1 text-[10px] font-bold text-[#4a5568] uppercase tracking-wider">
-            <RefreshCw className="w-3 h-3" />
-            <span>Actualizado {new Date(updated).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false })}</span>
+          <div className="flex items-center justify-between px-1 text-[10px] font-bold text-[#4a5568] uppercase tracking-wider">
+            <div className="flex items-center gap-2">
+              <RefreshCw className="w-3 h-3" />
+              <span>Actualizado {new Date(updated).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false })}</span>
+            </div>
+            {isRetrying && (
+              <span className="text-cyan-400 font-mono animate-pulse flex items-center gap-1">
+                <RefreshCw className="w-2.5 h-2.5 animate-spin" /> Actualizando...
+              </span>
+            )}
           </div>
         )}
 
-        {loading && tab !== 'channels' ? (
+        {usingCache && tab !== 'channels' && (
+          <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold">
+            <span className="flex items-center gap-2">
+              <span>📦 Mostrando datos guardados en caché (antigüedad: {cacheAge})</span>
+            </span>
+            {isRetrying && (
+              <span className="text-[11px] font-bold text-amber-400 animate-pulse flex items-center gap-1">
+                <RefreshCw className="w-3 h-3 animate-spin" /> Actualizando en segundo plano...
+              </span>
+            )}
+          </div>
+        )}
+
+        {loading && events.length === 0 && tab !== 'channels' ? (
           <div className="flex flex-col items-center py-20 text-[#8a94a3] text-xs font-bold uppercase tracking-widest gap-4">
             <div className="w-10 h-10 border-2 border-[#00c2e0] border-t-transparent rounded-full animate-spin" />
             Cargando agenda deportiva…
           </div>
-        ) : allFailed && tab !== 'channels' ? (
-          empty('No se pudo cargar la agenda deportiva. Revisá tu conexión y tocá actualizar.')
+        ) : (hasError || (allFailed && events.length === 0)) && tab !== 'channels' ? (
+          <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 mb-4 shadow-lg shadow-rose-500/10">
+              <AlertCircle className="w-8 h-8" />
+            </div>
+            <h3 className="text-base sm:text-lg font-black text-white mb-2">
+              No se pudieron cargar los eventos deportivos
+            </h3>
+            <p className="text-xs sm:text-sm text-zinc-400 max-w-md mb-6 leading-relaxed">
+              No pudimos conectar con los servidores de marcadores deportivos. Comprobá tu conexión o reintentá.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setLoading(true);
+                loadScores().finally(() => setLoading(false));
+              }}
+              className="tv-focusable px-6 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-black text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-cyan-500/20 active:scale-95 transition-all cursor-pointer outline-none focus:ring-2 focus:ring-cyan-300"
+            >
+              <RefreshCw className="w-4 h-4" />
+              <span>Reintentar</span>
+            </button>
+          </div>
         ) : tab !== 'channels' ? (
           groupedSections.length === 0 ? (
             empty(tab === 'mine' ? 'Seguí a tus equipos con la estrella para ver sus partidos acá.' : 'No hay partidos disponibles.')

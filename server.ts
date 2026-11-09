@@ -958,6 +958,29 @@ app.post('/api/iptv/login', async (req, res) => {
   }
 });
 
+// Sports Events Proxy (ESPN fallback for browser CORS / adblocker resilience)
+app.get('/api/sports/proxy', async (req, res) => {
+  const targetUrl = req.query.url as string;
+  if (!targetUrl || !targetUrl.startsWith('https://site.api.espn.com')) {
+    return res.status(400).json({ error: 'URL no válida' });
+  }
+  try {
+    const apiRes = await fetch(targetUrl, {
+      headers: {
+        Accept: 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      },
+    });
+    if (!apiRes.ok) {
+      return res.status(apiRes.status).json({ error: `HTTP ${apiRes.status}` });
+    }
+    const data = await apiRes.json();
+    res.json(data);
+  } catch (err: any) {
+    res.status(502).json({ error: err.message });
+  }
+});
+
 // Xtream Codes Action Proxy (categories, streams, series_info)
 app.get('/api/iptv/proxy', async (req, res) => {
   const { action, username, password, category_id, series_id, stream_id } = req.query;
