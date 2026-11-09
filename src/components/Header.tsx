@@ -216,17 +216,19 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
         )}
 
-        {/* Admin Settings Button */}
-        <button
-          onClick={onOpenSettings}
-          className="tv-focusable p-2 bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700/60 text-zinc-300 hover:text-white rounded-lg transition cursor-pointer"
-          title="Administración"
-        >
-          <Settings className="w-4 h-4 text-zinc-300 hover:text-cyan-400" />
-        </button>
+        {/* Admin Settings Button (Solo TV / Tablet) */}
+        {viewMode !== 'mobile' && (
+          <button
+            onClick={onOpenSettings}
+            className="tv-focusable p-2 bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700/60 text-zinc-300 hover:text-white rounded-lg transition cursor-pointer"
+            title="Administración"
+          >
+            <Settings className="w-4 h-4 text-zinc-300 hover:text-cyan-400" />
+          </button>
+        )}
 
-        {/* Logout Button */}
-        {userInfo && (
+        {/* Logout Button (Solo TV / Tablet) */}
+        {viewMode !== 'mobile' && userInfo && (
           <button
             onClick={onLogout}
             className="tv-focusable px-2.5 py-1.5 bg-rose-950/80 hover:bg-rose-900/90 border border-rose-800/80 text-rose-300 hover:text-white rounded-lg transition cursor-pointer flex items-center gap-1.5 text-xs font-bold shadow-md"

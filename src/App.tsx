@@ -404,8 +404,8 @@ export default function App() {
         viewMode === 'tv' ? 'tv-overscan text-base' : 'text-sm'
       }`}
     >
-      {/* Top Application Bar - Only shown in sub-sections, Home has its own integrated TV bar matching the screenshot */}
-      {activeSection !== 'home' && (
+      {/* Top Application Bar - Only shown in sub-sections, Home has its own integrated TV bar. In Mobile Live TV, LiveTVScreen renders its own compact header */}
+      {activeSection !== 'home' && !(viewMode === 'mobile' && activeSection === 'live') && (
         <Header
           appName={config.serviceName || 'Calix Tv iptv Pro'}
           version="v2.5.4"
@@ -426,9 +426,9 @@ export default function App() {
 
       {/* Main View Router */}
       <main
-        className={`flex-1 flex flex-col overflow-hidden ${viewMode === 'mobile' ? 'pb-16 sm:pb-20' : ''}`}
+        className={`flex-1 flex flex-col overflow-hidden ${viewMode === 'mobile' && activeSection !== 'live' ? 'pb-16 sm:pb-20' : ''}`}
         style={
-          viewMode === 'mobile'
+          viewMode === 'mobile' && activeSection !== 'live'
             ? {
                 paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 4.25rem)',
               }
@@ -460,6 +460,7 @@ export default function App() {
             viewMode={viewMode}
             onBack={() => setActiveSection('home')}
             onNavigate={(sec) => setActiveSection(sec)}
+            onOpenSettings={() => setIsProfileOpen(true)}
             onPlayStream={handlePlayStream}
           />
         )}
@@ -494,8 +495,8 @@ export default function App() {
         )}
       </main>
 
-      {/* Persistent Mobile Bottom Navigation Bar (Visible in all screens for Mobile) */}
-      {viewMode === 'mobile' && !activePlayback && (
+      {/* Persistent Mobile Bottom Navigation Bar (Visible in all screens for Mobile except Live TV which has its own sticky layout) */}
+      {viewMode === 'mobile' && !activePlayback && activeSection !== 'live' && (
         <MobileBottomNav
           activeSection={activeSection}
           onNavigate={(sec) => setActiveSection(sec)}

@@ -869,10 +869,14 @@ app.post('/api/iptv/login', async (req, res) => {
     return res.status(400).json({ success: false, message: 'Usuario y contraseña requeridos' });
   }
 
-  // Check if user requested demo credentials
+  // Check if user requested demo or guest credentials
+  const uLow = username.toLowerCase().trim();
+  const pLow = password.toLowerCase().trim();
   if (
-    (username.toLowerCase() === 'demo' && password.toLowerCase() === 'demo') ||
-    (username.toLowerCase() === 'nexus' && password.toLowerCase() === 'nexus2026')
+    (uLow === 'demo' && pLow === 'demo') ||
+    (uLow === 'nexus' && pLow === 'nexus2026') ||
+    uLow === 'invitado' ||
+    uLow === 'guest'
   ) {
     return res.json({
       success: true,
@@ -962,10 +966,16 @@ app.get('/api/iptv/proxy', async (req, res) => {
     return res.status(400).json({ success: false, message: 'Parámetros faltantes' });
   }
 
-  // If demo credentials, return sample realistic data
+  // If demo credentials or guest mode, return sample realistic data
+  const uLower = String(username).toLowerCase().trim();
+  const pLower = String(password).toLowerCase().trim();
+
   if (
-    username === 'demo' ||
-    username === 'nexus' ||
+    uLower === 'demo' ||
+    uLower === 'nexus' ||
+    uLower === 'invitado' ||
+    uLower === 'guest' ||
+    pLower === 'demo' ||
     currentConfig.serverUrl.includes('demo-nexus.tv')
   ) {
     return res.json(getDemoData(action as string, { category_id, series_id, stream_id }));
@@ -994,10 +1004,15 @@ app.get('/api/iptv/proxy', async (req, res) => {
     clearTimeout(timeout);
 
     if (!apiRes.ok) {
-      return res.status(apiRes.status).json({ success: false, message: `Error HTTP ${apiRes.status}` });
+      console.warn(`Upstream returned HTTP ${apiRes.status} for ${action}. Falling back to demo catalog.`);
+      return res.json(getDemoData(action as string, { category_id, series_id, stream_id }));
     }
 
     const data = await apiRes.json();
+    if (!data || (Array.isArray(data) && data.length === 0)) {
+      console.warn(`Upstream returned empty data for ${action}. Falling back to demo catalog.`);
+      return res.json(getDemoData(action as string, { category_id, series_id, stream_id }));
+    }
     res.json(data);
   } catch (error: any) {
     console.warn(`Proxy fetch failed for ${action}, falling back to demo catalog:`, error.message);

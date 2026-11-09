@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import {
   Search,
   Star,
@@ -16,6 +16,10 @@ import {
   Users,
   User as UserIcon,
   Heart,
+  Trophy,
+  Film,
+  Clapperboard,
+  Settings,
 } from 'lucide-react';
 import { ActiveSection, DeviceViewMode, LiveCategory, LiveStream } from '../types/iptv';
 import { iptvApi } from '../services/iptvApi';
@@ -26,6 +30,7 @@ interface LiveTVScreenProps {
   viewMode: DeviceViewMode;
   onBack: () => void;
   onNavigate?: (section: ActiveSection) => void;
+  onOpenSettings?: () => void;
   onPlayStream: (stream: {
     streamId: string | number;
     title: string;
@@ -59,11 +64,101 @@ const adjustTime = (text: string | undefined): string => {
   return result;
 };
 
+const getCategoryIcon = (categoryName: string): string => {
+  const name = categoryName.toLowerCase();
+  if (name.includes('deporte') || name.includes('sport') || name.includes('futbol') || name.includes('fútbol')) return '⚽';
+  if (name.includes('noticia') || name.includes('news')) return '📰';
+  if (name.includes('cine') || name.includes('pelicula') || name.includes('película') || name.includes('movie') || name.includes('hbo')) return '🎬';
+  if (name.includes('infantil') || name.includes('kid') || name.includes('dibujo') || name.includes('animac') || name.includes('disney')) return '🧸';
+  if (name.includes('musica') || name.includes('música') || name.includes('music')) return '🎵';
+  if (name.includes('documental') || name.includes('docu') || name.includes('cultura')) return '🌍';
+  if (name.includes('serie')) return '📺';
+  if (name.includes('variedad') || name.includes('entretenimiento')) return '✨';
+  if (name.includes('premium') || name.includes('vip')) return '👑';
+  return '📁';
+};
+
+interface ChannelRowProps {
+  stream: LiveStream;
+  index: number;
+  isPlaying: boolean;
+  isFavorite: boolean;
+  onSelect: (stream: LiveStream) => void;
+  onToggleFavorite: (e: React.MouseEvent, stream: LiveStream) => void;
+}
+
+const ChannelRow = React.memo<ChannelRowProps>(({
+  stream,
+  index,
+  isPlaying,
+  isFavorite,
+  onSelect,
+  onToggleFavorite,
+}) => {
+  const [imgError, setImgError] = useState(false);
+  const title = adjustTime(stream.name);
+  const epgRaw = stream.current_program;
+  const epgProgram = adjustTime(epgRaw);
+  const hasEpg = Boolean(
+    epgProgram &&
+    epgProgram.trim() !== '' &&
+    !epgProgram.toLowerCase().includes('no información') &&
+    !epgProgram.toLowerCase().includes('sin información')
+  );
+
+  return (
+    <div
+      onClick={() => onSelect(stream)}
+      className={`channel-row ${isPlaying ? 'playing' : ''}`}
+    >
+      <div className="w-[44px] h-[44px] shrink-0 rounded-[10px] bg-zinc-900/80 border border-white/10 flex items-center justify-center overflow-hidden">
+        {stream.stream_icon && !imgError ? (
+          <img
+            src={stream.stream_icon}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            onError={() => setImgError(true)}
+            className="logo"
+          />
+        ) : (
+          <Tv className="w-5 h-5 text-zinc-500" />
+        )}
+      </div>
+
+      <div className="flex-1 min-w-0 pr-1 flex flex-col justify-center">
+        <div className="name">
+          {index + 1}. {title}
+        </div>
+        {hasEpg && (
+          <div className="epg truncate mt-0.5">
+            {epgProgram}
+          </div>
+        )}
+      </div>
+
+      <button
+        type="button"
+        onClick={(e) => onToggleFavorite(e, stream)}
+        className="shrink-0 p-2 text-zinc-500 active:scale-125 transition-transform"
+        aria-label={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+      >
+        <Heart
+          className={`w-5 h-5 transition-colors ${
+            isFavorite ? 'fill-rose-500 text-rose-500' : 'text-zinc-600 hover:text-zinc-400'
+          }`}
+        />
+      </button>
+    </div>
+  );
+});
+
 export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
   username,
   viewMode,
   onBack,
   onNavigate,
+  onOpenSettings,
   onPlayStream,
 }) => {
   const [categories, setCategories] = useState<LiveCategory[]>([]);
@@ -77,6 +172,43 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
   const [expiryDate, setExpiryDate] = useState<string>('Ilimitado');
   const [previewStream, setPreviewStream] = useState<LiveStream | null>(null);
   const [debouncedStream, setDebouncedStream] = useState<LiveStream | null>(null);
+
+  const chipsRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
+  const [currentTimeStr, setCurrentTimeStr] = useState<string>(() =>
+    new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
+  );
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTimeStr(
+        new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
+      );
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const handleSelectCategoryChip = async (catId: string) => {
+    if (catId === 'favorites') {
+      setShowOnlyFavorites(true);
+      chipsRefs.current['favorites']?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      try {
+        const allStreams = await iptvApi.getStreams('live', username, 'all');
+        if (allStreams && allStreams.length > 0) {
+          setStreams(allStreams);
+          const firstFav = allStreams.find((s) => favoritesList.includes(String(s.stream_id)));
+          if (firstFav && (!selectedStream || !favoritesList.includes(String(selectedStream.stream_id)))) {
+            setSelectedStream(firstFav);
+          }
+        }
+      } catch (err) {
+        console.error('Error loading streams for favorites:', err);
+      }
+      return;
+    }
+    setShowOnlyFavorites(false);
+    handleSelectCategory(catId);
+    chipsRefs.current[catId]?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  };
 
   // Debounce preview updates to avoid spamming the server
   useEffect(() => {
@@ -213,115 +345,185 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
 
   if (viewMode === 'mobile') {
     return (
-      <div className="flex-1 flex flex-col h-full bg-[#05060a] text-white select-none overflow-hidden relative">
-        {/* Top: Live Player - Sticky to ensure it never scrolls away */}
-        <div className="w-full aspect-video bg-black shrink-0 sticky top-0 z-50 border-b border-zinc-900 shadow-2xl overflow-hidden">
-          {selectedStream ? (
-            <VideoPlayer
-              url={iptvApi.buildStreamUrl('live', selectedStream.stream_id, 'm3u8', username)}
-              title={adjustTime(selectedStream.name)}
-              type="live"
-              autoPlay={true}
-              className="w-full h-full"
-              onExpand={handleOpenFullscreen}
-              onNextChannel={handleNextChannel}
-              onPrevChannel={handlePrevChannel}
-              isMiniPlayer={false}
+      <div className="live-screen mobile-mode">
+        {/* 1) CABECERA COMPACTA */}
+        <header className="app-header">
+          <div className="flex items-center gap-2">
+            <img
+              src="/logo.png"
+              alt="CALIX TV"
+              className="logo"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
             />
+            <div className="flex items-center gap-1.5 ml-1">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse inline-block shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+              <span className="text-xs font-semibold text-zinc-300 max-w-[95px] truncate">
+                {username || 'Usuario'}
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-mono font-bold bg-white/10 text-cyan-300 px-1.5 py-0.5 rounded border border-cyan-500/30">
+              v1.0
+            </span>
+            <span className="text-xs font-mono font-bold text-zinc-200">
+              {currentTimeStr}
+            </span>
+          </div>
+        </header>
+
+        {/* 2) REPRODUCTOR FIJO (STICKY 16:9) */}
+        <div className="player-box">
+          {selectedStream ? (
+            <>
+              <VideoPlayer
+                url={iptvApi.buildStreamUrl('live', selectedStream.stream_id, 'm3u8', username)}
+                title={adjustTime(selectedStream.name)}
+                type="live"
+                autoPlay={true}
+                className="w-full h-full"
+                onExpand={handleOpenFullscreen}
+                onNextChannel={handleNextChannel}
+                onPrevChannel={handlePrevChannel}
+                isMiniPlayer={false}
+              />
+              <button
+                type="button"
+                onClick={handleOpenFullscreen}
+                className="absolute top-2 right-2 p-2 rounded-lg bg-black/60 hover:bg-black/80 text-white backdrop-blur-md z-20 border border-white/15 active:scale-95 transition-all"
+                title="Pantalla completa"
+                aria-label="Pantalla completa"
+              >
+                <Maximize2 className="w-4 h-4 text-white" />
+              </button>
+            </>
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center text-zinc-700 bg-[#0a0c14] border-b border-zinc-800">
-              <div className="w-12 h-12 rounded-full border-2 border-zinc-800 border-t-rose-600 animate-spin mb-3" />
-              <span className="text-[10px] font-black uppercase tracking-[3px] animate-pulse">Sintonizando...</span>
+            <div className="w-full h-full flex flex-col items-center justify-center bg-[#070913] text-zinc-400 gap-3">
+              <div className="w-9 h-9 rounded-full border-2 border-cyan-500/20 border-t-cyan-400 animate-spin" />
+              <span className="text-xs font-bold tracking-widest uppercase text-cyan-300/80 animate-pulse">
+                Conectando señal...
+              </span>
             </div>
           )}
         </div>
 
-        {/* Middle: Content with Categories and Channels */}
-        <div className="flex-1 flex overflow-hidden">
-          {/* Categories Sidebar (Narrow) */}
-          <div className="w-[110px] bg-[#0c0d14] border-r border-zinc-900/50 overflow-y-auto custom-scrollbar flex flex-col py-1">
-            {categories.map((cat) => {
-              const isSelected = selectedCategoryId === cat.category_id;
-              return (
-                <button
-                  key={cat.category_id}
-                  onClick={() => handleSelectCategory(cat.category_id)}
-                  className={`w-full text-left px-3 py-4 flex flex-col gap-1 transition-all border-l-2 ${
-                    isSelected ? 'border-rose-600 bg-rose-600/5 text-rose-500' : 'border-transparent text-zinc-500'
-                  }`}
-                >
-                  <span className={`text-[10px] font-black uppercase tracking-tighter leading-tight ${isSelected ? 'opacity-100' : 'opacity-80'} flex items-center gap-1`}>
-                    • {cat.managedName || cat.category_name}
-                    {cat.isPinned && <Star className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />}
-                  </span>
-                  <span className="text-[9px] opacity-40 ml-2 font-bold">
-                    {Math.floor(Math.random() * 100) + 10} canales
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Channels List */}
-          <div className="flex-1 bg-black overflow-y-auto custom-scrollbar pb-20">
-            {isLoading ? (
-              <div className="flex items-center justify-center h-40">
-                <div className="w-6 h-6 border-2 border-rose-600 border-t-transparent rounded-full animate-spin" />
-              </div>
-            ) : filteredStreams.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-40 text-zinc-600 italic text-xs">
-                No se encontraron canales
-              </div>
-            ) : (
-              filteredStreams.map((stream, idx) => {
-                const isSelected = selectedStream?.stream_id === stream.stream_id;
-                const isFav = favoritesList.includes(String(stream.stream_id));
-                return (
-                  <div
-                    key={stream.stream_id}
-                    onClick={() => setSelectedStream(stream)}
-                    className={`flex items-center p-3 border-b border-zinc-900/40 transition-colors active:bg-zinc-900/80 ${
-                      isSelected ? 'bg-zinc-900/50' : ''
-                    }`}
-                  >
-                    {/* Channel Logo */}
-                    <div className="w-14 h-14 rounded-xl bg-white flex items-center justify-center overflow-hidden shrink-0 mr-3.5 border border-zinc-800/30 shadow-sm">
-                      {stream.stream_icon ? (
-                        <img src={stream.stream_icon} className="w-full h-full object-contain p-1" alt="" />
-                      ) : (
-                        <Tv className="w-6 h-6 text-zinc-300" />
-                      )}
-                    </div>
-
-                    {/* Info */}
-                    <div className="flex-1 overflow-hidden pr-2">
-                      <div className="flex items-center gap-1.5 overflow-hidden mb-0.5">
-                        {isSelected && <PlayIcon className="w-3 h-3 text-rose-600 fill-rose-600 shrink-0" />}
-                        <h4 className={`text-[13px] font-black tracking-tight truncate ${isSelected ? 'text-rose-500' : 'text-zinc-100'}`}>
-                          {idx + 1}. {adjustTime(stream.name)}
-                        </h4>
-                      </div>
-                      <p className="text-[11px] text-zinc-500 font-bold truncate opacity-80">
-                        {adjustTime(stream.current_program) || 'No información'}
-                      </p>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center gap-3.5 shrink-0">
-                      <button 
-                        onClick={(e) => handleToggleFavorite(e, stream)}
-                        className="p-1"
-                      >
-                        <Heart className={`w-5 h-5 ${isFav ? 'fill-rose-600 text-rose-600' : 'text-zinc-700'}`} />
-                      </button>
-                      <ChevronRight className="w-5 h-5 text-zinc-800" />
-                    </div>
-                  </div>
-                );
-              })
+        {/* 3) FILA HORIZONTAL DE CARPETAS (CHIPS) */}
+        <div className="chips custom-scrollbar">
+          <button
+            type="button"
+            ref={(el) => {
+              chipsRefs.current['favorites'] = el;
+            }}
+            onClick={() => handleSelectCategoryChip('favorites')}
+            className={`chip ${showOnlyFavorites ? 'active' : ''}`}
+          >
+            <span>⭐</span>
+            <span>Favoritos</span>
+            {favoritesList.length > 0 && (
+              <span className="text-[11px] opacity-75 font-mono">({favoritesList.length})</span>
             )}
-          </div>
+          </button>
+
+          {categories.map((cat) => {
+            const isCatActive = !showOnlyFavorites && selectedCategoryId === cat.category_id;
+            return (
+              <button
+                key={cat.category_id}
+                type="button"
+                ref={(el) => {
+                  chipsRefs.current[cat.category_id] = el;
+                }}
+                onClick={() => handleSelectCategoryChip(cat.category_id)}
+                className={`chip ${isCatActive ? 'active' : ''}`}
+              >
+                <span>{getCategoryIcon(cat.category_name)}</span>
+                <span>{cat.managedName || cat.category_name}</span>
+              </button>
+            );
+          })}
         </div>
+
+        {/* 4) LISTA DE CANALES */}
+        <div className="channel-list custom-scrollbar">
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center h-48 gap-3">
+              <div className="w-8 h-8 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+              <span className="text-xs text-zinc-400 font-medium">Cargando canales...</span>
+            </div>
+          ) : filteredStreams.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-48 text-zinc-500 text-sm gap-2">
+              <span>{showOnlyFavorites ? 'No tienes canales favoritos aún' : 'No se encontraron canales'}</span>
+            </div>
+          ) : (
+            filteredStreams.map((stream, idx) => (
+              <ChannelRow
+                key={stream.stream_id}
+                stream={stream}
+                index={idx}
+                isPlaying={selectedStream?.stream_id === stream.stream_id}
+                isFavorite={favoritesList.includes(String(stream.stream_id))}
+                onSelect={setSelectedStream}
+                onToggleFavorite={handleToggleFavorite}
+              />
+            ))
+          )}
+        </div>
+
+        {/* 5) BARRA DE NAVEGACIÓN INFERIOR FIJA */}
+        <nav className="bottom-nav">
+          <button
+            type="button"
+            onClick={() => {
+              if (onNavigate) onNavigate('home');
+              else onBack();
+            }}
+          >
+            <Home className="w-5 h-5 mb-0.5" />
+            <span>Inicio</span>
+          </button>
+
+          <button
+            type="button"
+            className="active"
+          >
+            <Tv className="w-5 h-5 mb-0.5" />
+            <span>TV en Vivo</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onNavigate?.('events')}
+          >
+            <Trophy className="w-5 h-5 mb-0.5" />
+            <span>Eventos</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onNavigate?.('movies')}
+          >
+            <Film className="w-5 h-5 mb-0.5" />
+            <span>Películas</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onNavigate?.('series')}
+          >
+            <Clapperboard className="w-5 h-5 mb-0.5" />
+            <span>Series</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onOpenSettings?.()}
+          >
+            <Settings className="w-5 h-5 mb-0.5" />
+            <span>Ajustes</span>
+          </button>
+        </nav>
       </div>
     );
   }

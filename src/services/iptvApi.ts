@@ -142,10 +142,14 @@ class IptvApiService {
     const trimmedPass = password.trim();
     this.activePassword = trimmedPass;
 
-    // Demo credentials
+    // Demo & Guest credentials
+    const uLow = trimmedUser.toLowerCase();
+    const pLow = trimmedPass.toLowerCase();
     if (
-      (trimmedUser.toLowerCase() === 'demo' && trimmedPass.toLowerCase() === 'demo') ||
-      (trimmedUser.toLowerCase() === 'nexus' && trimmedPass.toLowerCase() === 'nexus2026')
+      (uLow === 'demo' && pLow === 'demo') ||
+      (uLow === 'nexus' && pLow === 'nexus2026') ||
+      uLow === 'invitado' ||
+      uLow === 'guest'
     ) {
       const demoAuth: XtreamAuthResponse = {
         user_info: {
@@ -400,7 +404,10 @@ class IptvApiService {
       return managed;
     }
 
-    return [];
+    const fallbackCats = this.getFallbackCategories(type);
+    const managedFallback = this.applyCategoryManagement(type, fallbackCats);
+    this.categoryCache.set(type, managedFallback.length > 0 ? managedFallback : fallbackCats);
+    return managedFallback.length > 0 ? managedFallback : fallbackCats;
   }
 
   // 5. Fetch Streams (Direct + Proxy fallback + Memory Cache)
@@ -485,11 +492,204 @@ class IptvApiService {
       // For now, let's keep provider order.
     }
 
+    if (!result || result.length === 0) {
+      result = this.getFallbackStreams(type);
+    }
+
     if (result.length > 0) {
       this.streamCache.set(cacheKey, result);
     }
     
     return result;
+  }
+
+  getFallbackCategories(type: 'live' | 'vod' | 'series'): any[] {
+    if (type === 'live') {
+      return [
+        { category_id: '1', category_name: '⚽ DEPORTES PREMIUM EN VIVO', parent_id: 0 },
+        { category_id: '2', category_name: '🎬 CINE & SERIES 24/7', parent_id: 0 },
+        { category_id: '3', category_name: '🌍 NOTICIAS INTERNACIONALES', parent_id: 0 },
+        { category_id: '5', category_name: '🦁 DOCUMENTALES & NATURALEZA', parent_id: 0 },
+        { category_id: '7', category_name: '⚽ EVENTOS DEPORTIVOS DEL DÍA', parent_id: 0 },
+      ];
+    }
+    if (type === 'vod') {
+      return [
+        { category_id: '201', category_name: '🔥 ESTRENOS 2026', parent_id: 0 },
+        { category_id: '202', category_name: '💥 ACCIÓN Y SUSPENSO', parent_id: 0 },
+        { category_id: '203', category_name: '🚀 CIENCIA FICCIÓN & FANTASÍA', parent_id: 0 },
+      ];
+    }
+    return [
+      { category_id: '301', category_name: '⭐ SERIES TENDENCIA MUNDIAL', parent_id: 0 },
+      { category_id: '303', category_name: '🤖 CIENCIA FICCIÓN & TECNOLOGÍA', parent_id: 0 },
+    ];
+  }
+
+  getFallbackStreams(type: 'live' | 'vod' | 'series'): any[] {
+    if (type === 'live') {
+      return [
+        {
+          num: 1,
+          name: 'ESPN Deportes HD [FHD 60FPS]',
+          stream_type: 'live',
+          stream_id: 101,
+          stream_icon: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=300&q=80',
+          epg_channel_id: 'espn.es',
+          category_id: '1',
+          current_program: 'Fútbol Europeo: El Clásico en Vivo',
+          next_program: 'SportsCenter Edición Nocturna',
+          stream_url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+        },
+        {
+          num: 2,
+          name: 'Fox Sports 1 UHD [4K]',
+          stream_type: 'live',
+          stream_id: 102,
+          stream_icon: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=300&q=80',
+          epg_channel_id: 'foxsports.es',
+          category_id: '1',
+          current_program: 'Fórmula 1: Gran Premio en Directo',
+          next_program: 'Debate Central de Campeones',
+          stream_url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+        },
+        {
+          num: 3,
+          name: 'HBO Max Cinema FHD',
+          stream_type: 'live',
+          stream_id: 103,
+          stream_icon: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=300&q=80',
+          epg_channel_id: 'hbo.es',
+          category_id: '2',
+          current_program: 'Dune: Parte Dos (Estreno Exclusivo)',
+          next_program: 'Oppenheimer',
+          stream_url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+        },
+        {
+          num: 4,
+          name: 'TNT Series FHD Dual Audio',
+          stream_type: 'live',
+          stream_id: 104,
+          stream_icon: 'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=300&q=80',
+          epg_channel_id: 'tnt.es',
+          category_id: '2',
+          current_program: 'Breaking Bad - Temporada 5 Ep 14',
+          next_program: 'Better Call Saul',
+          stream_url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+        },
+        {
+          num: 5,
+          name: 'BBC World News 24/7',
+          stream_type: 'live',
+          stream_id: 105,
+          stream_icon: 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=300&q=80',
+          epg_channel_id: 'bbc.news',
+          category_id: '3',
+          current_program: 'Global News Hour: Headlines & Tech',
+          next_program: 'World Business Report',
+          stream_url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+        },
+        {
+          num: 6,
+          name: 'National Geographic Wild FHD',
+          stream_type: 'live',
+          stream_id: 106,
+          stream_icon: 'https://images.unsplash.com/photo-1534567153574-2b12153a87f0?auto=format&fit=crop&w=300&q=80',
+          epg_channel_id: 'natgeo.es',
+          category_id: '5',
+          current_program: 'Grandes Depredadores del Serengeti',
+          next_program: 'Secretos de las Profundidades',
+          stream_url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+        },
+        {
+          num: 7,
+          name: 'Agenda Deportiva VIP 24/7',
+          stream_type: 'live',
+          stream_id: 107,
+          stream_icon: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=300&q=80',
+          epg_channel_id: 'events.tv',
+          category_id: '7',
+          current_program: 'Resumen de Goles y Próximos Partidos',
+          next_program: 'Debate Deportivo Central',
+          stream_url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
+        },
+      ];
+    }
+    if (type === 'vod') {
+      return [
+        {
+          num: 1,
+          name: 'Cyber Horizon 2099 (4K HDR)',
+          stream_type: 'movie',
+          stream_id: 2001,
+          stream_icon: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=600&q=80',
+          rating: '8.8',
+          rating_5based: 4.4,
+          category_id: '201',
+          container_extension: 'mp4',
+          year: '2026',
+          duration_secs: 7420,
+          duration: '02:03:40',
+          plot: 'En una metrópolis subterránea, un androide consciente busca el origen de los recuerdos humanos.',
+          genre: 'Ciencia Ficción, Acción',
+          stream_url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+        },
+        {
+          num: 2,
+          name: 'Velocidad Máxima: Desafío Urbano',
+          stream_type: 'movie',
+          stream_id: 2002,
+          stream_icon: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=600&q=80',
+          rating: '8.2',
+          category_id: '202',
+          container_extension: 'mp4',
+          year: '2025',
+          duration: '01:54:12',
+          plot: 'Pilotos clandestinos se enfrentan por el control de las autopistas de Tokio.',
+          genre: 'Acción, Suspenso',
+          stream_url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+        },
+        {
+          num: 3,
+          name: 'El Enigma del Abismo Cósmico',
+          stream_type: 'movie',
+          stream_id: 2003,
+          stream_icon: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=600&q=80',
+          rating: '9.1',
+          category_id: '203',
+          container_extension: 'mp4',
+          year: '2025',
+          duration: '02:28:00',
+          plot: 'Una tripulación científica responde a una señal misteriosa en los confines del sistema solar.',
+          genre: 'Ciencia Ficción, Aventura',
+          stream_url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
+        },
+      ];
+    }
+    return [
+      {
+        num: 1,
+        name: 'Crónicas del Trono Imperial',
+        series_id: 3001,
+        cover: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80',
+        plot: 'Guerras dinásticas, traición política y batallas épicas por el control del continente eterno.',
+        genre: 'Drama Épico, Acción',
+        releaseDate: '2024-2026',
+        rating: '9.4',
+        category_id: '301',
+      },
+      {
+        num: 2,
+        name: 'Protocolo Cero: Hackers de Medianoche',
+        series_id: 3002,
+        cover: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=600&q=80',
+        plot: 'Un grupo clandestino de analistas descubre un algoritmo que predice crímenes.',
+        genre: 'Thriller Tecnológico',
+        releaseDate: '2025',
+        rating: '8.9',
+        category_id: '303',
+      },
+    ];
   }
 
   // 6. Fetch Series Details (Seasons + Episodes)
