@@ -426,7 +426,7 @@ export default function App() {
 
       {/* Main View Router */}
       <main
-        className={`flex-1 flex flex-col overflow-hidden ${viewMode === 'mobile' && activeSection !== 'live' ? 'pb-16 sm:pb-20' : ''}`}
+        className={`flex-1 flex flex-col min-h-0 overflow-hidden ${viewMode === 'mobile' && activeSection !== 'live' ? 'pb-16 sm:pb-20' : ''}`}
         style={
           viewMode === 'mobile' && activeSection !== 'live'
             ? {

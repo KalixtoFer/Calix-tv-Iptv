@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   User,
   Calendar,
@@ -12,10 +12,17 @@ import {
   CheckCircle2,
   Trash2,
   RefreshCw,
+  Activity,
+  Copy,
+  Check,
+  AlertTriangle,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { XtreamUserInfo } from '../types/iptv';
 import { dbService } from '../services/db';
 import { iptvApi } from '../services/iptvApi';
+import { eventsDiagnosticsService, EventsDiagnosticData } from '../services/eventsDiagnostics';
 
 interface UserProfileModalProps {
   userInfo: XtreamUserInfo | null;
@@ -36,6 +43,50 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   viewMode,
   onChangeViewMode,
 }) => {
+  const [diagData, setDiagData] = useState<EventsDiagnosticData | null>(eventsDiagnosticsService.getLatest());
+  const [isRunningDiag, setIsRunningDiag] = useState(false);
+  const [copiedDiag, setCopiedDiag] = useState(false);
+  const [showDiagDetails, setShowDiagDetails] = useState(true);
+
+  const handleRunDiagnostic = async () => {
+    setIsRunningDiag(true);
+    try {
+      const data = await eventsDiagnosticsService.runDiagnostics(userInfo?.username || '');
+      setDiagData(data);
+    } catch (e) {
+      console.error('Error running diagnostics:', e);
+    } finally {
+      setIsRunningDiag(false);
+    }
+  };
+
+  const handleCopyDiagnostic = async () => {
+    if (!diagData) return;
+    const report = eventsDiagnosticsService.formatReportText(diagData);
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(report);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = report;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+      setCopiedDiag(true);
+      setTimeout(() => setCopiedDiag(false), 2500);
+    } catch (e) {
+      console.error('Error copying diagnostic:', e);
+    }
+  };
+
+  useEffect(() => {
+    if (!diagData) {
+      handleRunDiagnostic();
+    }
+  }, []);
+
   // 1. Format Expiration Date
   const formatExpDate = (expTimestamp?: string) => {
     if (!expTimestamp) return { text: 'Ilimitado (Sin Vencimiento)', daysLeft: null };
@@ -314,6 +365,156 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
               <Trash2 className="w-3.5 h-3.5 text-rose-400" />
               <span>Borrar caché y recargar</span>
             </button>
+          </div>
+
+          {/* Diagnóstico de eventos deportivos */}
+          <div className="setting-row p-3.5 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-3 shadow-inner">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-black text-white uppercase tracking-wider flex items-center gap-1.5">
+                <Activity className="w-3.5 h-3.5 text-cyan-400" /> Diagnóstico de eventos
+              </span>
+              <div className="flex items-center gap-2">
+                {diagData && (
+                  <span
+                    className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
+                      diagData.source === 'RED'
+                        ? 'bg-emerald-950/80 text-emerald-400 border-emerald-600/60'
+                        : diagData.source === 'CACHÉ (IndexedDB)'
+                        ? 'bg-amber-950/80 text-amber-400 border-amber-600/60'
+                        : 'bg-rose-950/80 text-rose-400 border-rose-600/60'
+                    }`}
+                  >
+                    {diagData.source} • {diagData.httpStatus}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setShowDiagDetails((v) => !v)}
+                  className="text-zinc-400 hover:text-white p-1 rounded transition cursor-pointer"
+                  title="Expandir / Colapsar"
+                >
+                  {showDiagDetails ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+            </div>
+
+            {diagData && showDiagDetails && (
+              <div className="space-y-2 text-xs">
+                {/* Métricas clave */}
+                <div className="grid grid-cols-2 gap-2 text-[11px] font-mono">
+                  <div className="p-2 rounded-xl bg-zinc-950/80 border border-zinc-800/80">
+                    <span className="text-zinc-500 block text-[9px] uppercase font-sans font-bold">Respuesta HTTP</span>
+                    <span className="text-white font-bold">{diagData.httpStatus} ({diagData.responseTimeMs} ms)</span>
+                  </div>
+                  <div className="p-2 rounded-xl bg-zinc-950/80 border border-zinc-800/80">
+                    <span className="text-zinc-500 block text-[9px] uppercase font-sans font-bold">Partidos recibidos</span>
+                    <span className="text-cyan-400 font-bold">{diagData.eventsCount} eventos</span>
+                  </div>
+                </div>
+
+                {/* URL consultada */}
+                <div className="p-2 rounded-xl bg-zinc-950/80 border border-zinc-800/80">
+                  <span className="text-zinc-500 block text-[9px] uppercase font-sans font-bold">URL consultada</span>
+                  <p className="text-[10px] font-mono text-zinc-300 break-all select-all">{diagData.testedUrl}</p>
+                </div>
+
+                {/* Origen y antigüedad */}
+                <div className="p-2 rounded-xl bg-zinc-950/80 border border-zinc-800/80 flex items-center justify-between">
+                  <div>
+                    <span className="text-zinc-500 block text-[9px] uppercase font-sans font-bold">Origen de datos</span>
+                    <span className="text-zinc-200 font-semibold">{diagData.source}</span>
+                  </div>
+                  {diagData.source === 'CACHÉ (IndexedDB)' && (
+                    <div className="text-right">
+                      <span className="text-zinc-500 block text-[9px] uppercase font-sans font-bold">Antigüedad caché</span>
+                      <span className="text-amber-400 font-mono font-bold">{diagData.cacheAge}</span>
+                    </div>
+                  )}
+                  <div className="text-right">
+                    <span className="text-zinc-500 block text-[9px] uppercase font-sans font-bold">CapacitorHttp Nativo</span>
+                    <span className={diagData.isNative ? 'text-emerald-400 font-bold' : 'text-zinc-400 font-medium'}>
+                      {diagData.isNative ? 'ACTIVO (APK)' : 'Desactivado (Web)'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Error si existe */}
+                {diagData.lastError && (
+                  <div className="p-2 rounded-xl bg-rose-950/40 border border-rose-800/60 text-rose-300 text-[10px] flex items-start gap-1.5">
+                    <AlertTriangle className="w-3.5 h-3.5 text-rose-400 shrink-0 mt-0.5" />
+                    <span className="font-mono break-all">{diagData.lastError}</span>
+                  </div>
+                )}
+
+                {/* Carpetas dinámicas del channel-map */}
+                <div className="p-2 rounded-xl bg-zinc-950/80 border border-zinc-800/80 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-zinc-400 text-[10px] uppercase font-bold tracking-wider">
+                      Carpetas dinámicas ({diagData.dynamicFolders.length})
+                    </span>
+                    <span className="text-[9px] text-zinc-500">channel-map.json</span>
+                  </div>
+                  <div className="max-h-28 overflow-y-auto space-y-1 custom-scrollbar pr-1">
+                    {diagData.dynamicFolders.length === 0 ? (
+                      <p className="text-[10px] text-zinc-500 italic">No se detectaron carpetas dinámicas</p>
+                    ) : (
+                      diagData.dynamicFolders.map((f, i) => (
+                        <div key={i} className="flex items-center justify-between text-[10px] py-0.5 border-b border-zinc-900 last:border-0">
+                          <span className="text-zinc-300 truncate max-w-[170px]" title={f.sourceGroup}>
+                            {f.name}
+                          </span>
+                          <span
+                            className={`font-mono font-bold px-1.5 py-0.2 rounded text-[9px] ${
+                              f.channelsCount > 0
+                                ? 'text-emerald-400 bg-emerald-950/60'
+                                : 'text-zinc-500 bg-zinc-900'
+                            }`}
+                          >
+                            {f.channelsCount} canales
+                          </span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Botones de acción */}
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <button
+                type="button"
+                tabIndex={0}
+                onClick={handleRunDiagnostic}
+                disabled={isRunningDiag}
+                className="tv-focusable py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 bg-zinc-800/80 hover:bg-zinc-700/80 text-cyan-300 border border-zinc-700 hover:border-cyan-500/50 transition cursor-pointer active:scale-95 outline-none focus:ring-2 focus:ring-cyan-400 disabled:opacity-50"
+                title="Probar de nuevo la conexión con la API deportiva"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isRunningDiag ? 'animate-spin' : ''}`} />
+                <span>{isRunningDiag ? 'Probando...' : 'Probar de nuevo'}</span>
+              </button>
+
+              <button
+                type="button"
+                tabIndex={0}
+                onClick={handleCopyDiagnostic}
+                disabled={!diagData}
+                className="tv-focusable py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-200 border border-zinc-700 hover:border-cyan-500/50 transition cursor-pointer active:scale-95 outline-none focus:ring-2 focus:ring-cyan-400 disabled:opacity-50"
+                title="Copiar informe completo de diagnóstico al portapapeles"
+              >
+                {copiedDiag ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="text-emerald-400">¡Copiado!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5 text-zinc-400" />
+                    <span>Copiar diagnóstico</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
 
           {/* Connection Security Status */}

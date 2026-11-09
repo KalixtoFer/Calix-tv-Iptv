@@ -46,41 +46,51 @@ export const LEAGUES = [
 
 const BASE = 'https://site.api.espn.com/apis/site/v2/sports';
 
-// En el APK se usa el plugin HTTP nativo (sin problemas de CORS); en el navegador, fetch con fallback a proxy.
-async function getJson(url: string): Promise<any> {
-  let status = 0;
-  try {
-    let data: any;
-    if (Capacitor.isNativePlatform()) {
-      const r = await CapacitorHttp.get({ url, headers: { Accept: 'application/json' } });
-      status = r.status;
-      if (status >= 400) {
-        console.error(`[EVENTOS] Error en URL: ${url} | Código: ${status}`);
-        throw new Error('HTTP ' + status);
-      }
-      data = typeof r.data === 'string' ? JSON.parse(r.data) : r.data;
-    } else {
-      let r: Response;
-      try {
-        r = await fetch(url);
-        status = r.status;
-      } catch (fetchErr: any) {
-        // Fallback al proxy local si el fetch directo falla por CORS o bloqueo de red
-        const proxyUrl = `/api/sports/proxy?url=${encodeURIComponent(url)}`;
-        r = await fetch(proxyUrl);
-        status = r.status;
-      }
-      if (!r.ok) {
-        console.error(`[EVENTOS] Error en URL: ${url} | Código: ${status}`);
-        throw new Error('HTTP ' + status);
-      }
-      data = await r.json();
+// En el APK se usa el plugin HTTP nativo CapacitorHttp (sin CORS); en la web fetch con fallback opcional.
+export async function httpGetJson(url: string): Promise<{ status: number; data: any; durationMs: number }> {
+  const startTime = Date.now();
+  if (Capacitor.isNativePlatform()) {
+    try {
+      const r = await CapacitorHttp.get({ url, connectTimeout: 8000, readTimeout: 10000 });
+      const durationMs = Date.now() - startTime;
+      const data = typeof r.data === 'string' ? JSON.parse(r.data) : r.data;
+      return { status: r.status, data, durationMs };
+    } catch (err: any) {
+      const durationMs = Date.now() - startTime;
+      console.error(`[EVENTOS] Error nativo CapacitorHttp en ${url} (${durationMs}ms):`, err.message || err);
+      throw err;
     }
-    const count = data?.events?.length || 0;
-    console.log(`[EVENTOS] URL consultada: ${url} | Código: ${status} | Partidos recibidos: ${count}`);
-    return data;
+  }
+
+  // En versión Web
+  try {
+    const r = await fetch(url);
+    const durationMs = Date.now() - startTime;
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data = await r.json();
+    return { status: r.status, data, durationMs };
+  } catch (webErr: any) {
+    // Respaldo exclusivamente web: nunca depender de /api/ en el APK
+    try {
+      const proxyUrl = `/api/sports/proxy?url=${encodeURIComponent(url)}`;
+      const proxyRes = await fetch(proxyUrl);
+      const durationMs = Date.now() - startTime;
+      if (proxyRes.ok) {
+        return { status: proxyRes.status, data: await proxyRes.json(), durationMs };
+      }
+    } catch {}
+    throw webErr;
+  }
+}
+
+async function getJson(url: string): Promise<any> {
+  try {
+    const res = await httpGetJson(url);
+    const count = res.data?.events?.length || 0;
+    console.log(`[EVENTOS] URL consultada: ${url} | Código: ${res.status} | Partidos recibidos: ${count} (${res.durationMs}ms)`);
+    return res.data;
   } catch (err: any) {
-    console.error(`[EVENTOS] Excepción consultando URL: ${url} | Código: ${status || 'N/A'} | Error: ${err.message || err}`);
+    console.error(`[EVENTOS] Excepción consultando URL: ${url} | Error: ${err.message || err}`);
     throw err;
   }
 }
