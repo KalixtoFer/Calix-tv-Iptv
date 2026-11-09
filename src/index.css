@@ -186,23 +186,24 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 14px;
+  padding: 7px 15px;
   border-radius: 999px;
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 700;
   white-space: nowrap;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: #d4d4d8;
+  background: rgba(9, 21, 40, 0.85);
+  border: 1px solid rgba(6, 182, 212, 0.35);
+  color: #e4e4e7;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .mobile-mode .chip.active {
-  background: linear-gradient(135deg, #7c3aed, #a855f7);
-  border-color: transparent;
+  background: linear-gradient(135deg, #c026d3, #9333ea);
+  border-color: #f0abfc;
   color: #ffffff;
-  font-weight: 700;
-  box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+  font-weight: 800;
+  box-shadow: 0 0 15px rgba(192, 38, 211, 0.5);
 }
 
 .mobile-mode .channel-list,

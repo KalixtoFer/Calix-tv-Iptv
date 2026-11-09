@@ -32,7 +32,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
       style={{
         paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 8px)',
       }}
-      className="fixed bottom-0 left-0 right-0 z-40 bg-[#060812]/95 backdrop-blur-2xl border-t border-zinc-800/90 px-2 pt-2 flex items-center justify-around shadow-[0_-10px_25px_rgba(0,0,0,0.6)] select-none"
+      className="fixed bottom-0 left-0 right-0 z-40 bg-[#040814]/96 backdrop-blur-2xl border-t border-cyan-500/25 px-1 pt-2 flex items-center justify-around shadow-[0_-10px_25px_rgba(0,0,0,0.8)] select-none"
     >
       {navItems.map((item) => {
         const Icon = item.icon;
@@ -49,9 +49,9 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
                 onNavigate(item.id);
               }
             }}
-            className={`flex-1 py-1 flex flex-col items-center justify-center gap-0.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 ${
+            className={`flex-1 py-1 relative flex flex-col items-center justify-center gap-0.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 ${
               isActive
-                ? 'text-cyan-400 drop-shadow-[0_0_10px_rgba(6,182,212,0.6)] font-black'
+                ? 'text-cyan-400 drop-shadow-[0_0_10px_rgba(6,182,212,0.6)] font-extrabold before:absolute before:-top-[8px] before:inset-x-2 before:h-[3px] before:bg-cyan-400 before:rounded-full before:shadow-[0_0_12px_rgba(34,211,238,0.9)]'
                 : 'text-zinc-400 hover:text-zinc-200 font-semibold'
             }`}
           >
@@ -62,7 +62,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
             >
               <Icon className="w-5 h-5" />
             </div>
-            <span className="text-[10px] tracking-tight truncate max-w-[62px]">
+            <span className="text-[10px] tracking-tight truncate max-w-[64px]">
               {item.label}
             </span>
           </button>

@@ -255,28 +255,6 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
               </>
             )}
           </button>
-
-          {/* Quick Demo / Explore Menu Button */}
-          <button
-            type="button"
-            onClick={onEnterGuest}
-            disabled={isLoading}
-            className="tv-focusable w-full py-3 bg-gradient-to-r from-zinc-900 to-zinc-950 hover:from-zinc-850 hover:to-zinc-900 border border-cyan-500/40 text-cyan-300 hover:text-white font-extrabold text-xs rounded-xl flex items-center justify-center gap-2 cursor-pointer transition transform active:scale-95 shadow-[0_0_15px_rgba(6,182,212,0.15)]"
-          >
-            <Sparkles className="w-4 h-4 text-cyan-400 animate-pulse" />
-            <span>EXPLORAR MENÚ PRINCIPAL (MODO DEMO)</span>
-          </button>
-
-          {/* Admin Panel Direct Entry Button */}
-          <button
-            type="button"
-            onClick={onOpenAdmin}
-            disabled={isLoading}
-            className="tv-focusable w-full py-2.5 bg-zinc-900/90 hover:bg-zinc-800 border border-emerald-500/40 text-emerald-400 hover:text-emerald-300 font-extrabold text-xs rounded-xl flex items-center justify-center gap-2 cursor-pointer transition transform active:scale-95"
-          >
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span>PANEL DE ADMINISTRACIÓN</span>
-          </button>
         </form>
 
         {/* Security Note */}

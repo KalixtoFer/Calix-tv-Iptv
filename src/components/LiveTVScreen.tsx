@@ -20,6 +20,7 @@ import {
   Film,
   Clapperboard,
   Settings,
+  LogOut,
 } from 'lucide-react';
 import { ActiveSection, DeviceViewMode, LiveCategory, LiveStream } from '../types/iptv';
 import { iptvApi } from '../services/iptvApi';
@@ -109,9 +110,14 @@ const ChannelRow = React.memo<ChannelRowProps>(({
   return (
     <div
       onClick={() => onSelect(stream)}
-      className={`channel-row ${isPlaying ? 'playing' : ''}`}
+      className={`channel-row flex items-center gap-3 p-2.5 mb-2.5 rounded-2xl bg-[#08101d]/90 border transition-all cursor-pointer select-none ${
+        isPlaying
+          ? 'playing border-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.4)] bg-cyan-950/30'
+          : 'border-cyan-500/20 hover:border-cyan-500/50 hover:bg-[#0d1728]'
+      }`}
     >
-      <div className="w-[44px] h-[44px] shrink-0 rounded-[10px] bg-zinc-900/80 border border-white/10 flex items-center justify-center overflow-hidden">
+      {/* Red rounded logo container matching reference design */}
+      <div className="w-14 h-11 shrink-0 rounded-xl bg-gradient-to-br from-red-600 via-rose-600 to-red-700 border border-red-400/40 shadow-md flex items-center justify-center p-1 overflow-hidden">
         {stream.stream_icon && !imgError ? (
           <img
             src={stream.stream_icon}
@@ -119,35 +125,51 @@ const ChannelRow = React.memo<ChannelRowProps>(({
             loading="lazy"
             decoding="async"
             onError={() => setImgError(true)}
-            className="logo"
+            className="w-full h-full object-contain p-0.5"
           />
         ) : (
-          <Tv className="w-5 h-5 text-zinc-500" />
+          <Tv className="w-5 h-5 text-white" />
         )}
       </div>
 
+      {/* Channel info */}
       <div className="flex-1 min-w-0 pr-1 flex flex-col justify-center">
-        <div className="name">
+        <div className="text-sm font-extrabold text-white truncate leading-snug tracking-tight">
           {index + 1}. {title}
         </div>
-        {hasEpg && (
-          <div className="epg truncate mt-0.5">
-            {epgProgram}
-          </div>
-        )}
+        <div className="text-xs text-zinc-400 font-medium truncate mt-0.5">
+          {hasEpg ? epgProgram : 'No información'}
+        </div>
       </div>
 
+      {/* Vertical divider line */}
+      <div className="w-[1px] h-7 bg-zinc-800/80 my-auto shrink-0" />
+
+      {/* Favorite Heart button */}
       <button
         type="button"
         onClick={(e) => onToggleFavorite(e, stream)}
-        className="shrink-0 p-2 text-zinc-500 active:scale-125 transition-transform"
+        className="shrink-0 p-1.5 text-zinc-400 hover:text-white active:scale-125 transition-transform"
         aria-label={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
       >
         <Heart
           className={`w-5 h-5 transition-colors ${
-            isFavorite ? 'fill-rose-500 text-rose-500' : 'text-zinc-600 hover:text-zinc-400'
+            isFavorite ? 'fill-rose-500 text-rose-500' : 'text-zinc-500 hover:text-zinc-300'
           }`}
         />
+      </button>
+
+      {/* Cyan Circular Play Button */}
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onSelect(stream);
+        }}
+        className="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-[0_0_12px_rgba(6,182,212,0.6)] shrink-0 active:scale-90 transition-transform"
+        aria-label="Reproducir canal"
+      >
+        <PlayIcon className="w-4 h-4 fill-white translate-x-0.5" />
       </button>
     </div>
   );
@@ -346,31 +368,68 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
   if (viewMode === 'mobile') {
     return (
       <div className="live-screen mobile-mode">
-        {/* 1) CABECERA COMPACTA */}
-        <header className="app-header">
+        {/* 1) CABECERA COMPACTA (Matching reference image /public/assets/aistudio/image_9df75803.png) */}
+        <header className="app-header px-3 py-2 bg-[#040812] border-b border-cyan-500/20 flex items-center justify-between shadow-lg">
+          {/* Logo & Username */}
           <div className="flex items-center gap-2">
-            <img
-              src="/logo.png"
-              alt="CALIX TV"
-              className="logo"
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-              }}
-            />
-            <div className="flex items-center gap-1.5 ml-1">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse inline-block shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-              <span className="text-xs font-semibold text-zinc-300 max-w-[95px] truncate">
-                {username || 'Usuario'}
+            <div className="h-10 px-2 rounded-xl bg-[#071224] border border-cyan-500/40 shadow-[0_0_12px_rgba(6,182,212,0.3)] flex items-center justify-center">
+              <img
+                src="/logo.png"
+                alt="CALIX TV"
+                className="h-8 w-auto object-contain"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            </div>
+            <div className="flex flex-col justify-center">
+              <div className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.9)]" />
+                <span className="text-[10px] font-extrabold bg-cyan-950/80 text-cyan-300 px-1.5 py-0.2 rounded border border-cyan-600/40">
+                  1.0
+                </span>
+              </div>
+              <span className="text-[11px] font-bold text-zinc-300 font-mono tracking-tight">
+                @{username || 'DEMO0091'}
               </span>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-mono font-bold bg-white/10 text-cyan-300 px-1.5 py-0.5 rounded border border-cyan-500/30">
-              v1.0
-            </span>
-            <span className="text-xs font-mono font-bold text-zinc-200">
+
+          {/* Clock Pill Badge */}
+          <div className="px-3 py-1 rounded-full bg-[#081528] border border-cyan-500/40 flex items-center gap-2 shadow-[0_0_12px_rgba(6,182,212,0.35)]">
+            <div className="w-5 h-5 rounded-full bg-cyan-500/20 border border-cyan-400 flex items-center justify-center text-cyan-300">
+              <Clock className="w-3 h-3 text-cyan-300" />
+            </div>
+            <span className="text-xs font-mono font-extrabold text-cyan-300 tracking-wider">
               {currentTimeStr}
             </span>
+          </div>
+
+          {/* Right Action Icons: Signal, Settings, Logout */}
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              className="p-2 rounded-xl bg-[#091528] border border-cyan-500/40 text-cyan-400 hover:text-white active:scale-95 transition-transform"
+              title="Señal digital"
+            >
+              <Radio className="w-4 h-4 text-cyan-400" />
+            </button>
+            <button
+              type="button"
+              onClick={onOpenSettings}
+              className="p-2 rounded-xl bg-[#091528] border border-cyan-500/40 text-cyan-300 hover:text-white active:scale-95 transition-transform cursor-pointer"
+              title="Ajustes"
+            >
+              <Settings className="w-4 h-4 text-cyan-300" />
+            </button>
+            <button
+              type="button"
+              onClick={onBack}
+              className="p-2 rounded-xl bg-rose-950/90 border border-rose-700/80 text-rose-400 hover:text-rose-200 active:scale-95 transition-transform cursor-pointer shadow-[0_0_10px_rgba(244,63,94,0.3)]"
+              title="Salir"
+            >
+              <LogOut className="w-4 h-4 text-rose-400" />
+            </button>
           </div>
         </header>
 
