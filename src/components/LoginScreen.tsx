@@ -42,6 +42,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   const [preloadStatus, setPreloadStatus] = useState<string>('');
   const [preloadPercent, setPreloadPercent] = useState<number>(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  // Sin servidor configurado en el panel de admin, el login normal no puede funcionar
+  const serviceAvailable = Boolean(config.serverUrl);
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -53,12 +55,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
       return;
     }
 
-    // Auto-detect Admin login: if admin credentials typed in main form, open Admin Panel
-    if (
-      (u === 'admin' || u === 'kalixgaming123@gmail.com' || u === 'kalix' || u === 'calix') &&
-      (p === 'CalixTvAdmin2026!' || p === 'admin' || p === 'admin123')
-    ) {
-      onOpenAdmin();
+    if (!serviceAvailable) {
+      setErrorMessage('Servicio no disponible por el momento. Intentá de nuevo más tarde.');
       return;
     }
 
@@ -154,6 +152,15 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
             Versión 1.0 • {viewMode === 'mobile' ? 'Móvil' : 'Android TV'}
           </p>
         </div>
+
+        {!serviceAvailable && (
+          <div className="p-3 rounded-xl bg-amber-950/60 border border-amber-700 text-amber-200 text-xs flex items-start gap-2.5">
+            <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+            <span className="leading-snug">
+              Servicio no disponible por el momento. Revisá tu conexión a internet o intentá más tarde.
+            </span>
+          </div>
+        )}
 
         {/* Error Feedback */}
         {errorMessage && (

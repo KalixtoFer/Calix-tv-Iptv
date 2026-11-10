@@ -1,0 +1,25 @@
+name: Publicar panel de admin (Firebase Hosting)
+
+# Publica la carpeta /admin en https://influential-iris-f6shk.web.app
+# Requiere el secreto FIREBASE_SERVICE_ACCOUNT (ver docs/PANEL-ADMIN.md, paso 5).
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'admin/**'
+      - 'firebase.json'
+
+jobs:
+  deploy:
+    name: Publicar panel
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: influential-iris-f6shk
+          channelId: live

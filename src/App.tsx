@@ -320,9 +320,9 @@ export default function App() {
             max_connections: '1',
           },
           server_info: {
-            url: config?.serverUrl || 'https://sneoplus.net:8443',
-            port: '8443',
-            server_protocol: 'https',
+            url: config?.serverUrl || '',
+            port: config?.serverPort || '',
+            server_protocol: config?.serverProtocol || 'https',
           },
         },
         savedAt: Date.now(),

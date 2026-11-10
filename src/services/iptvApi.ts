@@ -10,6 +10,7 @@ import {
   SeriesDetails,
 } from '../types/iptv';
 import { Capacitor } from '@capacitor/core';
+import { fetchRemoteConfig } from './remoteConfig';
 
 const STORAGE_SESSION_KEY = 'nexus_iptv_session_v1';
 const STORAGE_FAVORITES_KEY = 'nexus_iptv_favorites_v1';
@@ -135,32 +136,21 @@ class IptvApiService {
     }
   }
 
-  // 1. Fetch Centralized Server Configuration
+  // 1. Configuración del servicio: el servidor IPTV NO está en el código, se lee de Firestore
+  //    (documento config/servidor, editado desde el panel de admin). Si no hay nada
+  //    configurado, serverUrl queda vacío y el login muestra "Servicio no disponible".
   async fetchConfig(): Promise<CentralizedConfig> {
-    try {
-      const res = await fetch('/api/iptv/config');
-      if (res.ok) {
-        const text = await res.text();
-        if (text.trim().startsWith('{')) {
-          const data = JSON.parse(text);
-          if (data.config) {
-            this.activeConfig = data.config;
-            return data.config;
-          }
-        }
-      }
-    } catch (err) {
-      console.warn('Could not fetch server config from backend, using client default:', err);
-    }
+    const remote = await fetchRemoteConfig();
+    const server = remote.status === 'ok' ? remote.config : null;
 
-    // Default fallback if backend unreachable (e.g. running as standalone APK)
-    const fallback: CentralizedConfig = {
-      serverUrl: 'https://sneoplus.net:8443',
-      serverPort: '8443',
-      serverProtocol: 'https',
-      serviceName: 'Calix TV',
-      announcement: '¡Bienvenidos a Calix TV! Tu Servicio Digital en la mejor calidad.',
-      showAnnouncement: true,
+    const config: CentralizedConfig = {
+      serverUrl: server?.serverUrl ?? '',
+      serverPort: server?.serverPort ?? '',
+      serverProtocol: server?.serverProtocol ?? 'https',
+      serviceName: server?.serviceName ?? 'Calix TV',
+      announcement:
+        server?.announcement ?? '¡Bienvenidos a Calix TV! Tu Servicio Digital en la mejor calidad.',
+      showAnnouncement: server?.showAnnouncement ?? true,
       banners: [],
       featuredStream: {
         streamId: 'demo-live-1',
@@ -173,8 +163,14 @@ class IptvApiService {
       },
       demoModeEnabled: true,
     };
-    this.activeConfig = fallback;
-    return fallback;
+    this.activeConfig = config;
+    return config;
+  }
+
+  /** URL base del servidor IPTV sin barra final. Vacía si el servicio no está configurado. */
+  private getBaseUrl(): string {
+    const base = this.activeConfig?.serverUrl || '';
+    return base.endsWith('/') ? base.slice(0, -1) : base;
   }
 
   // 2. Xtream Codes Login (Direct Xtream API + Proxy Fallback)
@@ -207,8 +203,8 @@ class IptvApiService {
           allowed_output_formats: ['m3u8', 'ts', 'rtmp'],
         },
         server_info: {
-          url: this.activeConfig?.serverUrl || 'https://sneoplus.net:8443',
-          port: this.activeConfig?.serverPort || '8443',
+          url: this.activeConfig?.serverUrl || '',
+          port: this.activeConfig?.serverPort || '',
           server_protocol: this.activeConfig?.serverProtocol || 'https',
         },
       };
@@ -216,8 +212,10 @@ class IptvApiService {
       return demoAuth;
     }
 
-    const base = this.activeConfig?.serverUrl || 'https://sneoplus.net:8443';
-    const cleanBase = base.endsWith('/') ? base.slice(0, -1) : base;
+    const cleanBase = this.getBaseUrl();
+    if (!cleanBase) {
+      throw new Error('Servicio no disponible por el momento. Intentá de nuevo más tarde.');
+    }
 
     // A. Direct call to Xtream Codes server (Works natively on Android APK and with CORS)
     try {
@@ -437,8 +435,7 @@ class IptvApiService {
         : 'get_series_categories';
 
     const effectivePass = this.getEffectivePassword(password);
-    const base = this.activeConfig?.serverUrl || 'https://sneoplus.net:8443';
-    const cleanBase = base.endsWith('/') ? base.slice(0, -1) : base;
+    const cleanBase = this.getBaseUrl();
 
     let rawData: any[] = [];
 
@@ -533,8 +530,7 @@ class IptvApiService {
           : 'get_series';
 
       const effectivePass = this.getEffectivePassword(password);
-      const base = this.activeConfig?.serverUrl || 'https://sneoplus.net:8443';
-      const cleanBase = base.endsWith('/') ? base.slice(0, -1) : base;
+      const cleanBase = this.getBaseUrl();
 
       // Direct fetch from Xtream Codes server
       try {
@@ -608,8 +604,7 @@ class IptvApiService {
     if ((!result || result.length === 0) && providerCatId && providerCatId !== 'all' && !isDynamic) {
       const action = type === 'live' ? 'get_live_streams' : type === 'vod' ? 'get_vod_streams' : 'get_series';
       const effectivePass = this.getEffectivePassword(password);
-      const base = this.activeConfig?.serverUrl || 'https://sneoplus.net:8443';
-      const cleanBase = base.endsWith('/') ? base.slice(0, -1) : base;
+      const cleanBase = this.getBaseUrl();
       const catParam = `&category_id=${encodeURIComponent(providerCatId)}`;
 
       try {
@@ -835,8 +830,7 @@ class IptvApiService {
     password?: string
   ): Promise<SeriesDetails | null> {
     const effectivePass = this.getEffectivePassword(password);
-    const base = this.activeConfig?.serverUrl || 'https://sneoplus.net:8443';
-    const cleanBase = base.endsWith('/') ? base.slice(0, -1) : base;
+    const cleanBase = this.getBaseUrl();
 
     // 1. Direct call
     try {
@@ -877,9 +871,7 @@ class IptvApiService {
     username = '',
     password = ''
   ): string {
-    const config = this.activeConfig;
-    const base = config?.serverUrl || 'https://sneoplus.net:8443';
-    const cleanBase = base.endsWith('/') ? base.slice(0, -1) : base;
+    const cleanBase = this.getBaseUrl();
 
     const session = this.getSavedSession();
     const activeUser = username || session?.username || 'demo';
@@ -936,47 +928,8 @@ class IptvApiService {
       console.warn('Network admin verify failed, trying client fallback:', e);
     }
 
-    // Client-side / Standalone APK Admin Validation Fallback:
-    const u = (params.username || '').trim().toLowerCase();
-    const p = (params.password || '').trim();
-
-    const isMatch =
-      (u === 'admin' || u === 'kalixgaming123@gmail.com') &&
-      (p === 'CalixTvAdmin2026!');
-
-    if (isMatch) {
-      this.adminToken = 'local_admin_token';
-      return {
-        success: true,
-        authorized: true,
-        token: 'local_admin_token',
-        adminUser: {
-          username: u || 'admin',
-          email: 'kalixgaming123@gmail.com',
-          name: 'Administrador Calix TV',
-          role: 'superadmin',
-        },
-        fullConfig: this.activeConfig || {
-          serverUrl: 'https://sneoplus.net:8443',
-          serverPort: '8443',
-          serverProtocol: 'https',
-          serviceName: 'Calix TV',
-          announcement: '¡Bienvenidos a Calix TV!',
-          showAnnouncement: true,
-          banners: [],
-          featuredStream: { streamId: '1', name: '', category: '', streamUrl: '', poster: '', resolution: '', fps: '' },
-          demoModeEnabled: true,
-          appUpdate: {
-            latestVersion: '1.0',
-            minVersion: '1.0',
-            apkDownloadUrl: 'https://github.com/KalixtoFer/calixtvapp/releases/latest/download/CalixTV.apk',
-            releaseNotes: 'Versión oficial de Calix TV v1.0',
-            forceUpdate: false,
-          },
-        },
-      };
-    }
-
+    // Sin plan B local: la validación del administrador la hace siempre el backend.
+    // (Antes había una contraseña escrita en texto plano en el cliente.)
     return {
       success: false,
       message: 'Usuario o contraseña de administrador incorrectos.',

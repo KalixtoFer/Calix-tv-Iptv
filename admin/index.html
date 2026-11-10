@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Calix TV · Panel de administración</title>
+<style>
+  :root {
+    --bg: #07080c; --card: #10131a; --line: #232836; --text: #e8ecf4; --muted: #8b94a8;
+    --accent: #22d3ee; --accent-2: #3b82f6; --ok: #34d399; --warn: #fbbf24; --bad: #f87171;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 640px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 20px; margin: 8px 0 4px; letter-spacing: .3px; }
+  .sub { color: var(--muted); margin: 0 0 20px; font-size: 13px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px; margin-bottom: 14px; }
+  .card h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent); margin: 0 0 12px; }
+  label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin: 14px 0 6px; text-transform: uppercase; letter-spacing: .8px; }
+  input[type=text], textarea { width: 100%; background: #0a0c12; color: var(--text); border: 1px solid var(--line);
+    border-radius: 10px; padding: 12px; font: inherit; }
+  input[type=text]:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  textarea { min-height: 76px; resize: vertical; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .check { display: flex; align-items: center; gap: 10px; margin-top: 14px; color: var(--text); font-size: 14px; }
+  button { font: inherit; font-weight: 700; border: 0; border-radius: 10px; padding: 12px 16px; cursor: pointer; color: #04121a;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2)); }
+  button.ghost { background: transparent; color: var(--text); border: 1px solid var(--line); }
+  button.danger { background: transparent; color: var(--bad); border: 1px solid #5b2230; }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; word-break: break-all;
+    background: #0a0c12; border: 1px solid var(--line); border-radius: 8px; padding: 10px; display: block; }
+  .msg { margin-top: 14px; font-size: 13px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); }
+  .msg.ok { color: var(--ok); border-color: #1c5a47; } .msg.bad { color: var(--bad); border-color: #5b2230; }
+  .msg.warn { color: var(--warn); border-color: #5c4a14; }
+  .note { color: var(--muted); font-size: 12.5px; margin-top: 10px; }
+  ol { padding-left: 20px; margin: 8px 0; } li { margin: 6px 0; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Calix TV · Panel de administración</h1>
+  <p class="sub">Acá cargás el servidor del servicio. La app de tus clientes lo lee de acá y no lo trae escrito.</p>
+
+  <section id="view-login" class="card" hidden>
+    <h2>Acceso</h2>
+    <p style="margin-top:0">Entrá con tu cuenta de Google. Solo las cuentas autorizadas pueden cambiar la configuración.</p>
+    <button id="btn-login">Entrar con Google</button>
+    <div id="login-msg" class="msg bad" hidden></div>
+  </section>
+
+  <section id="view-noadmin" class="card" hidden>
+    <h2>Falta autorizar tu cuenta</h2>
+    <p style="margin-top:0">Entraste bien, pero esta cuenta todavía no es administradora. Se autoriza una sola vez:</p>
+    <ol>
+      <li>Abrí <b>Firebase Console → Firestore Database → Datos</b>.</li>
+      <li>Creá la colección <b>admins</b>.</li>
+      <li>En <b>ID del documento</b> pegá este código (tu UID) y agregá un campo cualquiera, por ejemplo <b>rol</b> = <b>admin</b>:</li>
+    </ol>
+    <code id="uid-box" class="mono"></code>
+    <div class="row" style="margin-top:10px">
+      <button class="ghost" id="btn-copy-uid">Copiar UID</button>
+      <button class="ghost" id="btn-recheck">Ya lo hice, verificar</button>
+      <button class="ghost" id="btn-logout-1">Salir</button>
+    </div>
+    <div id="noadmin-msg" class="msg warn" hidden></div>
+  </section>
+
+  <section id="view-admin" hidden>
+    <div class="card">
+      <h2>Servidor del servicio</h2>
+      <label for="f-url">Dirección del servidor IPTV</label>
+      <input id="f-url" type="text" inputmode="url" autocomplete="off" placeholder="http://tu-servidor.com:puerto">
+      <p class="note">Solo la dirección (con puerto si lo tiene). <b>No cargues usuarios ni contraseñas acá:</b> este dato lo puede leer la app de todos los clientes.</p>
+
+      <label for="f-name">Nombre del servicio</label>
+      <input id="f-name" type="text" autocomplete="off" placeholder="Calix TV">
+
+      <label for="f-ann">Anuncio en la app</label>
+      <textarea id="f-ann" placeholder="Mensaje de bienvenida o aviso para tus clientes"></textarea>
+      <label class="check"><input id="f-show" type="checkbox"> Mostrar el anuncio</label>
+
+      <div class="row" style="margin-top:18px">
+        <button id="btn-save">Guardar</button>
+        <button class="danger" id="btn-disable">Desactivar servicio</button>
+        <button class="ghost" id="btn-logout-2">Salir</button>
+      </div>
+      <div id="save-msg" class="msg" hidden></div>
+      <p class="note" id="state-line"></p>
+    </div>
+    <p class="note">Los cambios se ven en la app la próxima vez que se abre. "Desactivar servicio" borra la dirección y los clientes ven "Servicio no disponible".</p>
+  </section>
+</main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut }
+  from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAo-BT50_pq2FGIATWx9rJaHnp84KOznxA",
+  authDomain: "influential-iris-f6shk.firebaseapp.com",
+  projectId: "influential-iris-f6shk",
+  storageBucket: "influential-iris-f6shk.firebasestorage.app",
+  messagingSenderId: "193279001480",
+  appId: "1:193279001480:web:3acc004d4d4b70b41ff03d"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const CONFIG_REF = () => doc(db, "config", "servidor");
+
+const $ = (id) => document.getElementById(id);
+const views = ["view-login", "view-noadmin", "view-admin"];
+const show = (id) => views.forEach((v) => { $(v).hidden = v !== id; });
+
+function say(el, text, kind) {
+  el.textContent = text;
+  el.className = "msg " + (kind || "");
+  el.hidden = !text;
+}
+
+// Igual que la app: agrega http:// si falta, quita barras finales, valida.
+function normalizeUrl(raw) {
+  let u = (raw || "").trim();
+  if (!u) return "";
+  if (!/^https?:\/\//i.test(u)) u = "http://" + u;
+  try {
+    const p = new URL(u);
+    return p.protocol + "//" + p.host + p.pathname.replace(/\/+$/, "");
+  } catch { return null; }
+}
+
+function explain(err) {
+  const c = err && err.code || "";
+  if (c === "permission-denied") return "Sin permiso. Revisá que las reglas de Firestore estén publicadas y que tu cuenta esté en la colección admins.";
+  if (c === "auth/popup-closed-by-user" || c === "auth/cancelled-popup-request") return "Se cerró la ventana de Google antes de terminar.";
+  if (c === "auth/popup-blocked") return "El navegador bloqueó la ventana emergente. Permitila e intentá de nuevo.";
+  if (c === "unavailable" || c === "auth/network-request-failed") return "Sin conexión con Firebase. Intentá de nuevo.";
+  return (err && err.message) || "Error inesperado.";
+}
+
+async function isAdmin(uid) {
+  const snap = await getDoc(doc(db, "admins", uid));
+  return snap.exists();
+}
+
+async function loadConfig() {
+  const snap = await getDoc(CONFIG_REF());
+  const d = snap.exists() ? snap.data() : {};
+  $("f-url").value = d.serverUrl || "";
+  $("f-name").value = d.serviceName || "";
+  $("f-ann").value = d.announcement || "";
+  $("f-show").checked = d.showAnnouncement !== false;
+  $("state-line").textContent = d.serverUrl
+    ? "Estado: servicio ACTIVO."
+    : "Estado: servicio sin servidor configurado (los clientes ven “Servicio no disponible”).";
+}
+
+async function route(user) {
+  say($("save-msg"), "");
+  if (!user) { show("view-login"); return; }
+  try {
+    if (await isAdmin(user.uid)) {
+      await loadConfig();
+      show("view-admin");
+    } else {
+      $("uid-box").textContent = user.uid;
+      say($("noadmin-msg"), "");
+      show("view-noadmin");
+    }
+  } catch (err) {
+    $("uid-box").textContent = user.uid;
+    show("view-noadmin");
+    say($("noadmin-msg"), explain(err), "warn");
+  }
+}
+
+onAuthStateChanged(auth, route);
+
+$("btn-login").onclick = async () => {
+  say($("login-msg"), "");
+  try { await signInWithPopup(auth, new GoogleAuthProvider()); }
+  catch (err) { say($("login-msg"), explain(err), "bad"); }
+};
+const out = () => signOut(auth);
+$("btn-logout-1").onclick = out;
+$("btn-logout-2").onclick = out;
+$("btn-recheck").onclick = () => route(auth.currentUser);
+$("btn-copy-uid").onclick = async () => {
+  try { await navigator.clipboard.writeText($("uid-box").textContent); say($("noadmin-msg"), "UID copiado.", "ok"); }
+  catch { say($("noadmin-msg"), "No se pudo copiar. Seleccionalo y copialo a mano.", "warn"); }
+};
+
+async function save(urlValue) {
+  const btn = $("btn-save"), btn2 = $("btn-disable");
+  btn.disabled = btn2.disabled = true;
+  say($("save-msg"), "Guardando…");
+  try {
+    // Documento de lectura pública: no se guarda quién lo editó ni ningún dato personal.
+    await setDoc(CONFIG_REF(), {
+      serverUrl: urlValue,
+      serviceName: $("f-name").value.trim(),
+      announcement: $("f-ann").value.trim(),
+      showAnnouncement: $("f-show").checked,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+    say($("save-msg"), urlValue ? "Guardado. La app ya toma este servidor." : "Servicio desactivado.", "ok");
+    await loadConfig();
+  } catch (err) {
+    say($("save-msg"), explain(err), "bad");
+  } finally {
+    btn.disabled = btn2.disabled = false;
+  }
+}
+
+$("btn-save").onclick = () => {
+  const url = normalizeUrl($("f-url").value);
+  if (url === null) return say($("save-msg"), "La dirección no es válida. Ejemplo: http://servidor.com:8080", "bad");
+  if (!url) return say($("save-msg"), "Escribí la dirección del servidor, o usá “Desactivar servicio”.", "bad");
+  save(url);
+};
+$("btn-disable").onclick = () => {
+  if (confirm("¿Desactivar el servicio? Los clientes verán “Servicio no disponible” hasta que cargues un servidor.")) {
+    $("f-url").value = "";
+    save("");
+  }
+};
+</script>
+</body>
+</html>

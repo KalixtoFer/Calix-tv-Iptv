@@ -644,7 +644,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           type="text"
                           value={config.serverUrl}
                           onChange={(e) => setConfig({ ...config, serverUrl: e.target.value })}
-                          placeholder="https://sneoplus.net:8443"
+                          placeholder="https://tu-servidor.com:puerto"
                           className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white text-xs font-mono focus:border-cyan-500 focus:outline-none"
                         />
                       </div>

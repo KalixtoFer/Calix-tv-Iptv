@@ -95,7 +95,7 @@ const DEFAULT_ADMIN_AUTH: AdminAuthData = {
 };
 
 const DEFAULT_CONFIG: CentralizedConfig = {
-  serverUrl: 'https://sneoplus.net:8443',
+  serverUrl: '',
   serverPort: '8443',
   serverProtocol: 'http',
   serviceName: 'Calix TV',
