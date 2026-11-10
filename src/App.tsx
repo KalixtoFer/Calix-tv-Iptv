@@ -80,11 +80,65 @@ export default function App() {
     }
   };
 
+  // Helper to detect if current URL is pointing to /panel or /admin
+  const isPanelOrAdminUrl = useCallback(() => {
+    if (typeof window === 'undefined') return false;
+    const path = window.location.pathname.toLowerCase().replace(/\/+$/, '');
+    const hash = window.location.hash.toLowerCase().replace(/\/+$/, '');
+    return (
+      path === '/panel' ||
+      path === '/admin' ||
+      path.startsWith('/panel/') ||
+      path.startsWith('/admin/') ||
+      hash === '#panel' ||
+      hash === '#admin' ||
+      hash.startsWith('#panel/') ||
+      hash.startsWith('#admin/')
+    );
+  }, []);
+
   // Modals
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
-  const [isAdminOpen, setIsAdminOpen] = useState<boolean>(false);
+  const [isAdminOpen, setIsAdminOpen] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    const path = window.location.pathname.toLowerCase().replace(/\/+$/, '');
+    const hash = window.location.hash.toLowerCase().replace(/\/+$/, '');
+    return (
+      path === '/panel' ||
+      path === '/admin' ||
+      path.startsWith('/panel/') ||
+      path.startsWith('/admin/') ||
+      hash === '#panel' ||
+      hash === '#admin' ||
+      hash.startsWith('#panel/') ||
+      hash.startsWith('#admin/')
+    );
+  });
   const [isRemoteOpen, setIsRemoteOpen] = useState<boolean>(false);
   const [isApkGuideOpen, setIsApkGuideOpen] = useState<boolean>(false);
+
+  const handleCloseAdmin = useCallback(() => {
+    setIsAdminOpen(false);
+    if (typeof window !== 'undefined' && isPanelOrAdminUrl()) {
+      window.history.replaceState({}, '', '/');
+    }
+  }, [isPanelOrAdminUrl]);
+
+  // Synchronize URL changes with admin panel state
+  useEffect(() => {
+    const handleUrlChange = () => {
+      if (isPanelOrAdminUrl()) {
+        setIsAdminOpen(true);
+      }
+    };
+    handleUrlChange();
+    window.addEventListener('popstate', handleUrlChange);
+    window.addEventListener('hashchange', handleUrlChange);
+    return () => {
+      window.removeEventListener('popstate', handleUrlChange);
+      window.removeEventListener('hashchange', handleUrlChange);
+    };
+  }, [isPanelOrAdminUrl]);
 
   // Active Fullscreen Video Playback
   const [activePlayback, setActivePlayback] = useState<PlaybackState | null>(null);
@@ -111,8 +165,8 @@ export default function App() {
           iptvApi.setStreamsCache('series', series.data);
         }
 
-        // Check if URL specifies /admin or #admin
-        if (typeof window !== 'undefined' && (window.location.pathname === '/admin' || window.location.hash === '#admin')) {
+        // Check if URL specifies /panel, /admin, #panel or #admin
+        if (isPanelOrAdminUrl()) {
           setIsAdminOpen(true);
         }
         
@@ -128,7 +182,7 @@ export default function App() {
       }
     }
     init();
-  }, []);
+  }, [isPanelOrAdminUrl]);
 
   // 1.1 Background Refresh: if loaded from cache, check for updates silently
   useEffect(() => {
@@ -208,7 +262,7 @@ export default function App() {
       } else if (isProfileOpen) {
         setIsProfileOpen(false);
       } else if (isAdminOpen) {
-        setIsAdminOpen(false);
+        handleCloseAdmin();
       } else if (isRemoteOpen) {
         setIsRemoteOpen(false);
       } else if (isApkGuideOpen) {
@@ -225,7 +279,7 @@ export default function App() {
     return () => {
       listener.then(l => l.remove());
     };
-  }, [activePlayback, activeSection, isAdminOpen, isRemoteOpen, isApkGuideOpen]);
+  }, [activePlayback, activeSection, isAdminOpen, isRemoteOpen, isApkGuideOpen, handleCloseAdmin]);
 
   // 4. Remote Control Key Listener (TV Remote D-Pad & shortcuts)
   const handleRemoteKey = useCallback(
@@ -242,7 +296,7 @@ export default function App() {
       // If any modal is open, Back closes it
       if (isAdminOpen) {
         if (key === 'BACK') {
-          setIsAdminOpen(false);
+          handleCloseAdmin();
           return true;
         }
         return false;
@@ -360,7 +414,7 @@ export default function App() {
       <div className="min-h-screen w-full bg-[#040508] flex items-center justify-center p-2 sm:p-4">
         <AdminPanelModal
           initialConfig={config}
-          onClose={() => setIsAdminOpen(false)}
+          onClose={handleCloseAdmin}
           onConfigSaved={(updated) => setConfig(updated)}
         />
       </div>
@@ -552,7 +606,7 @@ export default function App() {
       {isAdminOpen && (
         <AdminPanelModal
           initialConfig={config}
-          onClose={() => setIsAdminOpen(false)}
+          onClose={handleCloseAdmin}
           onConfigSaved={(newCfg) => setConfig(newCfg)}
         />
       )}
