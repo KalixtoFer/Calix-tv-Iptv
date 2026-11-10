@@ -60,6 +60,7 @@ public class PlayerActivity extends Activity {
 
     private ExoPlayer player;
     private PlayerView playerView;
+    private boolean playerIsVod = false; // tipo de LoadControl con el que se creó el player actual
 
     private FrameLayout root;
     private LinearLayout topBar;
@@ -169,6 +170,31 @@ public class PlayerActivity extends Activity {
     }
 
     /**
+     * Película o serie (VOD) en lugar de canal en vivo. Xtream Codes usa /movie/ y /series/;
+     * como respaldo, se detectan contenedores de archivo típicos de VOD.
+     */
+    private static boolean isVodUrl(String rawUrl) {
+        if (rawUrl == null) return false;
+        String u = rawUrl.trim().toLowerCase(Locale.ROOT);
+        if (u.contains("/live/")) return false;
+        if (u.contains("/movie/") || u.contains("/series/")) return true;
+        int q = u.indexOf('?');
+        String path = q >= 0 ? u.substring(0, q) : u;
+        return path.endsWith(".mkv") || path.endsWith(".mp4") || path.endsWith(".avi");
+    }
+
+    /** Libera el ExoPlayer actual para poder recrearlo con otro LoadControl (vivo <-> VOD). */
+    private void releasePlayer() {
+        if (player == null) return;
+        player.removeListener(playerListener);
+        player.removeAnalyticsListener(analyticsListener);
+        player.stop();
+        player.release();
+        player = null;
+        playerView.setPlayer(null);
+    }
+
+    /**
      * Regla 5: Usar la URL TS directa (output=ts); no convertir a HLS.
      */
     private String getEffectiveStreamUrl(String rawUrl) {
@@ -196,28 +222,52 @@ public class PlayerActivity extends Activity {
 
         Log.d(TAG, "Inicializando instancia única de ExoPlayer");
 
-        // 1) BUFFERS SEGÚN LA MEMORIA DEL EQUIPO (lowRam vs equipos normales)
+        // 1) BUFFERS SEGÚN EL TIPO DE CONTENIDO (vivo vs VOD) Y LA MEMORIA DEL EQUIPO
         ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
         boolean lowRam = am != null && (am.isLowRamDevice() || am.getMemoryClass() <= 128);
-        int minBufferMs = lowRam ? 3_000 : 5_000;
-        int maxBufferMs = lowRam ? 15_000 : 25_000;
-        int bufferForPlaybackMs = 1_000;
-        int bufferForPlaybackAfterRebufferMs = 2_000;
+        boolean vod = isVodUrl(url);
+        playerIsVod = vod;
 
-        Log.d(TAG, "Detección de memoria del equipo: lowRam=" + lowRam +
-                (am != null ? " [memoryClass=" + am.getMemoryClass() + "MB, isLowRamDevice=" + am.isLowRamDevice() + "]" : "") +
-                " -> Buffers: min=" + minBufferMs + "ms, max=" + maxBufferMs + "ms, playback=" + bufferForPlaybackMs + "ms, rebuffer=" + bufferForPlaybackAfterRebufferMs + "ms");
+        DefaultLoadControl loadControl;
+        if (vod) {
+            // PELÍCULAS Y SERIES (MP4/MKV de alto bitrate): buffer grande para absorber
+            // los picos de la red y no entrar en rebuffering constante. Se limita por bytes
+            // (no solo por tiempo) para no agotar la memoria en equipos chicos.
+            int minBufferMs = lowRam ? 15_000 : 30_000;
+            int maxBufferMs = lowRam ? 45_000 : 90_000;
+            int bufferForPlaybackMs = 2_500;
+            int bufferForPlaybackAfterRebufferMs = 5_000;
+            int targetBytes = (lowRam ? 24 : 64) * 1024 * 1024;
+            int backBufferMs = lowRam ? 0 : 20_000; // permite volver -10s sin re-descargar
 
-        DefaultLoadControl loadControl = new DefaultLoadControl.Builder()
-                .setBufferDurationsMs(
-                        minBufferMs,
-                        maxBufferMs,
-                        bufferForPlaybackMs,
-                        bufferForPlaybackAfterRebufferMs
-                )
-                .setBackBuffer(0, false) // en vivo no hace falta buffer hacia atrás
-                .setPrioritizeTimeOverSizeThresholds(!lowRam)
-                .build();
+            Log.d(TAG, "Modo VOD: lowRam=" + lowRam +
+                    (am != null ? " [memoryClass=" + am.getMemoryClass() + "MB, isLowRamDevice=" + am.isLowRamDevice() + "]" : "") +
+                    " -> Buffers: min=" + minBufferMs + "ms, max=" + maxBufferMs + "ms, playback=" + bufferForPlaybackMs +
+                    "ms, rebuffer=" + bufferForPlaybackAfterRebufferMs + "ms, bytes=" + (targetBytes / 1024 / 1024) + "MB");
+
+            loadControl = new DefaultLoadControl.Builder()
+                    .setBufferDurationsMs(minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs)
+                    .setTargetBufferBytes(targetBytes)
+                    .setBackBuffer(backBufferMs, true)
+                    .setPrioritizeTimeOverSizeThresholds(false) // el tope de bytes manda
+                    .build();
+        } else {
+            // TV EN VIVO: arranque rápido y poca latencia (configuración original)
+            int minBufferMs = lowRam ? 3_000 : 5_000;
+            int maxBufferMs = lowRam ? 15_000 : 25_000;
+            int bufferForPlaybackMs = 1_000;
+            int bufferForPlaybackAfterRebufferMs = 2_000;
+
+            Log.d(TAG, "Modo VIVO: lowRam=" + lowRam +
+                    (am != null ? " [memoryClass=" + am.getMemoryClass() + "MB, isLowRamDevice=" + am.isLowRamDevice() + "]" : "") +
+                    " -> Buffers: min=" + minBufferMs + "ms, max=" + maxBufferMs + "ms, playback=" + bufferForPlaybackMs + "ms, rebuffer=" + bufferForPlaybackAfterRebufferMs + "ms");
+
+            loadControl = new DefaultLoadControl.Builder()
+                    .setBufferDurationsMs(minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs)
+                    .setBackBuffer(0, false) // en vivo no hace falta buffer hacia atrás
+                    .setPrioritizeTimeOverSizeThresholds(!lowRam)
+                    .build();
+        }
 
         // 2) DECODIFICACIÓN: HARDWARE PRIMERO PARA EL VIDEO (EXTENSION_RENDERER_MODE_ON)
         // NextRenderersFactory extiende DefaultRenderersFactory y registra NextLib FFmpeg solo para audio (AC3/EAC3/DTS).
@@ -266,6 +316,11 @@ public class PlayerActivity extends Activity {
             return;
         }
 
+        // El LoadControl no se puede cambiar con el player creado: si se pasa de vivo a VOD
+        // (o al revés) se recrea la instancia con los buffers adecuados.
+        if (player != null && playerIsVod != isVodUrl(url)) {
+            releasePlayer();
+        }
         initPlayer();
         resumedOnce = false;
         startupRetryCount = 0;
