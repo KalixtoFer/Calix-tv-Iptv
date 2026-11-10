@@ -1345,6 +1345,17 @@ function getDemoData(action: string, params: any) {
 // Vite Dev Server or Production Static Serving
 // -------------------------------------------------------------
 async function startServer() {
+  // Panel de administración nuevo (Firebase): página estática en /panel.
+  // No usa este servidor para nada sensible: el acceso lo controlan Firebase Auth y las reglas de Firestore.
+  const adminDir = [path.resolve(__dirname, 'admin'), path.resolve(process.cwd(), 'admin')].find((d) =>
+    fs.existsSync(path.join(d, 'index.html'))
+  );
+  if (adminDir) {
+    app.use('/panel', express.static(adminDir, { index: 'index.html', maxAge: 0 }));
+  } else {
+    console.warn('Carpeta admin/ no encontrada: el panel nuevo no estará disponible en /panel');
+  }
+
   if (process.env.NODE_ENV !== 'production') {
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({

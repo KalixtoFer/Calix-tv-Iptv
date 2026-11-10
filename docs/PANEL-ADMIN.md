@@ -4,7 +4,9 @@ La app **no trae ningún servidor IPTV escrito**. El servidor se carga desde est
 Firestore (`config/servidor`) cada vez que arranca. Sin servidor cargado, los clientes ven
 "Servicio no disponible".
 
-- Panel: `https://influential-iris-f6shk.web.app` (carpeta `admin/`, Firebase Hosting)
+- Panel (carpeta `admin/`), se puede abrir en cualquiera de estas direcciones:
+  - `https://calix-tv.ai.studio/panel` (junto con la app publicada en AI Studio)
+  - `https://influential-iris-f6shk.web.app` (Firebase Hosting, opcional)
 - Datos: Firestore, proyecto `influential-iris-f6shk`
 - Login del panel: Google. Solo entran las cuentas que figuren en la colección `admins`.
 
@@ -22,7 +24,13 @@ Firebase Console → Firestore Database → pestaña **Reglas** → borrá todo,
 [`firestore.rules`](../firestore.rules) → **Publicar**.
 
 ### 4. Publicar el panel
-Elegí **una** de las dos formas:
+**Opción AI Studio (`https://calix-tv.ai.studio/panel`)**
+1. Traé a AI Studio la última versión del repo (rama `main`, después de hacer el merge) y volvé a publicar la app.
+2. Firebase Console → **Authentication → Configuración → Dominios autorizados → Agregar dominio** → `calix-tv.ai.studio`.
+   Sin este paso, el botón de Google falla con "dominio no autorizado".
+3. Abrí `https://calix-tv.ai.studio/panel`.
+
+**Opción Firebase Hosting (`https://influential-iris-f6shk.web.app`)** — elegí **una** de las dos formas:
 
 **A) Con GitHub Actions (recomendada, queda automático)**
 1. Firebase Console → ⚙️ Configuración del proyecto → **Cuentas de servicio** → *Generar nueva clave privada*.

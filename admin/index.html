@@ -141,6 +141,8 @@ function explain(err) {
   const c = err && err.code || "";
   if (c === "permission-denied") return "Sin permiso. Revisá que las reglas de Firestore estén publicadas y que tu cuenta esté en la colección admins.";
   if (c === "auth/popup-closed-by-user" || c === "auth/cancelled-popup-request") return "Se cerró la ventana de Google antes de terminar.";
+  if (c === "auth/unauthorized-domain") return "Este dominio (" + location.hostname + ") no está autorizado en Firebase. Andá a Firebase Console → Authentication → Configuración → Dominios autorizados → Agregar dominio, y agregá: " + location.hostname;
+  if (c === "auth/operation-not-allowed") return "El acceso con Google no está activado. Firebase Console → Authentication → Sign-in method → Google → Habilitar.";
   if (c === "auth/popup-blocked") return "El navegador bloqueó la ventana emergente. Permitila e intentá de nuevo.";
   if (c === "unavailable" || c === "auth/network-request-failed") return "Sin conexión con Firebase. Intentá de nuevo.";
   return (err && err.message) || "Error inesperado.";
