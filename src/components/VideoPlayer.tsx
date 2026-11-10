@@ -323,12 +323,13 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const retryCountRef = useRef<number>(0);
   const fallbackAttemptedRef = useRef<boolean>(false);
 
-  // Reproductor nativo (libVLC): películas y series por defecto; canales en vivo solo si se pide
+  // Reproductor nativo: películas, series y canales en vivo siempre usan el player nativo en APK.
+  // El reproductor web no puede manejar streams IPTV (.ts/.m3u8 de HTTP) en Capacitor.
   const [nativeFailed, setNativeFailed] = useState<boolean>(false);
   const [forceNative, setForceNative] = useState<boolean>(false);
   const nativeLaunchedFor = useRef<string>('');
   const nativeActive =
-    canUseNativePlayer() && !isMiniPlayer && !nativeFailed && (type !== 'live' || forceNative);
+    canUseNativePlayer() && !isMiniPlayer && !nativeFailed;
 
   const launchNative = useCallback(async () => {
     setIsLoading(true);
