@@ -778,21 +778,34 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         }`}
       />
 
-      {/* Zap Feedback Overlay */}
+      {/* Zap Feedback Overlay — muestra nombre del canal al hacer zapping */}
       {zapFeedback && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-40">
-          <div className="bg-black/60 backdrop-blur-xl p-6 rounded-full border border-white/20 animate-bounce">
-            {zapFeedback === 'next' ? (
-              <div className="flex flex-col items-center">
-                <ChevronRight className="w-12 h-12 text-rose-500 rotate-90" />
-                <span className="text-[10px] font-black text-rose-500 uppercase mt-1">Siguiente</span>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center">
-                <ChevronLeft className="w-12 h-12 text-rose-500 rotate-90" />
-                <span className="text-[10px] font-black text-rose-500 uppercase mt-1">Anterior</span>
-              </div>
-            )}
+          <div className="flex flex-col items-center gap-3 animate-fade-in">
+            <div className={`flex items-center gap-3 px-6 py-4 rounded-2xl bg-black/75 backdrop-blur-xl border border-white/15 shadow-2xl`}>
+              {zapFeedback === 'next' ? (
+                <ChevronRight className="w-8 h-8 text-cyan-400 shrink-0" />
+              ) : (
+                <ChevronLeft className="w-8 h-8 text-cyan-400 shrink-0" />
+              )}
+              {channelsList[currentIdx] && (
+                <>
+                  {channelsList[currentIdx].stream_icon && (
+                    <img
+                      src={channelsList[currentIdx].stream_icon}
+                      className="w-10 h-10 rounded-lg object-contain bg-white/10 p-1"
+                      alt=""
+                    />
+                  )}
+                  <div>
+                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-0.5">
+                      {zapFeedback === 'next' ? 'Canal siguiente' : 'Canal anterior'}
+                    </p>
+                    <p className="text-base font-black text-white">{adjustTime(channelsList[currentIdx].name)}</p>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -864,25 +877,46 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         </div>
       )}
 
-      {/* Mini Player Overlay Header */}
+      {/* Mini Player — muestra thumbnail del canal, toca para ir al fullscreen */}
       {isMiniPlayer && (
-        <div className="absolute top-2 left-2 right-2 flex items-center justify-between z-10 pointer-events-none">
-          <div className="flex items-center gap-2 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/10">
-            <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-            <span className="text-xs font-bold text-white truncate max-w-[140px]">{title}</span>
-          </div>
-          {onExpand && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onExpand();
-              }}
-              className="pointer-events-auto p-1.5 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-md shadow-md text-xs flex items-center gap-1 cursor-pointer"
-              title="Expandir a pantalla completa"
-            >
-              <Maximize className="w-3.5 h-3.5" />
-            </button>
+        <div
+          className="absolute inset-0 flex flex-col z-10 cursor-pointer"
+          onClick={onExpand}
+        >
+          {/* Fondo: poster o color sólido */}
+          {activePoster ? (
+            <img
+              src={activePoster}
+              alt={activeTitle}
+              className="absolute inset-0 w-full h-full object-contain p-4 opacity-60"
+              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+            />
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 to-zinc-950" />
           )}
+
+          {/* Gradiente oscuro encima */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/50" />
+
+          {/* Chip EN VIVO arriba izquierda */}
+          <div className="relative flex items-center gap-1.5 p-2">
+            <span className="flex items-center gap-1 px-2 py-0.5 bg-red-600 rounded text-[10px] font-black text-white uppercase tracking-wider">
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+              EN VIVO
+            </span>
+          </div>
+
+          {/* Icono play centrado */}
+          <div className="relative flex-1 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 flex items-center justify-center shadow-xl">
+              <Play className="w-6 h-6 text-white fill-white ml-0.5" />
+            </div>
+          </div>
+
+          {/* Título abajo */}
+          <div className="relative px-2 pb-2">
+            <p className="text-xs font-black text-white truncate drop-shadow-lg">{activeTitle}</p>
+          </div>
         </div>
       )}
 
@@ -893,79 +927,87 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             showControls ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
           }`}
         >
-          {/* Top Bar: Title & Channel Info */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+          {/* Top Bar: Volver + logo canal + título + badge calidad */}
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
               {onClose && (
                 <button
                   onClick={onClose}
-                  className="tv-focusable p-2.5 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700/60 rounded-xl text-zinc-300 hover:text-white transition cursor-pointer"
-                  title="Cerrar / Volver"
+                  className="tv-focusable shrink-0 p-2.5 bg-black/50 hover:bg-white/10 active:scale-90 border border-white/15 rounded-xl text-white transition cursor-pointer backdrop-blur-sm"
+                  title="Volver"
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
               )}
-              <div>
-                <div className="flex items-center gap-2">
+
+              {/* Logo canal */}
+              {activePoster && (
+                <div className="shrink-0 w-11 h-11 rounded-xl bg-white/5 border border-white/10 overflow-hidden flex items-center justify-center p-1">
+                  <img src={activePoster} className="w-full h-full object-contain" alt="" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                </div>
+              )}
+
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
                   {type === 'live' && (
-                    <span className="px-2 py-0.5 bg-rose-600 text-white text-[11px] font-extrabold rounded-md flex items-center gap-1 uppercase tracking-wider animate-pulse">
-                      <span className="w-1.5 h-1.5 rounded-full bg-white" /> EN VIVO
+                    <span className="shrink-0 px-2 py-0.5 bg-red-600 text-white text-[10px] font-black rounded flex items-center gap-1 uppercase tracking-wider">
+                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> EN VIVO
                     </span>
                   )}
-                  <h3 className="text-base sm:text-lg font-bold text-white tracking-wide truncate max-w-sm sm:max-w-md">
-                    {title}
+                  <h3 className="text-sm sm:text-base font-black text-white truncate">
+                    {activeTitle}
                   </h3>
                 </div>
-                {subtitle && <p className="text-xs text-zinc-400 truncate max-w-md mt-0.5">{subtitle}</p>}
+                {subtitle && <p className="text-xs text-zinc-400 truncate mt-0.5">{subtitle}</p>}
               </div>
             </div>
 
-            {/* Badges */}
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-1 bg-zinc-900/90 border border-zinc-700 text-cyan-400 text-xs font-mono font-bold rounded-lg shadow-inner">
-                {qualityText}
-              </span>
-              <span className="hidden sm:inline-block px-2.5 py-1 bg-zinc-900/90 border border-zinc-700 text-zinc-300 text-xs font-mono rounded-lg">
-                60 FPS
-              </span>
+            {/* Badges derecha */}
+            <div className="flex items-center gap-2 shrink-0">
+              {qualityText !== 'SD' && (
+                <span className="px-2 py-0.5 bg-black/60 border border-white/15 text-cyan-400 text-[11px] font-mono font-bold rounded-lg backdrop-blur-sm">
+                  {qualityText}
+                </span>
+              )}
               <button
                 onClick={cycleAspectRatio}
-                className="tv-focusable px-2.5 py-1 bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700 text-xs text-zinc-300 rounded-lg flex items-center gap-1 cursor-pointer"
+                className="tv-focusable p-2 bg-black/50 hover:bg-white/10 active:scale-90 border border-white/15 text-zinc-300 rounded-xl flex items-center gap-1 cursor-pointer backdrop-blur-sm"
                 title="Cambiar relación de aspecto"
               >
-                <Layers className="w-3.5 h-3.5 text-zinc-400" />
-                <span className="capitalize text-[11px] font-medium">{aspectRatio}</span>
+                <Layers className="w-4 h-4 text-zinc-400" />
               </button>
             </div>
           </div>
 
-          {/* Center Play Indicator for Click */}
-          <div className="flex items-center justify-center gap-6">
-            {type === 'live' && onPrevChannel && (
+          {/* Centro: controles de zapping + play/pause */}
+          <div className="flex items-center justify-center gap-5">
+            {type === 'live' && (
               <button
-                onClick={onPrevChannel}
-                className="tv-focusable p-3 bg-zinc-900/80 hover:bg-cyan-500 hover:text-black text-white rounded-full transition transform active:scale-95 cursor-pointer shadow-lg"
-                title="Canal Anterior (CH-)"
+                onClick={(e) => { e.stopPropagation(); if (onPrevChannel) onPrevChannel(); else changeChannelByIndex(currentIdx - 1); }}
+                className="tv-focusable flex flex-col items-center gap-1 p-3 bg-black/50 hover:bg-white/10 active:scale-90 text-white rounded-2xl transition-all cursor-pointer border border-white/10"
+                title="Canal Anterior"
               >
-                <ChevronLeft className="w-6 h-6" />
+                <ChevronLeft className="w-7 h-7" />
+                <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Anterior</span>
               </button>
             )}
 
             <button
-              onClick={handlePlayPause}
-              className="tv-focusable p-4 sm:p-5 bg-cyan-500 hover:bg-cyan-400 text-black rounded-full transition transform active:scale-95 shadow-[0_0_30px_rgba(6,182,212,0.6)] cursor-pointer"
+              onClick={(e) => { e.stopPropagation(); handlePlayPause(); }}
+              className="tv-focusable p-5 bg-white/10 hover:bg-white/20 active:scale-90 text-white rounded-full transition-all border border-white/20 shadow-2xl cursor-pointer backdrop-blur-sm"
               title={isPlaying ? 'Pausar' : 'Reproducir'}
             >
-              {isPlaying ? <Pause className="w-8 h-8 fill-current" /> : <Play className="w-8 h-8 fill-current ml-0.5" />}
+              {isPlaying ? <Pause className="w-9 h-9 fill-current" /> : <Play className="w-9 h-9 fill-current ml-0.5" />}
             </button>
 
-            {type === 'live' && onNextChannel && (
+            {type === 'live' && (
               <button
-                onClick={onNextChannel}
-                className="tv-focusable p-3 bg-zinc-900/80 hover:bg-cyan-500 hover:text-black text-white rounded-full transition transform active:scale-95 cursor-pointer shadow-lg"
-                title="Canal Siguiente (CH+)"
+                onClick={(e) => { e.stopPropagation(); if (onNextChannel) onNextChannel(); else changeChannelByIndex(currentIdx + 1); }}
+                className="tv-focusable flex flex-col items-center gap-1 p-3 bg-black/50 hover:bg-white/10 active:scale-90 text-white rounded-2xl transition-all cursor-pointer border border-white/10"
+                title="Canal Siguiente"
               >
-                <ChevronRight className="w-6 h-6" />
+                <ChevronRight className="w-7 h-7" />
+                <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Siguiente</span>
               </button>
             )}
           </div>
