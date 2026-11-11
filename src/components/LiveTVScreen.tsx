@@ -217,10 +217,7 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
         const allStreams = await iptvApi.getStreams('live', username, 'all');
         if (allStreams && allStreams.length > 0) {
           setStreams(allStreams);
-          const firstFav = allStreams.find((s) => favoritesList.includes(String(s.stream_id)));
-          if (firstFav && (!selectedStream || !favoritesList.includes(String(selectedStream.stream_id)))) {
-            setSelectedStream(firstFav);
-          }
+          // No auto-seleccionar favorito al cambiar filtro
         }
       } catch (err) {
         console.error('Error loading streams for favorites:', err);
@@ -267,9 +264,7 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
         const strList = await iptvApi.getStreams('live', username, initialCat);
         if (isMounted) {
           setStreams(strList);
-          if (strList.length > 0) {
-            setSelectedStream(strList[0]);
-          }
+          // No auto-seleccionar canal: el usuario elige tocando en la lista
         }
       } catch (err) {
         console.error('Error loading Live TV:', err);
@@ -295,9 +290,7 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
     try {
       const list = await iptvApi.getStreams('live', username, catId);
       setStreams(list);
-      if (list.length > 0) {
-        setSelectedStream(list[0]);
-      }
+      // No auto-seleccionar al cambiar categoría
     } catch (err) {
       console.error('Error switching TV category:', err);
     } finally {
@@ -433,36 +426,36 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
           </div>
         </header>
 
-        {/* 2) REPRODUCTOR FIJO (STICKY 16:9) */}
+        {/* 2) BANNER ÚLTIMO CANAL (toca uno de la lista para reproducir) */}
         <div className="player-box">
           {selectedStream ? (
-            <>
-              <VideoPlayer
-                url={iptvApi.buildStreamUrl('live', selectedStream.stream_id, 'm3u8', username)}
-                title={adjustTime(selectedStream.name)}
-                type="live"
-                autoPlay={true}
-                className="w-full h-full"
-                onExpand={handleOpenFullscreen}
-                onNextChannel={handleNextChannel}
-                onPrevChannel={handlePrevChannel}
-                isMiniPlayer={false}
-              />
-              <button
-                type="button"
-                onClick={handleOpenFullscreen}
-                className="absolute top-2 right-2 p-2 rounded-lg bg-black/60 hover:bg-black/80 text-white backdrop-blur-md z-20 border border-white/15 active:scale-95 transition-all"
-                title="Pantalla completa"
-                aria-label="Pantalla completa"
-              >
-                <Maximize2 className="w-4 h-4 text-white" />
-              </button>
-            </>
+            <button
+              type="button"
+              onClick={handleOpenFullscreen}
+              className="w-full h-full flex items-center gap-4 px-5 bg-gradient-to-r from-[#070913] to-[#0c1424] active:opacity-80 transition-opacity"
+            >
+              <div className="w-14 h-14 rounded-xl bg-white/5 border border-zinc-700 flex items-center justify-center overflow-hidden shrink-0">
+                {selectedStream.stream_icon ? (
+                  <img src={selectedStream.stream_icon} className="w-full h-full object-contain p-1.5" alt="" />
+                ) : (
+                  <Tv className="w-7 h-7 text-zinc-400" />
+                )}
+              </div>
+              <div className="flex-1 text-left overflow-hidden">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shrink-0" />
+                  <span className="text-[10px] font-black text-red-400 uppercase tracking-widest">En Vivo</span>
+                </div>
+                <p className="text-sm font-black text-white truncate">{adjustTime(selectedStream.name)}</p>
+                <p className="text-[11px] text-zinc-400 truncate">{selectedStream.current_program || 'Tocá para reproducir'}</p>
+              </div>
+              <PlayIcon className="w-8 h-8 text-cyan-400 shrink-0" />
+            </button>
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center bg-[#070913] text-zinc-400 gap-3">
-              <div className="w-9 h-9 rounded-full border-2 border-cyan-500/20 border-t-cyan-400 animate-spin" />
-              <span className="text-xs font-bold tracking-widest uppercase text-cyan-300/80 animate-pulse">
-                Conectando señal...
+            <div className="w-full h-full flex flex-col items-center justify-center bg-[#070913] text-zinc-500 gap-2">
+              <Tv className="w-8 h-8 opacity-30" />
+              <span className="text-xs font-bold tracking-widest uppercase opacity-50">
+                Elegí un canal para reproducir
               </span>
             </div>
           )}
@@ -523,7 +516,20 @@ export const LiveTVScreen: React.FC<LiveTVScreenProps> = ({
                 index={idx}
                 isPlaying={selectedStream?.stream_id === stream.stream_id}
                 isFavorite={favoritesList.includes(String(stream.stream_id))}
-                onSelect={setSelectedStream}
+                onSelect={(s) => {
+                  setSelectedStream(s);
+                  // En mobile: tocar un canal abre el reproductor fullscreen directamente
+                  onPlayStream({
+                    streamId: s.stream_id,
+                    title: adjustTime(s.name),
+                    url: s.stream_url || iptvApi.buildStreamUrl('live', s.stream_id, 'm3u8', username),
+                    type: 'live',
+                    poster: s.stream_icon,
+                    category: selectedCategoryId,
+                    channels: filteredStreams,
+                    initialChannelIndex: filteredStreams.findIndex((x) => x.stream_id === s.stream_id),
+                  });
+                }}
                 onToggleFavorite={handleToggleFavorite}
               />
             ))
