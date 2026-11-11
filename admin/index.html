@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Calix TV · Panel de administración</title>
+<style>
+:root{--bg:#050b1c;--card:#0d1a38;--line:#1d3a7a;--txt:#e8eefc;--mut:#8fa3cf;--acc:#2aa8ff}
+*{box-sizing:border-box}body{margin:0;font:15px/1.45 system-ui,sans-serif;background:var(--bg);color:var(--txt)}
+main{max-width:860px;margin:0 auto;padding:20px}h1{margin:0 0 4px}h2{margin:0 0 10px;font-size:18px;color:var(--acc)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:14px 0}
+label{display:block;margin:10px 0 4px;color:var(--mut);font-size:13px}
+input,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid var(--line);background:#071229;color:var(--txt);font:inherit}
+textarea{min-height:90px}button{background:var(--acc);color:#04122a;border:0;border-radius:999px;padding:10px 18px;font-weight:700;cursor:pointer;margin:10px 8px 0 0}
+button.sec{background:transparent;color:var(--acc);border:1px solid var(--acc)}button.del{background:#c0392b;color:#fff;padding:6px 12px;margin:0}
+.row{display:flex;gap:10px;align-items:center}.row>*{flex:1}.row>button{flex:0 0 auto}
+.chk{display:flex;gap:8px;align-items:center;margin:10px 0}.chk input{width:auto}
+#msg{position:sticky;top:0;padding:10px 14px;border-radius:10px;margin:10px 0;display:none}
+.ok{background:#12351f;border:1px solid #2ecc71}.err{background:#3a1616;border:1px solid #e74c3c}
+small{color:var(--mut)}.ban{border:1px dashed var(--line);border-radius:10px;padding:10px;margin:8px 0}
+</style></head><body><main>
+<h1>Calix TV · Panel</h1><small>Edita lo que la app lee desde GitHub (carpeta <code>remote/</code>). No hay servidor: se guarda directo en tu repositorio.</small>
+<div id="msg"></div>
+
+<div class="card"><h2>1 · Conexión con GitHub</h2>
+<label>Repositorio (usuario/nombre)</label><input id="repo" placeholder="miusuario/Calix-tv-Iptv">
+<label>Rama</label><input id="branch" value="main">
+<label>Token de GitHub (permiso "Contents: Read and write" solo sobre este repositorio)</label><input id="token" type="password" placeholder="github_pat_...">
+<div class="chk"><input type="checkbox" id="remember"><span>Recordar en este navegador <small>(el token queda guardado en este dispositivo; no lo uses en una PC compartida)</small></span></div>
+<button onclick="loadAll()">Cargar configuración actual</button></div>
+
+<div class="card"><h2>2 · Servidor y nombre</h2>
+<label>Nombre del servicio</label><input id="serviceName">
+<label>Servidor Xtream (ej.: http://servidor:puerto). Los usuarios solo escriben usuario y contraseña.</label><input id="serverUrl">
+<div class="chk"><input type="checkbox" id="allowCustom"><span>Permitir que el usuario use otras fuentes (M3U, Stalker, otro servidor)</span></div></div>
+
+<div class="card"><h2>3 · Anuncio</h2>
+<div class="chk"><input type="checkbox" id="annEnabled"><span>Mostrar anuncio al abrir la app</span></div>
+<label>ID del anuncio (cambialo para que se vuelva a mostrar a todos)</label><input id="annId">
+<label>Título</label><input id="annTitle"><label>Texto</label><textarea id="annText"></textarea></div>
+
+<div class="card"><h2>4 · Banners</h2><small>Imágenes públicas (https). El primero se muestra dentro del anuncio.</small>
+<div id="banners"></div><button class="sec" onclick="addBanner()">+ Agregar banner</button></div>
+
+<div class="card"><h2>5 · Actualización de la app</h2>
+<small>Subí el APK nuevo como Release en GitHub y completá estos datos. La app avisa a quien tenga una versión menor. El número de versión (código) debe ser mayor al instalado.</small>
+<div class="row"><div><label>Código de versión (número entero, sube de a 1)</label><input id="vCode" type="number"></div><div><label>Nombre de versión</label><input id="vName"></div></div>
+<label>Enlace directo al APK</label><input id="vApk"><label>Novedades</label><textarea id="vNotes"></textarea></div>
+
+<button onclick="saveAll()">Guardar todo en GitHub</button>
+<script>
+const $=id=>document.getElementById(id);
+let shas={}; let banners=[];
+function msg(t,ok){const m=$('msg');m.textContent=t;m.className=ok?'ok':'err';m.style.display='block'}
+(function(){try{const s=JSON.parse(localStorage.getItem('calixPanel')||'{}');if(s.repo)$('repo').value=s.repo;if(s.branch)$('branch').value=s.branch;if(s.token){$('token').value=s.token;$('remember').checked=true}}catch(e){}})();
+function api(path){return 'https://api.github.com/repos/'+$('repo').value.trim()+'/contents/'+path}
+function hdr(){return {'Authorization':'Bearer '+$('token').value.trim(),'Accept':'application/vnd.github+json'}}
+function b64d(s){return decodeURIComponent(escape(atob(s.replace(/\n/g,''))))}
+function b64e(s){return btoa(unescape(encodeURIComponent(s)))}
+async function getFile(p){const r=await fetch(api(p)+'?ref='+encodeURIComponent($('branch').value.trim()),{headers:hdr(),cache:'no-store'});
+ if(r.status===404)return null;if(!r.ok)throw new Error('GitHub respondió '+r.status+' (revisá repositorio, rama y token)');
+ const j=await r.json();shas[p]=j.sha;return JSON.parse(b64d(j.content))}
+async function putFile(p,obj){const body={message:'Panel Calix TV: actualizar '+p,content:b64e(JSON.stringify(obj,null,2)+'\n'),branch:$('branch').value.trim()};
+ if(shas[p])body.sha=shas[p];const r=await fetch(api(p),{method:'PUT',headers:Object.assign({'Content-Type':'application/json'},hdr()),body:JSON.stringify(body)});
+ if(!r.ok){const t=await r.text();throw new Error('No se pudo guardar '+p+' ('+r.status+'): '+t.slice(0,200))}
+ const j=await r.json();shas[p]=j.content.sha}
+function renderBanners(){const d=$('banners');d.innerHTML='';banners.forEach((b,i)=>{const e=document.createElement('div');e.className='ban';
+ e.innerHTML='<label>Imagen (https://...)</label><input value="'+(b.image||'').replace(/"/g,'&quot;')+'" oninput="banners['+i+'].image=this.value"><label>Título</label><input value="'+(b.title||'').replace(/"/g,'&quot;')+'" oninput="banners['+i+'].title=this.value"><label>Enlace (opcional)</label><input value="'+(b.link||'').replace(/"/g,'&quot;')+'" oninput="banners['+i+'].link=this.value"><button class="del" onclick="banners.splice('+i+',1);renderBanners()">Quitar</button>';d.appendChild(e)})}
+function addBanner(){banners.push({image:'',title:'',link:''});renderBanners()}
+async function loadAll(){try{
+ if($('remember').checked)localStorage.setItem('calixPanel',JSON.stringify({repo:$('repo').value.trim(),branch:$('branch').value.trim(),token:$('token').value.trim()}));else localStorage.removeItem('calixPanel');
+ const c=await getFile('remote/config.json')||{};const u=await getFile('remote/update.json')||{};
+ $('serviceName').value=c.serviceName||'Calix TV';$('serverUrl').value=c.serverUrl||'';$('allowCustom').checked=!!c.allowCustomSources;
+ const a=c.announcement||{};$('annEnabled').checked=!!a.enabled;$('annId').value=a.id||'';$('annTitle').value=a.title||'';$('annText').value=a.text||'';
+ banners=(c.banners||[]).map(b=>({image:b.image||'',title:b.title||'',link:b.link||''}));renderBanners();
+ $('vCode').value=u.versionCode||'';$('vName').value=u.versionName||'';$('vApk').value=u.apk||'';$('vNotes').value=u.notes||'';
+ msg('Configuración cargada.',true)}catch(e){msg(e.message,false)}}
+async function saveAll(){try{
+ const srv=$('serverUrl').value.trim();if(srv&&!/^https?:\/\//i.test(srv))throw new Error('El servidor debe empezar con http:// o https://');
+ for(const b of banners){if(b.image&&!/^https:\/\//i.test(b.image.trim()))throw new Error('Los banners deben ser enlaces https://')}
+ const cfg={serviceName:$('serviceName').value.trim()||'Calix TV',serverUrl:srv,allowCustomSources:$('allowCustom').checked,
+  announcement:{enabled:$('annEnabled').checked,id:$('annId').value.trim(),title:$('annTitle').value.trim(),text:$('annText').value.trim()},
+  banners:banners.filter(b=>b.image.trim()).map(b=>({image:b.image.trim(),title:b.title.trim(),link:b.link.trim()}))};
+ const code=parseInt($('vCode').value,10);const upd={versionCode:isNaN(code)?0:code,versionName:$('vName').value.trim(),apk:$('vApk').value.trim(),notes:$('vNotes').value.trim()};
+ if(!shas['remote/config.json'])await getFile('remote/config.json');if(!shas['remote/update.json'])await getFile('remote/update.json');
+ await putFile('remote/config.json',cfg);if(upd.versionCode>0&&upd.apk)await putFile('remote/update.json',upd);
+ msg('Guardado. La app lo toma al abrirse (GitHub puede tardar unos minutos en reflejarlo).',true)}catch(e){msg(e.message,false)}}
+</script></main></body></html>

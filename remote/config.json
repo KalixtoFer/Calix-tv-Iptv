@@ -1,0 +1,12 @@
+{
+  "serviceName": "Calix TV",
+  "serverUrl": "https://sneoplus.net:8443",
+  "allowCustomSources": false,
+  "announcement": {
+    "enabled": true,
+    "id": "bienvenida-1",
+    "title": "¡Bienvenido a Calix TV!",
+    "text": "Gracias por usar Calix TV. Ingresá tu usuario y contraseña para empezar."
+  },
+  "banners": []
+}

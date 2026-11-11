@@ -1,43 +1,29 @@
-# Calix Tv iptv Pro - Aplicación IPTV Profesional para Android TV & Móvil
+# Calix TV (versión nativa Android)
 
-Aplicación IPTV profesional con identidad visual propia, compatible con **Android TV, TV Box, Fire TV Stick, Google TV, celulares y tablets Android**.
+Reproductor IPTV para **Android TV, Fire TV, TV Box, celulares y tablets**, hecho en Kotlin + Jetpack Compose + Media3/ExoPlayer.
+Basado en [IPVIO Stream](https://github.com/Emrodev/IPVIO-Stream) (licencia **GPL-3.0**), con la marca y el panel de Calix TV.
 
----
+Incluye: TV en vivo con guía, películas y series, perfiles, favoritos, control parental, reproductor ExoPlayer (HLS/DASH/TS), actualización desde la app.
 
-## 🚀 Compilación Automática de APK en GitHub Actions
+## Pasos para tener tu APK
 
-Este repositorio ya contiene el flujo de trabajo automatizado en `.github/workflows/build-apk.yml`.
+1. **Subí esta carpeta a tu repositorio de GitHub** (el repo debe ser **público**: la app lee `remote/config.json` desde ahí).
+2. Abrí `calix.properties` y poné tu `repo` (ej. `miusuario/Calix-tv-Iptv`). Ahí también está el servidor por defecto.
+3. En GitHub: pestaña **Actions → "Calix TV - Compilar APK" → Run workflow**. Al terminar, bajá el APK en *Artifacts*.
+4. **APK firmado (recomendado):** creá un keystore y cargá estos secretos en *Settings → Secrets and variables → Actions*:
+   `KEYSTORE_B64` (el archivo .keystore en base64), `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`.
+   **Guardá ese keystore para siempre**: todas las versiones futuras deben firmarse con la misma clave o Android no deja actualizar.
 
-### ¿Cómo obtener el archivo APK desde GitHub?
+## Panel de administración
 
-1. Sube este repositorio a tu cuenta de **GitHub**.
-2. Ve a la pestaña **Actions** en la parte superior de tu repositorio en GitHub.
-3. Verás la acción llamada **"Compilar APK para Android TV"** ejecutándose automáticamente.
-4. Si quieres ejecutarla manualmente en cualquier momento:
-   - Haz clic en **"Compilar APK para Android TV"** en el panel izquierdo.
-   - Haz clic en el botón desplegable **"Run workflow"** ➔ **"Run workflow"**.
-5. Espera aproximadamente **2 minutos** mientras GitHub compila el proyecto con Java 17 y Gradle.
-6. Al finalizar con un check verde ✅, haz clic sobre la ejecución completada.
-7. Al final de la página, en la sección **Artifacts**, encontrarás el enlace para descargar:
-   - **`CalixTV-v1.0-APK`** (El archivo `.apk` instalable listo para tu televisor o celular).
+Abrí `admin/index.html` en tu navegador (doble clic, o publicalo con GitHub Pages).
+Con un token de GitHub (permiso *Contents: Read and write* solo sobre este repo) podés cambiar:
+servidor, nombre, anuncio, banners y aviso de actualización. Se guarda en `remote/config.json` y `remote/update.json`.
 
----
+- **Nueva versión:** subí el APK como *Release*, y en el panel poné código de versión (mayor al anterior), nombre, enlace directo al APK y novedades.
+- Los usuarios solo escriben **usuario y contraseña**; el servidor sale del panel.
 
-## 📺 Instalación en Android TV y TV Box
-
-1. Descarga el archivo `CalixTV-v1.0.apk`.
-2. Puedes pasarlo a tu televisor de tres formas:
-   - **Memoria USB:** Cópialo a un pendrive USB y ábrelo en tu TV Box con cualquier explorador de archivos.
-   - **App "Send files to TV":** Instala esa app en tu celular y en tu TV para transferir el APK por WiFi.
-   - **App "Downloader":** En Firestick o Android TV, ingresa el enlace directo de descarga.
-3. Selecciona **Instalar**.
-4. ¡Listo! La aplicación aparecerá en la fila principal de canales y apps de tu televisor con soporte nativo para control remoto (D-Pad).
-
----
-
-## ⚙️ Características Técnicas
-- **Conexión Xtream Codes Centralizada:** El usuario solo ingresa su Usuario y Contraseña.
-- **Soporte TV Box:** Navegación por flechas (D-Pad) y botón OK.
-- **5 Secciones:** VIVO, SERIES, PELÍCULAS, ANIME, ESPECIAL.
-- **Reproductor HLS Integrado:** Zapping, pantalla completa y guía EPG en directo.
-- **Panel de Administración:** Protegido con autenticación de administrador para cambiar servidores y banners.
+## Importante
+- No pongas contraseñas ni claves en el repositorio (`remote/` es público).
+- Calix TV es solo un reproductor: usá únicamente contenido que tengas derecho a distribuir.
+- Al ser GPL-3.0, si repartís el APK tenés que mantener este código fuente disponible (este repositorio) y la licencia (`LICENSE`).
