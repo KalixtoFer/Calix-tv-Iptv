@@ -79,3 +79,4 @@
 - Se quitó la sección de donaciones del autor original.
 - Primer inicio: elegir dispositivo (Celular / Tablet o TV / TV Box). Se puede cambiar en Ajustes > General > Gerät. Base para el rediseño del celular (T-007).
 - Celular: inicio de sesión vertical con usuario y contraseña (T-008).
+- Celular: TV en vivo táctil estilo Netflix (categorías en chips, inicio con filas, búsqueda con teclado normal) (T-009).

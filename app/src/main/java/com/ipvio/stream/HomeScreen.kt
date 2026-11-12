@@ -541,7 +541,7 @@ fun HomeScreen(
                         }
                     }
                 }
-                tab == 3 -> LiveTab(live, liveP, favLive, onOpen, onPlayNow)
+                tab == 3 -> if (MobilePrefs.isMobile(ctx)) LiveTabPhone(live, liveP, favLive, onOpen) else LiveTab(live, liveP, favLive, onOpen, onPlayNow)
                 tab == MenuLogic.SPORT -> SportHub(live) { ch, l -> ZapContext.list = l; ZapContext.key = null; onOpen(ch) }
                 // The selected row stays in the lower half (PivotSpec); rows above are hidden so that at the top
                 // title and info of the selected title are free (billboard)
