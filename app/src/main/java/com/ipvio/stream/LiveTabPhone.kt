@@ -2,6 +2,8 @@ package com.ipvio.stream
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -215,25 +217,36 @@ private fun PhoneChannelRow(item: Item, onClick: () -> Unit, onLong: () -> Unit)
         value = withContext(Dispatchers.Default) { Epg.now(item) }
     }
     val nowE = Epg.current(epg)
+    val shape = RoundedCornerShape(DS.RadiusM)
+    // TV-guide style row: logo, running program (or channel name), time + channel, LIVE badge and progress bar
     Row(
-        Modifier.fillMaxWidth().height(72.dp).clip(RoundedCornerShape(DS.RadiusM)).background(Color(0x0FFFFFFF))
-            .combinedClickable(onClick = onClick, onLongClick = onLong).padding(horizontal = 10.dp, vertical = 8.dp),
+        Modifier.fillMaxWidth().heightIn(min = 76.dp).clip(shape).background(Color(0x14FFFFFF)).border(1.dp, Color(0x1FFFFFFF), shape)
+            .combinedClickable(onClick = onClick, onLongClick = onLong).padding(horizontal = 10.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Box(Modifier.size(52.dp).clip(RoundedCornerShape(DS.RadiusS)).background(DS.Overlay2), contentAlignment = Alignment.Center) {
+        Box(Modifier.size(width = 64.dp, height = 52.dp).clip(RoundedCornerShape(DS.RadiusS)).background(Color(0xFF0E1A33)), contentAlignment = Alignment.Center) {
             if (item.logo != null) AsyncImage(item.logo, null, Modifier.fillMaxSize().padding(6.dp), contentScale = ContentScale.Fit)
             else Text(raw = true, text = item.title.take(2).uppercase(), color = Color.White, fontWeight = FontWeight.Bold)
         }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-            Text(raw = true, text = item.title, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(raw = true, text = nowE?.title ?: item.title, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(
+                raw = true, text = if (nowE != null) "${hhmm(nowE.start)} - ${hhmm(nowE.end)}  ·  ${item.title}" else item.group,
+                color = Muted, fontSize = 13.sp, maxLines = 1, overflow = TextOverflow.Ellipsis
+            )
             if (nowE != null) {
-                val frac = ((System.currentTimeMillis() / 1000 - nowE.start).toFloat() / (nowE.end - nowE.start)).coerceIn(0f, 1f)
-                Text(raw = true, text = "${hhmm(nowE.start)}–${hhmm(nowE.end)}  ${nowE.title}", color = Accent2, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Box(Modifier.fillMaxWidth().height(3.dp).clip(RoundedCornerShape(50)).background(DS.Overlay3)) {
+                val frac = ((System.currentTimeMillis() / 1000 - nowE.start).toFloat() / (nowE.end - nowE.start).coerceAtLeast(1)).coerceIn(0f, 1f)
+                Box(Modifier.fillMaxWidth().padding(top = 2.dp).height(3.dp).clip(RoundedCornerShape(50)).background(DS.Overlay3)) {
                     Box(Modifier.fillMaxWidth(frac).fillMaxHeight().background(Accent2))
                 }
-            } else Text(raw = true, text = item.group, color = Muted, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
         }
-        if (Library.isFav(item.id)) AppIcon(AIcon.Star, DS.Gold, size = 18.dp)
+        Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            if (nowE != null) Text(
+                raw = true, text = "LIVE", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold, maxLines = 1,
+                modifier = Modifier.clip(RoundedCornerShape(6.dp)).background(Color(0xFFE11D48)).padding(horizontal = 7.dp, vertical = 3.dp)
+            )
+            if (Library.isFav(item.id)) AppIcon(AIcon.Star, DS.Gold, size = 18.dp)
+        }
     }
 }

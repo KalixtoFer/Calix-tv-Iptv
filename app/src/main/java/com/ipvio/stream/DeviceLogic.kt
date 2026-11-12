@@ -33,4 +33,13 @@ object DeviceLogic {
         TV -> false
         else -> hardwareMobile
     }
+
+    /** Smallest design scale in phone mode: below this, fixed design heights (pills, rows) become smaller than their 13 sp text. */
+    const val PHONE_MIN_SCALE = 0.6f
+
+    /** dp per design pixel: screen width / design width; phones never go below [PHONE_MIN_SCALE] (content scrolls instead). */
+    fun designScale(widthDp: Float, designWidth: Float, phone: Boolean): Float {
+        val k = widthDp / designWidth
+        return if (phone) maxOf(k, PHONE_MIN_SCALE) else k
+    }
 }

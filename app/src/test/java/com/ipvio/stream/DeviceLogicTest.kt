@@ -47,4 +47,10 @@ class DeviceLogicTest {
         assertEquals("¿En qué dispositivo vas a usar la app?", I18nCore.translate("Auf welchem Gerät nutzt du die App?", 6))
         assertEquals("Device", I18nCore.translate("Gerät", 1))
     }
+
+    @Test fun phoneDesignScaleHasAFloor() {
+        assertEquals(0.6f, DeviceLogic.designScale(360f, 1658f, phone = true), 0.0001f)
+        assertEquals(360f / 1658f, DeviceLogic.designScale(360f, 1658f, phone = false), 0.0001f)
+        assertEquals(1130f / 1658f, DeviceLogic.designScale(1130f, 1658f, phone = true), 0.0001f)
+    }
 }

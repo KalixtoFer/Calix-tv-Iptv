@@ -9,7 +9,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -54,13 +57,13 @@ fun PhoneHomeTop(featured: List<Item>, tiles: List<QuickTile>, onOpen: (Item) ->
 }
 
 @Composable
-private fun PhoneHero(featured: List<Item>, onOpen: (Item) -> Unit, onPlay: (Item) -> Unit, onSearch: () -> Unit) {
+private fun PhoneHero(featured: List<Item>, onOpen: (Item) -> Unit, onPlay: (Item) -> Unit, onSearch: () -> Unit, topBar: Boolean = true, heroH: Int = 470) {
     var idx by remember { mutableIntStateOf(0) }
     LaunchedEffect(featured.size, General.heroSec) {
         while (featured.size > 1 && General.heroSec > 0) { delay(General.heroSec * 1000L); idx = (idx + 1) % featured.size }
     }
     val item = featured.getOrNull(idx.coerceIn(0, (featured.size - 1).coerceAtLeast(0)))
-    Box(Modifier.fillMaxWidth().height(if (item != null) 470.dp else 72.dp).background(Bg).clipToBounds()) {
+    Box(Modifier.fillMaxWidth().height(if (item != null) heroH.dp else if (topBar) 72.dp else 0.dp).background(Bg).clipToBounds()) {
         if (item != null) {
             Crossfade(item, animationSpec = tween(900), label = "phoneHeroBg") { c ->
                 val m = rememberMeta(c)
@@ -69,7 +72,7 @@ private fun PhoneHero(featured: List<Item>, onOpen: (Item) -> Unit, onPlay: (Ite
             Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0f to Bg.copy(alpha = .65f), 0.2f to Color.Transparent, 0.45f to Color.Transparent, 0.8f to Bg.copy(alpha = .9f), 1f to Bg)))
         }
         // Top bar: logo left, search right
-        Row(Modifier.align(Alignment.TopStart).fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+        if (topBar) Row(Modifier.align(Alignment.TopStart).fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             BrandLogo(Modifier.width(112.dp))
             Spacer(Modifier.weight(1f))
             MenuIcon(MenuLogic.SEARCH, Color.White, Modifier.clip(CircleShape).clickable(onClick = onSearch).padding(10.dp).size(26.dp))
@@ -174,5 +177,29 @@ private fun PhoneLiveCard(item: Item, modifier: Modifier, onClick: () -> Unit) {
             Box(Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF22C55E)))
             Text(raw = true, text = if (nowE != null) "Live · ${hhmm(nowE.start)}–${hhmm(nowE.end)}" else "Live", color = Muted, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
+    }
+}
+
+/**
+ * Movies / Series start of the phone: big title with search, a row of filter chips (the four header entries, then the genres)
+ * and the featured picture. The rows below are the normal ones.
+ */
+@Composable
+fun PhoneVodTop(title: String, chips: List<Pair<String, () -> Unit>>, featured: List<Item>, onOpen: (Item) -> Unit, onPlay: (Item) -> Unit, onSearch: () -> Unit) {
+    Column(Modifier.fillMaxWidth()) {
+        Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(title, color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.weight(1f), maxLines = 1)
+            MenuIcon(MenuLogic.SEARCH, Color.White, Modifier.clip(CircleShape).clickable(onClick = onSearch).padding(10.dp).size(26.dp))
+        }
+        LazyRow(contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            items(chips) { (label, go) ->
+                Text(
+                    label, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, maxLines = 1,
+                    modifier = Modifier.clip(RoundedCornerShape(50)).background(Color(0x1FFFFFFF)).border(1.dp, Color(0x33FFFFFF), RoundedCornerShape(50))
+                        .clickable(onClick = go).padding(horizontal = 16.dp, vertical = 9.dp)
+                )
+            }
+        }
+        PhoneHero(featured, onOpen, onPlay, onSearch, topBar = false, heroH = 430)
     }
 }

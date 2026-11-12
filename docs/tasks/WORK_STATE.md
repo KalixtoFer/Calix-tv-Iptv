@@ -4,7 +4,7 @@ Last update: 2026-11-12. Read `CLAUDE.md` first, then this file.
 
 ## Current task
 
-**T-013** (phone start page, `docs/tasks/T-013-phone-home.md`): implemented, CI result and device test PENDING. T-007 to T-012 (device selector, phone login, Live TV touch, bottom bar, CI versioning, logo) are pushed. Next: Movies / Series phone screen from portrait screenshots; open questions to the maintainer: "Recordar sesión" (auth change, needs approval) and permanent signing secrets.
+**T-014** (`docs/tasks/T-014-phone-vod-live-sport.md`): phone Movies/Series header, TV-guide channel rows, design scale floor for Sports. CI and device test PENDING. T-013 (phone start page) pushed and CI green. Next: guide screen with date and Now/Later/All chips, poster carousel for Movies; open questions to the maintainer: "Recordar sesión" and permanent signing secrets.
 
 Earlier note:
 

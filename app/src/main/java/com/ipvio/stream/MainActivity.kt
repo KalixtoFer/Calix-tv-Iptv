@@ -396,7 +396,7 @@ private fun AppContent() {
     // Phone mode: keep clear of the status bar and the navigation bar (the screens are drawn edge to edge); the player stays full screen
     BoxWithConstraints(Modifier.fillMaxSize().background(Bg).then(if (DeviceMode.phoneNow && playing == null) Modifier.systemBarsPadding() else Modifier).fitScreenInset(playing == null)) {
         // Scale of the design from the available width (see Design)
-        val dk = maxWidth.value / Design.WIDTH
+        val dk = DeviceLogic.designScale(maxWidth.value, Design.WIDTH, DeviceMode.phoneNow)
         SideEffect { if (Design.k != dk) Design.k = dk }
         val p = playing
         val d = detail

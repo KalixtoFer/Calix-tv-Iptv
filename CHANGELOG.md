@@ -85,3 +85,4 @@
 - Celular: vertical por defecto, el reproductor en horizontal, y sin pisar la barra de estado; el dispositivo se detecta solo (T-011).
 - Celular: logo completo en el inicio de sesión; barra de abajo con Inicio, TV en vivo, Películas, Series y Más (T-012).
 - Celular: nuevo inicio estilo Netflix (imagen grande con logo y buscador, accesos rápidos y canales en vivo en 2 columnas) (T-013).
+- Celular: deportes sin texto cortado (escala mínima en modo celular), canales en vivo estilo guía de TV, Películas/Series con título, filtros por género e imagen destacada (T-014).

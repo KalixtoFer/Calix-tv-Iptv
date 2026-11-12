@@ -637,7 +637,10 @@ fun HomeScreen(
                             val noun = if (isM) "Filme" else "Serien"
                             val kind = if (isM) Kind.MOVIE else Kind.SERIES
                             val groups = if (isM) movieG else seriesG
-                            if (ready.isNotEmpty()) item(key = "hero$tab") { Hero(ready.toList(), heroH, false, onOpen, onPlayNow, header, { heroScroll(states[tab]) }) { scope.launch { states[tab].animateScrollToItem(0) } } }
+                            if (phone) item(key = "phoneVod$tab") {
+                                val chips = navTabs.map { t -> t.label to t.onClick } + groups.entries.filter { it.key != "Sonstige" }.take(10).map { (g, l) -> g to { onBrowse(BrowseReq(g, l, SORT_NEW)) } }
+                                PhoneVodTop(noun, chips, ready.toList(), onOpen, onPlayNow) { onTab(4) }
+                            } else if (ready.isNotEmpty()) item(key = "hero$tab") { Hero(ready.toList(), heroH, false, onOpen, onPlayNow, header, { heroScroll(states[tab]) }) { scope.launch { states[tab].animateScrollToItem(0) } } }
                             else item(key = "top$tab") { header(Modifier) }
                             // Popular (trending, otherwise top rated) directly under the big picture. First row:
                             // "Show all" up = profile at the top right, left = "To list" in the picture
