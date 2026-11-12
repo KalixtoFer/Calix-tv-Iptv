@@ -292,32 +292,76 @@ fun Sidebar(tab: Int, onTab: (Int) -> Unit, modifier: Modifier, activeFocus: Foc
 }
 
 /**
- * Phone mode: bottom bar with one touch target per menu entry (icon + small label). Entries that do not fit slide sideways.
- * Search is always there (on the TV it is hidden because the phone does the typing).
+ * Phone mode: bottom bar like the design: Start, Live TV, Movies, Series and "More" (everything else in a sheet).
+ * Search and Settings are always in the sheet, even when they are hidden from the TV menu.
  */
 @Composable
 private fun PhoneBottomBar(tab: Int, visible: List<Int>, onTab: (Int) -> Unit, modifier: Modifier) {
-    val ids = ArrayList(visible)
-    if (MenuLogic.SEARCH !in ids) ids.add(minOf(ids.size, 4), MenuLogic.SEARCH)
+    val main = listOf(MenuLogic.HOME, 3, 1, 2)
+    val more = ArrayList<Int>()
+    visible.forEach { if (it !in main && it !in more) more.add(it) }
+    if (MenuLogic.SEARCH !in more) more.add(0, MenuLogic.SEARCH)
+    if (MenuLogic.SETTINGS !in more) more.add(MenuLogic.SETTINGS)
+    var sheet by remember { mutableStateOf(false) }
+    val shape = RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp)
     Row(
-        modifier.fillMaxWidth().background(SidebarBg)
-            .drawBehind { drawLine(Color(0x1AFFFFFF), Offset(0f, 1f), Offset(size.width, 1f), 1f) }
-            .navigationBarsPadding().height(BottomBarH)
-            .horizontalScroll(androidx.compose.foundation.rememberScrollState()),
+        modifier.fillMaxWidth().clip(shape).background(SidebarBg)
+            .drawBehind { drawLine(Color(0x3329C7F5), Offset(0f, 1f), Offset(size.width, 1f), 2f) }
+            .navigationBarsPadding().height(BottomBarH),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        ids.forEach { id ->
-            val active = id == tab
-            val ink = if (active) Accent1 else SidebarInk
+        main.forEach { id ->
+            PhoneBarItem(MENU_LABELS[id], id == tab, Modifier.weight(1f), { MenuIcon(id, it, Modifier.size(24.dp)) }) { onTab(id) }
+        }
+        PhoneBarItem("Mehr", tab in more, Modifier.weight(1f), { MoreGridIcon(it) }) { sheet = true }
+    }
+    if (sheet) androidx.compose.ui.window.Dialog(
+        onDismissRequest = { sheet = false },
+        properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Box(Modifier.fillMaxSize().clickable(indication = null, interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }) { sheet = false }, contentAlignment = Alignment.BottomCenter) {
             Column(
-                Modifier.fillMaxHeight().widthIn(min = 72.dp).clickable { onTab(id) }.padding(horizontal = 10.dp),
-                horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
+                Modifier.fillMaxWidth().clip(shape).background(SidebarBg).clickable(indication = null, interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }) {}
+                    .navigationBarsPadding().padding(horizontal = 12.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                MenuIcon(id, ink, Modifier.size(24.dp))
-                Spacer(Modifier.height(3.dp))
-                Text(MENU_LABELS[id], color = ink, fontSize = spx(11), fontWeight = if (active) FontWeight.Bold else FontWeight.Medium, maxLines = 1)
+                more.chunked(3).forEach { row ->
+                    Row(Modifier.fillMaxWidth()) {
+                        row.forEach { id ->
+                            PhoneBarItem(MENU_LABELS[id], id == tab, Modifier.weight(1f).height(76.dp), { MenuIcon(id, it, Modifier.size(26.dp)) }) { sheet = false; onTab(id) }
+                        }
+                        repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
+                    }
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun PhoneBarItem(label: String, active: Boolean, modifier: Modifier, icon: @Composable (Color) -> Unit, onClick: () -> Unit) {
+    val ink = if (active) Accent1 else SidebarInk
+    Column(
+        modifier.fillMaxHeight().clickable(onClick = onClick).padding(horizontal = 2.dp),
+        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
+    ) {
+        icon(ink)
+        Spacer(Modifier.height(3.dp))
+        Text(label, color = ink, fontSize = spx(11), fontWeight = if (active) FontWeight.Bold else FontWeight.Medium, maxLines = 1)
+    }
+}
+
+/** Four rounded squares ("More"). */
+@Composable
+private fun MoreGridIcon(color: Color) {
+    Canvas(Modifier.size(24.dp)) {
+        val s = size.minDimension
+        val cell = s * 0.36f
+        val gap = s * 0.1f
+        for (ix in 0..1) for (iy in 0..1) drawRoundRect(
+            color, topLeft = Offset(s * 0.07f + ix * (cell + gap), s * 0.07f + iy * (cell + gap)),
+            size = Size(cell, cell), cornerRadius = CornerRadius(s * 0.08f)
+        )
     }
 }
 

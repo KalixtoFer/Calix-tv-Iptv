@@ -1,6 +1,7 @@
 package com.ipvio.stream
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -16,6 +17,17 @@ fun BrandMark(modifier: Modifier = Modifier) {
         painter = painterResource(R.drawable.ic_brand_mark),
         contentDescription = null,
         modifier = modifier,
+        contentScale = ContentScale.Fit
+    )
+}
+
+/** Full "CALIX TV" logo (wide, transparent background). Give it a width; the height follows the picture. */
+@Composable
+fun BrandLogo(modifier: Modifier = Modifier) {
+    Image(
+        painter = painterResource(R.drawable.calix_logo),
+        contentDescription = null,
+        modifier = modifier.aspectRatio(657f / 481f),
         contentScale = ContentScale.Fit
     )
 }

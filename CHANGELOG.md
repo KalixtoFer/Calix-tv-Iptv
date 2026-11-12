@@ -83,3 +83,4 @@
 - Celular: barra de navegación inferior táctil (T-010).
 - Compilación en GitHub: ya no es la app "test"; cada build sube la versión (1.3.<n>) y se instala sobre la anterior (T-010).
 - Celular: vertical por defecto, el reproductor en horizontal, y sin pisar la barra de estado; el dispositivo se detecta solo (T-011).
+- Celular: logo completo en el inicio de sesión; barra de abajo con Inicio, TV en vivo, Películas, Series y Más (T-012).
