@@ -132,6 +132,16 @@ fun AddPlaylistScreen(onDone: () -> Unit) {
 
     if (PlaylistStore.loading) { PlaylistLoadingOverlay(); return }
 
+    // Phone mode with the fixed server: simple portrait login (user + password), same loading logic as below
+    if (fixed && MobilePrefs.isMobile(ctx)) {
+        PhoneLogin(user, { user = it }, pass, { pass = it }, PlaylistStore.error) {
+            val finalUrl = PlaylistStore.xtreamUrl(RemoteConfig.server(), user.trim(), pass)
+            if (finalUrl == null) PlaylistStore.error = "Ingresá tu usuario y contraseña."
+            else scope.launch { if (PlaylistStore.load(ctx, finalUrl, true)) onDone() }
+        }
+        return
+    }
+
     // Start focus on the M3U/Xtream choice (not on an input field: that would open the on-screen keyboard immediately)
     val startFocus = remember { FocusRequester() }
     LaunchedEffect(Unit) { delay(120); runCatching { startFocus.requestFocus() } }
