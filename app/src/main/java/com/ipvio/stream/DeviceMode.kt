@@ -42,15 +42,20 @@ object DeviceMode {
     private const val KEY = "mode"
 
     private var loaded = false
+    private var hardware = false
 
     /** [DeviceLogic.PHONE], [DeviceLogic.TV] or null while not chosen. Compose state, so screens update on change. */
     var mode by mutableStateOf<String?>(null)
         private set
 
+    /** Phone mode without a Context (for layout code): the choice, else what the hardware looked like at [init]. Reads Compose state. */
+    val phoneNow: Boolean get() = DeviceLogic.isPhone(mode, hardware)
+
     fun init(c: Context) {
         if (loaded) return
         loaded = true
-        mode = DeviceLogic.valid(c.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY, null))
+        hardware = MobilePrefs.hardwareMobile(c)
+        mode =DeviceLogic.valid(c.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY, null))
     }
 
     fun needsChoice(c: Context): Boolean { init(c); return DeviceLogic.needsChoice(mode) }

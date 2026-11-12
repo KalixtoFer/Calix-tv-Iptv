@@ -164,21 +164,26 @@ object SidebarPrefs {
         Profiles.sp(c, "ipvio_side").edit().putInt("pos", this.pos).putBoolean("labels", labels).apply()
     }
 
-    fun align(): Alignment = when (pos) { RIGHT -> Alignment.CenterEnd; TOP -> Alignment.TopCenter; else -> Alignment.CenterStart }
+    /** Phone mode: the menu is a touch bar at the bottom (the stored position is for the TV and stays untouched). */
+    fun align(): Alignment = if (DeviceMode.phoneNow) Alignment.BottomCenter
+        else when (pos) { RIGHT -> Alignment.CenterEnd; TOP -> Alignment.TopCenter; else -> Alignment.CenterStart }
 }
 
 /** Height of the bar at the top. */
 val TopBarH: androidx.compose.ui.unit.Dp get() = dpx(68)
 
-/** Space for the sidebar at the content (left, right or top). */
-fun Modifier.sidebarPad(): Modifier = when (SidebarPrefs.pos) {
+/** Height of the touch bar at the bottom (phone mode). */
+val BottomBarH: androidx.compose.ui.unit.Dp get() = 62.dp
+
+/** Space for the sidebar at the content (left, right, top, or bottom in phone mode). */
+fun Modifier.sidebarPad(): Modifier = if (DeviceMode.phoneNow) this.padding(bottom = BottomBarH) else when (SidebarPrefs.pos) {
     SidebarPrefs.RIGHT -> this.padding(end = DS.SidebarW)
     SidebarPrefs.TOP -> this.padding(top = TopBarH)
     else -> this.padding(start = DS.SidebarW)
 }
 
 /** Distance from the left to the content (only with the bar on the left). */
-val SideStart: androidx.compose.ui.unit.Dp get() = if (SidebarPrefs.pos == SidebarPrefs.LEFT) DS.SidebarW else 0.dp
+val SideStart: androidx.compose.ui.unit.Dp get() = if (!DeviceMode.phoneNow && SidebarPrefs.pos == SidebarPrefs.LEFT) DS.SidebarW else 0.dp
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -223,6 +228,11 @@ fun Sidebar(tab: Int, onTab: (Int) -> Unit, modifier: Modifier, activeFocus: Foc
         }
         .focusGroup()
         .onFocusChanged { focusIn = it.hasFocus; onFocusIn(it.hasFocus) }
+
+    if (DeviceMode.phoneNow) {
+        PhoneBottomBar(tab, visible, onTab, modifier)
+        return
+    }
 
     if (pos == SidebarPrefs.TOP) {
         // Bar at the top: icons with text side by side
@@ -277,6 +287,36 @@ fun Sidebar(tab: Int, onTab: (Int) -> Unit, modifier: Modifier, activeFocus: Foc
             // At the very bottom: phone search (QR code), so you can type on the phone instead of with the remote
             Spacer(Modifier.weight(1f))
             PhoneSearchItem(expanded, Modifier.padding(bottom = dpx(22)))
+        }
+    }
+}
+
+/**
+ * Phone mode: bottom bar with one touch target per menu entry (icon + small label). Entries that do not fit slide sideways.
+ * Search is always there (on the TV it is hidden because the phone does the typing).
+ */
+@Composable
+private fun PhoneBottomBar(tab: Int, visible: List<Int>, onTab: (Int) -> Unit, modifier: Modifier) {
+    val ids = ArrayList(visible)
+    if (MenuLogic.SEARCH !in ids) ids.add(minOf(ids.size, 4), MenuLogic.SEARCH)
+    Row(
+        modifier.fillMaxWidth().background(SidebarBg)
+            .drawBehind { drawLine(Color(0x1AFFFFFF), Offset(0f, 1f), Offset(size.width, 1f), 1f) }
+            .navigationBarsPadding().height(BottomBarH)
+            .horizontalScroll(androidx.compose.foundation.rememberScrollState()),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        ids.forEach { id ->
+            val active = id == tab
+            val ink = if (active) Accent1 else SidebarInk
+            Column(
+                Modifier.fillMaxHeight().widthIn(min = 72.dp).clickable { onTab(id) }.padding(horizontal = 10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
+            ) {
+                MenuIcon(id, ink, Modifier.size(24.dp))
+                Spacer(Modifier.height(3.dp))
+                Text(MENU_LABELS[id], color = ink, fontSize = spx(11), fontWeight = if (active) FontWeight.Bold else FontWeight.Medium, maxLines = 1)
+            }
         }
     }
 }

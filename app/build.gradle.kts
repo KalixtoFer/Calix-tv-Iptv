@@ -46,8 +46,10 @@ android {
         minSdk = 24
         targetSdk = 37
         // Raise both for every release; the GitHub release tag must match versionName (e.g. tag "v1.1").
-        versionCode = 4
-        versionName = "1.3"
+        // GitHub Actions builds get a rising versionCode and a visible build number (1.3.<run>), so every APK installs over the previous one.
+        val ciRun = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull()
+        versionCode = if (ciRun != null) 100 + ciRun else 4
+        versionName = if (ciRun != null) "1.3.$ciRun" else "1.3"
         // Name under the icon; the debug build overrides it (see buildTypes)
         manifestPlaceholders["appLabel"] = "Calix TV"
 
@@ -77,7 +79,8 @@ android {
             manifestPlaceholders["appLabel"] = "Calix TV (test)"
         }
         release {
-            if (hasKeystore) signingConfig = signingConfigs.getByName("release")
+            // Without keystore.properties (e.g. CI without secrets) the build is signed with the debug key so it still installs.
+            signingConfig = if (hasKeystore) signingConfigs.getByName("release") else signingConfigs.getByName("debug")
             optimization {
                 // Off: the shrunk release build (12.7 MB) did not start on the device. Turn back on only together with
                 // keep rules in src/main/keepRules and a test on a real device.

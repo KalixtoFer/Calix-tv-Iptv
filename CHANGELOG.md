@@ -80,3 +80,5 @@
 - Primer inicio: elegir dispositivo (Celular / Tablet o TV / TV Box). Se puede cambiar en Ajustes > General > Gerät. Base para el rediseño del celular (T-007).
 - Celular: inicio de sesión vertical con usuario y contraseña (T-008).
 - Celular: TV en vivo táctil estilo Netflix (categorías en chips, inicio con filas, búsqueda con teclado normal) (T-009).
+- Celular: barra de navegación inferior táctil (T-010).
+- Compilación en GitHub: ya no es la app "test"; cada build sube la versión (1.3.<n>) y se instala sobre la anterior (T-010).

@@ -37,18 +37,21 @@ jobs:
             } > keystore.properties
             echo "SIGNED=true" >> "$GITHUB_ENV"
           fi
-      - name: Compilar APK firmado (release)
-        if: env.SIGNED == 'true'
-        run: ./gradlew --no-daemon assembleRelease
-      - name: Compilar APK de prueba (debug)
+      # Sin secretos de firma: se reutiliza siempre la misma clave de depuración (cache), así cada APK se instala sobre el anterior
+      - name: Clave de firma estable (cache)
         if: env.SIGNED != 'true'
-        run: ./gradlew --no-daemon assembleDebug
+        uses: actions/cache@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: calix-debug-keystore-v1
+      - name: Compilar APK (release)
+        run: ./gradlew --no-daemon assembleRelease
       - name: Renombrar APK
         run: |
           mkdir -p out
-          f=$(ls app/build/outputs/apk/release/*.apk app/build/outputs/apk/debug/*.apk 2>/dev/null | head -n1)
-          cp "$f" out/Calix-TV.apk
+          f=$(ls app/build/outputs/apk/release/*.apk | head -n1)
+          cp "$f" "out/Calix-TV-1.3.${{ github.run_number }}.apk"
       - uses: actions/upload-artifact@v4
         with:
           name: Calix-TV-APK
-          path: out/Calix-TV.apk
+          path: out/*.apk
