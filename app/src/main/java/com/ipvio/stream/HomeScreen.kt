@@ -179,6 +179,8 @@ fun HomeScreen(
 ) {
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
+    // Phone mode (portrait): own start page on top instead of the TV picture, tiles and billboard
+    val phone = DeviceMode.phoneNow
     val allRaw = PlaylistStore.channels
     // Movies/series: playlist selection at the top (with several shown playlists) – only titles of this playlist
     val areaK = if (tab in 1..2) AreaSource.get(tab) else -1
@@ -468,7 +470,7 @@ fun HomeScreen(
     val reload: () -> Unit = { PlaylistStore.savedUrl(ctx)?.let { u -> scope.launch { PlaylistStore.load(ctx, u, false) } } }
 
     // Round 17b (Cinematic Remake): background and info follow the selected title once the big picture has scrolled away
-    val bbTab = tab in 0..2
+    val bbTab = tab in 0..2 && !phone
     val bbState = states[tab.coerceIn(0, states.lastIndex)]
     // Round 18: even when the big picture is still partly visible (e.g. first row "Popular series"), the background shows
     // the info of the selected title – and the big picture (slideshow) pauses.
@@ -573,7 +575,8 @@ fun HomeScreen(
                                     Text("Bearbeiten: Über jeder Reihe kannst du sie verschieben oder ausblenden.", color = Muted, fontSize = 15.sp)
                                 }
                             }
-                            if (ready.isNotEmpty() && HomeLayout.shown("hero")) item(key = "hero") { Hero(ready.toList(), heroH, true, onOpen, onPlayNow, header, { heroScroll(states[0]) }) { scope.launch { states[0].animateScrollToItem(0) } } }
+                            if (phone && tab == 0) item(key = "phoneTop") { PhoneHomeTop(ready.toList(), tiles, onOpen, onPlayNow) { onTab(4) } }
+                            else if (ready.isNotEmpty() && HomeLayout.shown("hero")) item(key = "hero") { Hero(ready.toList(), heroH, true, onOpen, onPlayNow, header, { heroScroll(states[0]) }) { scope.launch { states[0].animateScrollToItem(0) } } }
                             else item(key = "top") { header(Modifier) }
                             val wl = wlVod
                             for (blockId in HomeLayout.order) {
@@ -582,12 +585,14 @@ fun HomeScreen(
                                 if (editing) item(key = "eb$blockId") { HomeEditBar(ctx, blockId) }
                                 if (!HomeLayout.shown(blockId)) continue
                                 when (blockId) {
-                                    "tiles" -> { item(key = "tiles") { QuickTiles(tiles) } }
+                                    "tiles" -> { if (!phone) item(key = "tiles") { QuickTiles(tiles) } }
                                     "clock" -> { item(key = "clock") { ClockWidget() } }
                                     // Continue watching directly under the tiles: whoever watches a lot wants to continue in few clicks
                                     "resume" -> { if (resumeList.isNotEmpty()) item(key = "resume") { ResumeRow(resumeList, cardW, onResume) } }
                                     "favch" -> { if (favLive.isNotEmpty()) item(key = "favch") { ItemsRow("Meine Sender", favLive, cardW, onOpen) { onTab(3) } } }
-                                    "chnow" -> { if (nowChannels.isNotEmpty()) item(key = "chnow") { ChannelNowRow("Live TV", nowChannels, onOpen) { onTab(3) } } }
+                                    "chnow" -> { if (nowChannels.isNotEmpty()) item(key = "chnow") {
+                                        if (phone) PhoneLiveGrid("Live TV", nowChannels.take(6), onOpen) { onTab(3) } else ChannelNowRow("Live TV", nowChannels, onOpen) { onTab(3) }
+                                    } }
                                     // Top 10 always as whole covers (independent of the picture setting)
                                     "trend" -> { if (trendItems.size >= 3) item(key = "trend") {
                                         ItemsRow("Top 10 heute", trendTop, cardW, onOpen, style = CARD_TOP10) { onBrowse(BrowseReq("Im Trend", trendItems, SORT_PLAYLIST)) }

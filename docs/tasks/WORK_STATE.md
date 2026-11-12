@@ -1,10 +1,10 @@
 # Work state
 
-Last update: 2026-11-11. Read `CLAUDE.md` first, then this file.
+Last update: 2026-11-12. Read `CLAUDE.md` first, then this file.
 
 ## Current task
 
-**T-007** (device selector, see `docs/tasks/T-007-device-selector.md`): implemented and pushed, CI result and device test PENDING. Next for phones: Live TV navigation by categories, easier remote entry, Netflix-like phone layout (each its own task, with plan first).
+**T-013** (phone start page, `docs/tasks/T-013-phone-home.md`): implemented, CI result and device test PENDING. T-007 to T-012 (device selector, phone login, Live TV touch, bottom bar, CI versioning, logo) are pushed. Next: Movies / Series phone screen from portrait screenshots; open questions to the maintainer: "Recordar sesión" (auth change, needs approval) and permanent signing secrets.
 
 Earlier note:
 
