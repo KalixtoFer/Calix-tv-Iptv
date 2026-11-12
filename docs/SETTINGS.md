@@ -4,7 +4,7 @@ All settings are on the **Settings** tab of the sidebar. They are grouped into t
 
 | Tile | What it does |
 |---|---|
-| General | Start screen, exit behaviour, autostart, landscape on phones |
+| General | Start screen, exit behaviour, autostart, device (phone or TV), landscape on phones |
 | Language & region | App language (10 languages), clock format, time zone |
 | View | Card size and artwork with live preview, sidebar position (left, right, top) and labels, grid, default cinema view |
 | Design | Colour theme, background, fonts (Outfit, Inter, system), text and display size, animations |

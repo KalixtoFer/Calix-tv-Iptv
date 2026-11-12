@@ -4,6 +4,10 @@ Last update: 2026-11-11. Read `CLAUDE.md` first, then this file.
 
 ## Current task
 
+**T-007** (device selector, see `docs/tasks/T-007-device-selector.md`): implemented and pushed, CI result and device test PENDING. Next for phones: Live TV navigation by categories, easier remote entry, Netflix-like phone layout (each its own task, with plan first).
+
+Earlier note:
+
 None active. **T-005** (documentation skeleton, CHANGELOG headings for 1.2 and 1.3, `CLAUDE.md` section 15) and **T-001b** (`org.json` test dependency, commit `75e1892`) are done and pushed. T-005 touched documents only.
 
 ## Completed steps

@@ -153,7 +153,13 @@ fun App(pick: Boolean = false) {
     ) {
         val c = LocalContext.current
         var picked by remember { mutableStateOf(!pick) }
-        if (!picked) ProfilePicker { id -> Profiles.select(c, id); AppSettings.init(c); Parental.init(c); LangFilter.init(c); Boomer.init(c); HomeLayout.init(c); BoomerLayout.init(c); picked = true }
+        var deviceChosen by remember { mutableStateOf(!DeviceMode.needsChoice(c)) }
+        if (!deviceChosen) DevicePicker(DeviceLogic.suggested(MobilePrefs.hardwareMobile(c))) { v ->
+            DeviceMode.set(c, v)
+            DeviceMode.activityOf(c)?.let { MobilePrefs.apply(it) }
+            deviceChosen = true
+        }
+        else if (!picked) ProfilePicker { id -> Profiles.select(c, id); AppSettings.init(c); Parental.init(c); LangFilter.init(c); Boomer.init(c); HomeLayout.init(c); BoomerLayout.init(c); picked = true }
         else {
             LaunchedEffect(Unit) { delay(10_000); runCatching { SportAlerts.run(c.applicationContext) } }   // after the start: the playlist and the home screen come first
             Box(Modifier.fillMaxSize()) { AppContent(); SportAlertHost() }

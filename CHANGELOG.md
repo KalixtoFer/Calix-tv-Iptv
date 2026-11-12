@@ -77,3 +77,4 @@
 - Acceso simplificado con servidor fijo (solo usuario y contraseña).
 - Panel remoto: `remote/config.json` (servidor, anuncio, banners) y `remote/update.json` (actualización), editable con `admin/index.html`.
 - Se quitó la sección de donaciones del autor original.
+- Primer inicio: elegir dispositivo (Celular / Tablet o TV / TV Box). Se puede cambiar en Ajustes > General > Gerät. Base para el rediseño del celular (T-007).

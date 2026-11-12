@@ -477,6 +477,13 @@ private fun GeneralPage(ctx: Context) {
     SectionTitle("Bedienung")
     ToggleRow("Tastatur des Geräts in der Suche", "Aus: die eingebaute Tastatur der App. An: die Tastatur deines Geräts (z. B. Gboard) mit allen Sprachen, Sprachfunktion und Einfügen. Mit OK auf das Suchfeld wird sie geöffnet.", AppSettings.systemKeyboard) { AppSettings.setSystemKeyboard(ctx, it) }
     ToggleRow("Beenden bestätigen", "Auf der Startseite muss „Zurück“ zweimal gedrückt werden, damit die App nicht aus Versehen schließt.", General.confirmExit) { General.setConfirmExit(ctx, it) }
+    val deviceOptions = listOf("Handy / Tablet", "Fernseher / TV-Box")
+    val deviceSel = if (MobilePrefs.isMobile(ctx)) 0 else 1
+    SelectRow("Gerät", deviceOptions[deviceSel], deviceOptions, deviceSel) { i ->
+        DeviceMode.set(ctx, if (i == 0) DeviceLogic.PHONE else DeviceLogic.TV)
+        DeviceMode.activityOf(ctx)?.let { MobilePrefs.apply(it) }
+    }
+    Hint("Wähle, auf welchem Gerät du die App nutzt. Die Ansicht für das Handy wird Schritt für Schritt angepasst.")
     // Phone/tablet: landscape (the UI is built for the TV)
     if (MobilePrefs.isMobile(ctx)) {
         val act = generateSequence<Context>(ctx) { (it as? android.content.ContextWrapper)?.baseContext }.filterIsInstance<android.app.Activity>().firstOrNull()

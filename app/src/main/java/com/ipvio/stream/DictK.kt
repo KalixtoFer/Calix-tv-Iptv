@@ -27,4 +27,13 @@ OK lange drücken = als gesehen markieren¦Hold OK = mark as watched
 OK lange drücken = als ungesehen markieren¦Hold OK = mark as unwatched
 Tastatur des Geräts in der Suche¦Device keyboard in search
 Aus: die eingebaute Tastatur der App. An: die Tastatur deines Geräts (z. B. Gboard) mit allen Sprachen, Sprachfunktion und Einfügen. Mit OK auf das Suchfeld wird sie geöffnet.¦Off: the app's built-in keyboard. On: your device's keyboard (e.g. Gboard) with all languages, voice input and paste. Press OK on the search field to open it.
+# Device choice (first start)
+Auf welchem Gerät nutzt du die App?¦Which device will you use the app on?¦Uygulamayı hangi cihazda kullanacaksın?¦Na kojem uređaju ćeš koristiti aplikaciju?¦¦¦¿En qué dispositivo vas a usar la app?¦Sur quel appareil vas-tu utiliser l'app ?¦Su quale dispositivo userai l'app?¦Op welk apparaat ga je de app gebruiken?
+Handy / Tablet¦Phone / Tablet¦Telefon / Tablet¦Telefon / Tablet¦¦¦Teléfono / Tablet¦Téléphone / Tablette¦Telefono / Tablet¦Telefoon / Tablet
+Fernseher / TV-Box¦TV / TV box¦TV / TV box¦TV / TV box¦¦¦TV / TV Box¦TV / box TV¦TV / TV box¦TV / tv-box
+Bedienung mit dem Finger¦Touch control¦Dokunmatik kullanım¦Upravljanje dodirom¦¦¦Control táctil¦Commande tactile¦Controllo touch¦Bediening met aanraking
+Bedienung mit der Fernbedienung¦Remote control¦Kumanda ile kullanım¦Upravljanje daljinskim¦¦¦Control con el mando¦Commande à distance¦Controllo con il telecomando¦Bediening met de afstandsbediening
+Du kannst das später in den Einstellungen ändern.¦You can change this later in Settings.¦Bunu daha sonra Ayarlar'dan değiştirebilirsin.¦To možeš kasnije promijeniti u postavkama.¦¦¦Puedes cambiarlo después en Ajustes.¦Tu peux le modifier plus tard dans les Réglages.¦Puoi cambiarlo più tardi nelle Impostazioni.¦Je kunt dit later wijzigen in Instellingen.
+Gerät¦Device¦Cihaz¦Uređaj¦¦¦Dispositivo¦Appareil¦Dispositivo¦Apparaat
+Wähle, auf welchem Gerät du die App nutzt. Die Ansicht für das Handy wird Schritt für Schritt angepasst.¦Choose which device you use the app on. The phone layout is being adapted step by step.¦Uygulamayı hangi cihazda kullandığını seç. Telefon görünümü adım adım uyarlanıyor.¦Odaberi na kojem uređaju koristiš aplikaciju. Prikaz za telefon se prilagođava korak po korak.¦¦¦Elige en qué dispositivo usas la app. La vista para celular se va adaptando paso a paso.¦Choisis sur quel appareil tu utilises l'app. L'affichage pour téléphone est adapté étape par étape.¦Scegli su quale dispositivo usi l'app. La vista per telefono viene adattata passo dopo passo.¦Kies op welk apparaat je de app gebruikt. De weergave voor telefoon wordt stap voor stap aangepast.
 """
