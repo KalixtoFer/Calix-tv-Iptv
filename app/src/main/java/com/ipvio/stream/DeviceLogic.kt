@@ -14,6 +14,16 @@ object DeviceLogic {
     /** True until the user has chosen a device. */
     fun needsChoice(stored: String?): Boolean = valid(stored) == null
 
+    /**
+     * Automatic choice from the hardware, or null when it is not clear (then the first-start screen asks).
+     * TV hardware (Leanback / Fire TV) = TV; otherwise a touch screen = phone/tablet; neither (generic TV box) = ask.
+     */
+    fun auto(hardwareTv: Boolean, hardwareTouch: Boolean): String? = when {
+        hardwareTv -> TV
+        hardwareTouch -> PHONE
+        else -> null
+    }
+
     /** Value the first-start screen highlights: what the hardware looks like (touch without Leanback = phone). */
     fun suggested(hardwareMobile: Boolean): String = if (hardwareMobile) PHONE else TV
 

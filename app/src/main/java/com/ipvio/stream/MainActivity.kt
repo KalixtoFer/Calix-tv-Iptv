@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.*
@@ -392,7 +393,8 @@ private fun AppContent() {
         }
     }
 
-    BoxWithConstraints(Modifier.fillMaxSize().background(Bg).fitScreenInset(playing == null)) {
+    // Phone mode: keep clear of the status bar and the navigation bar (the screens are drawn edge to edge); the player stays full screen
+    BoxWithConstraints(Modifier.fillMaxSize().background(Bg).then(if (DeviceMode.phoneNow && playing == null) Modifier.systemBarsPadding() else Modifier).fitScreenInset(playing == null)) {
         // Scale of the design from the available width (see Design)
         val dk = maxWidth.value / Design.WIDTH
         SideEffect { if (Design.k != dk) Design.k = dk }
@@ -421,6 +423,7 @@ private fun AppContent() {
                 }
                 // New start from outside (e.g. reminder "Switch") during playback: rebuild the player
                 key(p) {
+                    PhonePlayerOrientation()
                     PlayerScreen(p, zap, liveAll, seriesItem) {
                         // Live: back in Live TV on the last watched channel (also after switching in the player)
                         if (p.live || p.archive != null) LastFocus.pending = History.ids.firstOrNull { id -> liveAll.any { it.id == id } }

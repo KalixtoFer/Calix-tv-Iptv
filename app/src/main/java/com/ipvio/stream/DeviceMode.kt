@@ -3,6 +3,9 @@ package com.ipvio.stream
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.pm.ActivityInfo
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -55,7 +58,13 @@ object DeviceMode {
         if (loaded) return
         loaded = true
         hardware = MobilePrefs.hardwareMobile(c)
-        mode =DeviceLogic.valid(c.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY, null))
+        val prefs = c.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        mode = DeviceLogic.valid(prefs.getString(KEY, null))
+        // Not chosen yet: the hardware usually tells (TV vs touch device), then nobody has to be asked. Settings can still change it.
+        if (mode == null) DeviceLogic.auto(MobilePrefs.hardwareTv(c), MobilePrefs.hardwareTouch(c))?.let {
+            mode = it
+            prefs.edit().putString(KEY, it).apply()
+        }
     }
 
     fun needsChoice(c: Context): Boolean { init(c); return DeviceLogic.needsChoice(mode) }
@@ -72,6 +81,17 @@ object DeviceMode {
 
     /** The Activity behind a Compose context, if any. */
     fun activityOf(c: Context): Activity? = generateSequence(c) { (it as? ContextWrapper)?.baseContext }.filterIsInstance<Activity>().firstOrNull()
+}
+
+/** Phone mode: the full-screen player is landscape; the previous orientation comes back when it closes. */
+@Composable
+fun PhonePlayerOrientation() {
+    val ctx = LocalContext.current
+    DisposableEffect(Unit) {
+        val act = if (DeviceMode.isPhone(ctx)) DeviceMode.activityOf(ctx) else null
+        act?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+        onDispose { act?.let { MobilePrefs.apply(it) } }
+    }
 }
 
 /**

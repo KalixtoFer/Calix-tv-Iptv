@@ -28,6 +28,13 @@ class DeviceLogicTest {
         assertTrue(DeviceLogic.isPhone("garbage", hardwareMobile = true))
     }
 
+    @Test fun autoChoiceFromHardware() {
+        assertEquals(DeviceLogic.TV, DeviceLogic.auto(hardwareTv = true, hardwareTouch = false))
+        assertEquals(DeviceLogic.TV, DeviceLogic.auto(hardwareTv = true, hardwareTouch = true))
+        assertEquals(DeviceLogic.PHONE, DeviceLogic.auto(hardwareTv = false, hardwareTouch = true))
+        assertNull(DeviceLogic.auto(hardwareTv = false, hardwareTouch = false))
+    }
+
     @Test fun suggestionFollowsHardware() {
         assertEquals(DeviceLogic.PHONE, DeviceLogic.suggested(true))
         assertEquals(DeviceLogic.TV, DeviceLogic.suggested(false))
