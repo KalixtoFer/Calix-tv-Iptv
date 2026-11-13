@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.sp
  * then one line per team with logo, name and score. The TV row ([MatchRow]) is too wide for a portrait screen.
  */
 @Composable
-internal fun PhoneMatchCard(g: SportData.Game, hasChan: Boolean, onClick: () -> Unit) {
+internal fun PhoneMatchCard(g: SportData.Game, hasChan: Boolean, chan: String? = null, onClick: () -> Unit) {
     val shape = RoundedCornerShape(14.dp)
     val live = statusKind(g) == 1
     Column(
@@ -59,6 +59,10 @@ internal fun PhoneMatchCard(g: SportData.Game, hasChan: Boolean, onClick: () -> 
         } else {
             PhoneTeamLine(g.home, g.state)
             PhoneTeamLine(g.away, g.state)
+        }
+        if (!chan.isNullOrBlank()) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            AppIcon(AIcon.Live, Accent2, size = 16.dp)
+            Text(raw = true, text = chan, color = Accent2, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }

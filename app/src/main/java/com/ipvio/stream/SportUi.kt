@@ -317,7 +317,7 @@ internal fun MatchCard(g: SportData.Game, hasChan: Boolean, modifier: Modifier =
  */
 @Composable
 internal fun MatchRow(g: SportData.Game, hasChan: Boolean, timeFirst: Boolean = false, onClick: () -> Unit) {
-    if (DeviceMode.phoneNow) { PhoneMatchCard(g, hasChan, onClick); return }
+    if (DeviceMode.phoneNow) { PhoneMatchCard(g, hasChan, null, onClick); return }
     FRow(onClick) {
         Box(Modifier.width(dpx(150))) {
             if (timeFirst && g.state == 0 && statusKind(g) == 0) Text(raw = true, text = hhmm(g.start), color = Accent2, fontSize = spx(17), fontWeight = FontWeight.Bold)

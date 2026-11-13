@@ -49,9 +49,11 @@ import kotlinx.coroutines.withContext
  * (3 per row). The rows below are the normal ones, which scroll sideways with the finger. The TV start page is untouched.
  */
 @Composable
-fun PhoneHomeTop(featured: List<Item>, tiles: List<QuickTile>, onOpen: (Item) -> Unit, onPlay: (Item) -> Unit, onSearch: () -> Unit) {
+fun PhoneHomeTop(featured: List<Item>, tiles: List<QuickTile>, onOpen: (Item) -> Unit, onPlay: (Item) -> Unit, onSearch: () -> Unit, onKind: (Int) -> Unit) {
     Column(Modifier.fillMaxWidth()) {
-        PhoneHero(featured, onOpen, onPlay, onSearch)
+        PhoneLogoBar(onSearch)
+        PhoneChips(listOf("Serien" to { onKind(2) }, "Filme" to { onKind(1) }), selected = null)
+        PhoneHero(featured, onOpen, onPlay, onSearch, topBar = false, heroH = 420)
         PhoneTiles(tiles)
     }
 }
@@ -180,26 +182,44 @@ private fun PhoneLiveCard(item: Item, modifier: Modifier, onClick: () -> Unit) {
     }
 }
 
+/** Logo on the left, search on the right. */
+@Composable
+private fun PhoneLogoBar(onSearch: () -> Unit) {
+    Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+        BrandLogo(Modifier.width(104.dp))
+        Spacer(Modifier.weight(1f))
+        MenuIcon(MenuLogic.SEARCH, Color.White, Modifier.clip(CircleShape).clickable(onClick = onSearch).padding(10.dp).size(26.dp))
+    }
+}
+
+/** Row of pills; the one whose label equals [selected] is filled white. */
+@Composable
+private fun PhoneChips(chips: List<Pair<String, () -> Unit>>, selected: String?, leading: (@Composable () -> Unit)? = null) {
+    LazyRow(contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        if (leading != null) item { leading() }
+        items(chips) { (label, go) ->
+            val on = label == selected
+            Text(
+                label, color = if (on) Color.Black else Color.White, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, maxLines = 1,
+                modifier = Modifier.clip(RoundedCornerShape(50)).background(if (on) Color.White else Color(0x1FFFFFFF))
+                    .border(1.dp, Color(0x33FFFFFF), RoundedCornerShape(50)).clickable(onClick = go).padding(horizontal = 16.dp, vertical = 9.dp)
+            )
+        }
+    }
+}
+
 /**
- * Movies / Series start of the phone: big title with search, a row of filter chips (the four header entries, then the genres)
- * and the featured picture. The rows below are the normal ones.
+ * Movies / Series on the phone: opened from the chips of the start page. Logo + search, a close button (back to the start page),
+ * the chosen kind, "all groups" and the genres, then the featured picture. The rows below are the normal ones.
  */
 @Composable
-fun PhoneVodTop(title: String, chips: List<Pair<String, () -> Unit>>, featured: List<Item>, onOpen: (Item) -> Unit, onPlay: (Item) -> Unit, onSearch: () -> Unit) {
+fun PhoneVodTop(kind: String, chips: List<Pair<String, () -> Unit>>, featured: List<Item>, onOpen: (Item) -> Unit, onPlay: (Item) -> Unit, onSearch: () -> Unit, onClose: () -> Unit) {
     Column(Modifier.fillMaxWidth()) {
-        Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(title, color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.weight(1f), maxLines = 1)
-            MenuIcon(MenuLogic.SEARCH, Color.White, Modifier.clip(CircleShape).clickable(onClick = onSearch).padding(10.dp).size(26.dp))
-        }
-        LazyRow(contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(chips) { (label, go) ->
-                Text(
-                    label, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, maxLines = 1,
-                    modifier = Modifier.clip(RoundedCornerShape(50)).background(Color(0x1FFFFFFF)).border(1.dp, Color(0x33FFFFFF), RoundedCornerShape(50))
-                        .clickable(onClick = go).padding(horizontal = 16.dp, vertical = 9.dp)
-                )
-            }
-        }
+        PhoneLogoBar(onSearch)
+        PhoneChips(
+            listOf(kind to {}) + chips, selected = kind,
+            leading = { AppIcon(AIcon.Close, Color.White, Modifier.clip(CircleShape).background(Color(0x1FFFFFFF)).clickable(onClick = onClose).padding(8.dp), 34.dp) }
+        )
         PhoneHero(featured, onOpen, onPlay, onSearch, topBar = false, heroH = 430)
     }
 }

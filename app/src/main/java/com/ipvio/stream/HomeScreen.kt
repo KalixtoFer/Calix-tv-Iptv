@@ -575,7 +575,7 @@ fun HomeScreen(
                                     Text("Bearbeiten: Über jeder Reihe kannst du sie verschieben oder ausblenden.", color = Muted, fontSize = 15.sp)
                                 }
                             }
-                            if (phone && tab == 0) item(key = "phoneTop") { PhoneHomeTop(ready.toList(), tiles, onOpen, onPlayNow) { onTab(4) } }
+                            if (phone && tab == 0) item(key = "phoneTop") { PhoneHomeTop(ready.toList(), tiles, onOpen, onPlayNow, { onTab(4) }) { onTab(it) } }
                             else if (ready.isNotEmpty() && HomeLayout.shown("hero")) item(key = "hero") { Hero(ready.toList(), heroH, true, onOpen, onPlayNow, header, { heroScroll(states[0]) }) { scope.launch { states[0].animateScrollToItem(0) } } }
                             else item(key = "top") { header(Modifier) }
                             val wl = wlVod
@@ -638,8 +638,8 @@ fun HomeScreen(
                             val kind = if (isM) Kind.MOVIE else Kind.SERIES
                             val groups = if (isM) movieG else seriesG
                             if (phone) item(key = "phoneVod$tab") {
-                                val chips = navTabs.map { t -> t.label to t.onClick } + groups.entries.filter { it.key != "Sonstige" }.take(10).map { (g, l) -> g to { onBrowse(BrowseReq(g, l, SORT_NEW)) } }
-                                PhoneVodTop(noun, chips, ready.toList(), onOpen, onPlayNow) { onTab(4) }
+                                val chips = navTabs.map { t -> (if (t.id.startsWith("tb:cats")) "Alle Gruppen" else t.label) to t.onClick } + groups.entries.filter { it.key != "Sonstige" }.take(10).map { (g, l) -> g to { onBrowse(BrowseReq(g, l, SORT_NEW)) } }
+                                PhoneVodTop(noun, chips, ready.toList(), onOpen, onPlayNow, { onTab(4) }) { onTab(0) }
                             } else if (ready.isNotEmpty()) item(key = "hero$tab") { Hero(ready.toList(), heroH, false, onOpen, onPlayNow, header, { heroScroll(states[tab]) }) { scope.launch { states[tab].animateScrollToItem(0) } } }
                             else item(key = "top$tab") { header(Modifier) }
                             // Popular (trending, otherwise top rated) directly under the big picture. First row:

@@ -297,10 +297,11 @@ fun Sidebar(tab: Int, onTab: (Int) -> Unit, modifier: Modifier, activeFocus: Foc
  */
 @Composable
 private fun PhoneBottomBar(tab: Int, visible: List<Int>, onTab: (Int) -> Unit, modifier: Modifier) {
-    val main = listOf(MenuLogic.HOME, 3, 1, 2)
+    // Start (movies and series are chips on the start page), Live TV, Sports, Search; everything else under "More"
+    val main = listOf(MenuLogic.HOME, 3, MenuLogic.SPORT, MenuLogic.SEARCH)
     val more = ArrayList<Int>()
     visible.forEach { if (it !in main && it !in more) more.add(it) }
-    if (MenuLogic.SEARCH !in more) more.add(0, MenuLogic.SEARCH)
+    listOf(1, 2).forEachIndexed { i, id -> if (id !in more) more.add(i, id) }
     if (MenuLogic.SETTINGS !in more) more.add(MenuLogic.SETTINGS)
     var sheet by remember { mutableStateOf(false) }
     val shape = RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp)
@@ -311,9 +312,9 @@ private fun PhoneBottomBar(tab: Int, visible: List<Int>, onTab: (Int) -> Unit, m
         verticalAlignment = Alignment.CenterVertically
     ) {
         main.forEach { id ->
-            PhoneBarItem(MENU_LABELS[id], id == tab, Modifier.weight(1f), { MenuIcon(id, it, Modifier.size(24.dp)) }) { onTab(id) }
+            PhoneBarItem(MENU_LABELS[id], id == tab || (id == MenuLogic.HOME && tab in 1..2), Modifier.weight(1f), { MenuIcon(id, it, Modifier.size(24.dp)) }) { onTab(id) }
         }
-        PhoneBarItem("Mehr", tab in more, Modifier.weight(1f), { MoreGridIcon(it) }) { sheet = true }
+        PhoneBarItem("Mehr", tab in more && tab !in 1..2, Modifier.weight(1f), { MoreGridIcon(it) }) { sheet = true }
     }
     if (sheet) androidx.compose.ui.window.Dialog(
         onDismissRequest = { sheet = false },

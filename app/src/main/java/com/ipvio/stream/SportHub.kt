@@ -2,6 +2,9 @@ package com.ipvio.stream
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -94,7 +97,6 @@ class HubCtx(val nav: HubNav, val live: List<Item>, private val onPlay: (Item, L
 private object HubMemory {
     /** Pages that were open when a live stream started (restored when the hub comes back). */
     var keep: List<HubPage> = emptyList()
-    var opened = false
     var tab = 0
     var sport: String? = null
     var day = 0
@@ -114,8 +116,6 @@ fun SportHub(live: List<Item>, onPlay: (Item, List<Item>) -> Unit) {
     SportLeagues.init(ctx)
     SportHubFavs.init(ctx)
     SportFix.init(ctx)
-    // Phone: the first visit opens on "Live" (what is running right now) instead of the overview
-    if (!HubMemory.opened) { HubMemory.opened = true; if (DeviceMode.phoneNow) HubMemory.tab = 1 }
     var tab by remember { mutableIntStateOf(HubMemory.tab) }
     var sport by remember { mutableStateOf(HubMemory.sport) }
     var retry by remember { mutableIntStateOf(0) }
@@ -183,7 +183,7 @@ fun SportHub(live: List<Item>, onPlay: (Item, List<Item>) -> Unit) {
             HubEmpty(AIcon.Live, "Live-Ergebnisse sind aus", "Ergebnisse, Tabellen und Spielpläne kommen von ESPN (inoffizielle Quelle). Schalte sie ein, um den Sports Hub zu nutzen.",
                 "Einschalten") { General.setSportLive(ctx, true) }
         } else when (tab) {
-            0 -> HubOverview(feed, hub) { retry++ }
+            0 -> if (DeviceMode.phoneNow) PhoneSportOverview(feed, hub) { retry++ } else HubOverview(feed, hub) { retry++ }
             1 -> HubLive(feed, hub, sport, sportReq) { sport = it; HubMemory.sport = it }
             2 -> HubSchedule(hub, sport) { sport = it; HubMemory.sport = it }
             3 -> HubLeagues(hub)
@@ -234,6 +234,8 @@ private class HubOverviewModel(
     val finals: List<SportData.Game>,
     val top: SportData.Game?,
     val withCh: Set<String>,
+    /** Names of the channels that carry a game (first two), by game key. */
+    val chanNames: Map<String, String>,
     val popular: List<SportData.League>,
     val newsLeagues: List<SportData.League>,
     val counts: Map<String, Int>
@@ -242,7 +244,12 @@ private class HubOverviewModel(
 private fun buildOverview(raw: List<SportData.Game>, hub: HubCtx): HubOverviewModel {
     val games = current(raw)
     val hasCh = HashMap<String, Boolean>()
-    fun ch(g: SportData.Game): Boolean = hasCh.getOrPut(g.key) { hub.chans(g).isNotEmpty() }
+    val names = HashMap<String, String>()
+    fun ch(g: SportData.Game): Boolean = hasCh.getOrPut(g.key) {
+        val c = hub.chans(g)
+        if (c.isNotEmpty()) names[g.key] = c.take(2).joinToString(" · ") { it.title }
+        c.isNotEmpty()
+    }
     val liveG = games.filter { it.state == 1 }.sortedWith(compareBy({ if (SportHubFavs.isFavGame(it)) 0 else 1 }, { popularity(it) }))
     val liveMine = liveG.filter { ch(it) }
     val upcoming = games.filter { it.state == 0 && statusKind(it) == 0 }.sortedBy { it.start }
@@ -252,7 +259,7 @@ private fun buildOverview(raw: List<SportData.Game>, hub: HubCtx): HubOverviewMo
     val popular = SportData.POPULAR.mapNotNull { SportData.league(it) }.filter { SportLeagues.on(it) }
     val newsLeagues = (popular.filter { p -> games.any { it.league == p.name } } + games.mapNotNull { SportData.leagueOf(it) }).distinctBy { it.path }
     val counts = games.groupingBy { SportData.sportOf(it) }.eachCount()
-    return HubOverviewModel(games, liveMine, upcoming, finals, top, hasCh.filterValues { it }.keys, popular, newsLeagues, counts)
+    return HubOverviewModel(games, liveMine, upcoming, finals, top, hasCh.filterValues { it }.keys, names, popular, newsLeagues, counts)
 }
 
 @Composable
@@ -326,6 +333,85 @@ private fun HubOverview(feed: SportFeed.State, hub: HubCtx, onRetry: () -> Unit)
             Text("Hinweis: Die letzte Aktualisierung hat nicht geklappt. Angezeigt wird der letzte Stand.", color = Muted, fontSize = spx(14))
         }
     }
+}
+
+/**
+ * Sports overview for the phone: title, sport chips, the featured game, live events and today's upcoming games with the channel
+ * that carries them (only games with one of the user's channels unless "all games" is switched on), popular leagues, results.
+ */
+@Composable
+private fun PhoneSportOverview(feed: SportFeed.State, hub: HubCtx, onRetry: () -> Unit) {
+    val model by produceState<HubOverviewModel?>(null, feed.games) {
+        value = withContext(Dispatchers.Default) { buildOverview(feed.games, hub) }
+    }
+    var sport by remember { mutableStateOf<String?>(null) }
+    var onlyMine by remember { mutableStateOf(true) }
+    val m = model
+    if (m == null) { HubLoading("Lade Spiele …"); return }
+    fun inSport(g: SportData.Game) = sport == null || SportData.sportOf(g) == sport
+    val live = (if (onlyMine) m.liveMine else m.games.filter { it.state == 1 }).filter { inSport(it) }
+    val upcoming = m.upcoming.filter { inSport(it) && (!onlyMine || it.key in m.withCh) }
+    val finals = m.finals.filter { inSport(it) }
+    val hero = live.firstOrNull() ?: upcoming.firstOrNull() ?: m.top?.takeIf { inSport(it) }
+    LazyColumn(contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        item(key = "title") {
+            Column {
+                Text("Sport", color = Color.White, fontSize = 30.sp, fontWeight = FontWeight.ExtraBold)
+                Text("Alles aus dem Sport an einem Ort", color = Muted, fontSize = 14.sp)
+            }
+        }
+        item(key = "chips") {
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                item { PhoneSportChip("Alle", sport == null) { sport = null } }
+                items(SportData.SPORTS.filter { (m.counts[it.key] ?: 0) > 0 }, key = { it.key }) { s ->
+                    PhoneSportChip(s.label, sport == s.key) { sport = if (sport == s.key) null else s.key }
+                }
+            }
+        }
+        when {
+            hero != null -> item(key = "featured") { FeaturedPanel(hero, hub) }
+            feed.loading -> item(key = "load") { HubLoading("Lade Spiele …") }
+            feed.failed -> item(key = "err") {
+                HubEmpty(AIcon.Warning, "Daten konnten nicht geladen werden", "ESPN antwortet gerade nicht. Prüfe die Internetverbindung und versuche es erneut.", "Erneut versuchen") { onRetry() }
+            }
+            else -> item(key = "empty") { HubEmpty(AIcon.Info, "Heute keine Spiele gefunden.", "In deinen Ligen ist heute nichts angesetzt. Im Spielplan siehst du die nächsten Tage.", "Spielplan öffnen") { hub.goTab(2, null) } }
+        }
+        item(key = "mine") {
+            PhoneSportChip(if (onlyMine) "Nur Spiele in meinen Sendern" else "Alle Spiele des Tages", onlyMine) { onlyMine = !onlyMine }
+        }
+        if (live.isNotEmpty()) {
+            item(key = "liveT") { HubSectionTitle("Jetzt live") }
+            items(live.take(20), key = { "L" + it.key }) { g -> PhoneMatchCard(g, g.key in m.withCh, m.chanNames[g.key]) { hub.open(g) } }
+        }
+        if (upcoming.isNotEmpty()) {
+            item(key = "upT") { HubSectionTitle("Demnächst", action = "Spielplan") { hub.goTab(2, sport) } }
+            items(upcoming.take(20), key = { "U" + it.key }) { g -> PhoneMatchCard(g, g.key in m.withCh, m.chanNames[g.key]) { hub.open(g) } }
+        } else if (hero != null && live.isEmpty()) item(key = "noUp") {
+            Text(if (onlyMine) "Heute läuft in deinen Sendern nichts mehr. Schalte oben auf alle Spiele um." else "Heute stehen keine weiteren Spiele an.", color = Muted, fontSize = 14.sp)
+        }
+        if (m.popular.isNotEmpty()) item(key = "leagues") {
+            HubSectionTitle("Beliebte Ligen", action = "Alle Ligen") { hub.goTab(3, null) }
+            Spacer(Modifier.height(8.dp))
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp), contentPadding = PaddingValues(vertical = 4.dp)) {
+                items(m.popular, key = { it.path }) { l ->
+                    LogoTile(l.name, SportData.leagueLogos[l.path], l.name, marked = SportHubFavs.leagues.contains(l.path)) { hub.nav.open(HubPage.League(l)) }
+                }
+            }
+        }
+        if (finals.isNotEmpty()) {
+            item(key = "finT") { HubSectionTitle("Ergebnisse von heute") }
+            items(finals.take(10), key = { "F" + it.key }) { g -> PhoneMatchCard(g, false, null) { hub.open(g) } }
+        }
+    }
+}
+
+@Composable
+private fun PhoneSportChip(label: String, on: Boolean, onClick: () -> Unit) {
+    Text(
+        label, color = if (on) Color.Black else Color.White, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, maxLines = 1,
+        modifier = Modifier.clip(RoundedCornerShape(50)).background(if (on) Color.White else Color(0x1FFFFFFF))
+            .border(1.dp, Color(0x33FFFFFF), RoundedCornerShape(50)).clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 9.dp)
+    )
 }
 
 /** Big panel of the featured game: competition, teams with logos, score or start time, Watch Live and Match Center. */
