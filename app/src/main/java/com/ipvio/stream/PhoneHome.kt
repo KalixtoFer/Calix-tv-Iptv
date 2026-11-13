@@ -151,7 +151,7 @@ private fun PhoneLiveCard(item: Item, modifier: Modifier, onClick: () -> Unit) {
 
 /** Logo on the left, search on the right. */
 @Composable
-private fun PhoneLogoBar(onSearch: () -> Unit) {
+internal fun PhoneLogoBar(onSearch: () -> Unit) {
     Box(Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 6.dp)) {
         BrandLogo(Modifier.align(Alignment.Center).width(120.dp))
         MenuIcon(MenuLogic.SEARCH, Color.White, Modifier.align(Alignment.CenterEnd).clip(CircleShape).clickable(onClick = onSearch).padding(10.dp).size(26.dp))

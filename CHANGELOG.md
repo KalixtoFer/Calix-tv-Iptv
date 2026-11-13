@@ -1,6 +1,9 @@
 # Changelog
 
 ## 1.3
+**Phone**
+- Live TV, Movies and Series redesigned for the phone: category column with counts, search, sort chip, poster grid / channel cards (TV layout unchanged)
+
 [PENDING: Änderung eintragen]
 
 ## 1.2

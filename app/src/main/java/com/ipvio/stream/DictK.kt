@@ -45,4 +45,11 @@ Heute läuft in deinen Sendern nichts mehr. Schalte oben auf alle Spiele um.¦No
 Heute stehen keine weiteren Spiele an.¦No more games today.¦Bugün başka maç yok.¦Danas nema više utakmica.¦¦¦Hoy no hay más partidos.¦Plus de matchs aujourd'hui.¦Oggi non ci sono altre partite.¦Vandaag geen wedstrijden meer.
 Sport live¦Live sports¦Canlı spor¦Sport uživo¦¦¦Deportes en vivo¦Sport en direct¦Sport in diretta¦Sport live
 Sport heute¦Sports today¦Bugün spor¦Sport danas¦¦¦Deportes de hoy¦Sport aujourd'hui¦Sport di oggi¦Sport vandaag
+Titel suchen¦Search titles¦Yapım ara¦Traži naslove¦¦¦Buscar títulos¦Rechercher des titres¦Cerca titoli¦Titels zoeken
+Sender nach Nummer oder Name suchen¦Search channel by number or name¦Kanalı numara veya adla ara¦Traži kanal po broju ili imenu¦¦¦Buscar canal por número o nombre¦Rechercher une chaîne par numéro ou nom¦Cerca canale per numero o nome¦Zender zoeken op nummer of naam
+Auto-Genres¦Auto genres¦Otomatik türler¦Auto žanrovi¦¦¦Auto géneros¦Genres auto¦Generi auto¦Auto-genres
+Anbieter-Kategorien¦Provider categories¦Sağlayıcı kategorileri¦Kategorije davatelja¦¦¦Categorías del proveedor¦Catégories du fournisseur¦Categorie del fornitore¦Aanbiedercategorieën
+Nach Nummer¦By number¦Numaraya göre¦Po broju¦¦¦Por número¦Par numéro¦Per numero¦Op nummer
+Mosaik¦Mosaic¦Mozaik¦Mozaik¦¦¦Mosaico¦Mosaïque¦Mosaico¦Mozaïek
+Suchergebnisse¦Search results¦Arama sonuçları¦Rezultati pretrage¦¦¦Resultados de búsqueda¦Résultats de recherche¦Risultati di ricerca¦Zoekresultaten
 """

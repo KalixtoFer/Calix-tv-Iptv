@@ -543,6 +543,9 @@ fun HomeScreen(
                         }
                     }
                 }
+                phone && tab in 1..2 -> PhoneCatalog(
+                    vodNoun, vodBase, if (tab == 1) data.movieG else data.seriesG, if (tab == 1) data.movieP else data.seriesP, onOpen
+                ) { onTab(4) }
                 tab == 3 -> if (MobilePrefs.isMobile(ctx)) LiveTabPhone(live, liveP, favLive, onOpen) else LiveTab(live, liveP, favLive, onOpen, onPlayNow)
                 tab == MenuLogic.SPORT -> SportHub(live) { ch, l -> ZapContext.list = l; ZapContext.key = null; onOpen(ch) }
                 // The selected row stays in the lower half (PivotSpec); rows above are hidden so that at the top

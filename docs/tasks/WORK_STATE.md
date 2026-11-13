@@ -43,3 +43,7 @@ None run. This task changes documents only. Mermaid diagrams in `docs/DIAGRAMS.m
 1. Fill in the PENDING values (CI status, Gradle totals, CHANGELOG content, T-003 commit hash) and finish T-004.
 2. T-006: backup `NAMES` (`Backup.kt`), with a test step.
 3. Then P3 tasks S2, S3, S4, each with its own approval.
+
+## T-019 (phone Live TV / Movies / Series)
+
+Implemented: `PhoneCatalog.kt`, new `LiveTabPhone.kt`, HomeScreen branch. Awaiting CI and device test. Next stages: Más screen, guide screen, sports header polish.
