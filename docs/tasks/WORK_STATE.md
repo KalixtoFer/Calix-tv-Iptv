@@ -6,6 +6,15 @@ Last update: 2026-11-12. Read `CLAUDE.md` first, then this file.
 
 **T-015** (`docs/tasks/T-015-phone-search-sports.md`): phone search screen, Sports opens on Live with match cards. CI and device test PENDING. T-013/T-014 pushed, CI green. Next: Live TV guide screen (date, Now/Later/All), richer Sports overview; open questions to the maintainer: "Recordar sesión" and permanent signing secrets.
 
+## Backlog (2026-11-13, from the maintainer)
+
+1. Movies / Series phone screen like the maintainer's design (design image still to be sent).
+2. Sports: show today's events that are actually broadcast by channels loaded in the app, live first.
+3. Live TV: guide screen (date selector, Now / Later / All).
+4. Admin panel: scope and connection to the app to be defined (needs a decision before implementing).
+5. TV visual: starts after the phone work.
+6. Open: "Recordar sesión" (auth change, needs approval), permanent signing secrets.
+
 Earlier note:
 
 None active. **T-005** (documentation skeleton, CHANGELOG headings for 1.2 and 1.3, `CLAUDE.md` section 15) and **T-001b** (`org.json` test dependency, commit `75e1892`) are done and pushed. T-005 touched documents only.
