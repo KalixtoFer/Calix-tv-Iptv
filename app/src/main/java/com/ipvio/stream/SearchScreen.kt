@@ -61,6 +61,8 @@ fun SearchScreen(
     tab: Int, state: LazyListState,
     onOpen: (Item) -> Unit, onBrowse: (BrowseReq) -> Unit, onTab: (Int) -> Unit
 ) {
+    // Phone (portrait): own screen with the device keyboard; the layout below is built for the TV
+    if (DeviceMode.phoneNow) { PhoneSearchScreen(onOpen); return }
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
     val all = PlaylistStore.channels

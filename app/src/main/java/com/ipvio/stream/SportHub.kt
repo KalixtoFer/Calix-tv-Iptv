@@ -94,6 +94,7 @@ class HubCtx(val nav: HubNav, val live: List<Item>, private val onPlay: (Item, L
 private object HubMemory {
     /** Pages that were open when a live stream started (restored when the hub comes back). */
     var keep: List<HubPage> = emptyList()
+    var opened = false
     var tab = 0
     var sport: String? = null
     var day = 0
@@ -113,6 +114,8 @@ fun SportHub(live: List<Item>, onPlay: (Item, List<Item>) -> Unit) {
     SportLeagues.init(ctx)
     SportHubFavs.init(ctx)
     SportFix.init(ctx)
+    // Phone: the first visit opens on "Live" (what is running right now) instead of the overview
+    if (!HubMemory.opened) { HubMemory.opened = true; if (DeviceMode.phoneNow) HubMemory.tab = 1 }
     var tab by remember { mutableIntStateOf(HubMemory.tab) }
     var sport by remember { mutableStateOf(HubMemory.sport) }
     var retry by remember { mutableIntStateOf(0) }

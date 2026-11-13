@@ -4,7 +4,7 @@ Last update: 2026-11-12. Read `CLAUDE.md` first, then this file.
 
 ## Current task
 
-**T-014** (`docs/tasks/T-014-phone-vod-live-sport.md`): phone Movies/Series header, TV-guide channel rows, design scale floor for Sports. CI and device test PENDING. T-013 (phone start page) pushed and CI green. Next: guide screen with date and Now/Later/All chips, poster carousel for Movies; open questions to the maintainer: "Recordar sesión" and permanent signing secrets.
+**T-015** (`docs/tasks/T-015-phone-search-sports.md`): phone search screen, Sports opens on Live with match cards. CI and device test PENDING. T-013/T-014 pushed, CI green. Next: Live TV guide screen (date, Now/Later/All), richer Sports overview; open questions to the maintainer: "Recordar sesión" and permanent signing secrets.
 
 Earlier note:
 
