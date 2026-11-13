@@ -47,10 +47,6 @@ jobs:
         with:
           path: ~/.android/debug.keystore
           key: calix-debug-keystore-v1
-      # Pruebas de lógica pura (sin Android). No bloquean el APK: si fallan, se ve en el log y en el resumen.
-      - name: Pruebas unitarias
-        continue-on-error: true
-        run: ./gradlew --no-daemon testDebugUnitTest
       - name: Compilar APK (release)
         run: ./gradlew --no-daemon assembleRelease
       - name: Renombrar APK

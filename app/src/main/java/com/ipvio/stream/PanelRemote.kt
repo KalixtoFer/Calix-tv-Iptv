@@ -15,7 +15,7 @@ import java.util.UUID
 /**
  * Web panel connection (Firebase / Firestore over plain HTTPS, no extra library). The project id comes from calix.properties
  * (`firebase=`); empty means "no panel", and everything keeps working with the GitHub file or the built-in defaults.
- * The app only reads `config/*` and writes its own diagnostics row `devices/<id>` (version, mode, last error). No secrets.
+ * The app only reads the `config` documents and writes its own diagnostics row `devices/<id>` (version, mode, last error). No secrets.
  */
 object PanelRemote {
     private val project: String get() = BuildConfig.CALIX_FIREBASE_PROJECT

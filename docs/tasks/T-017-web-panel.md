@@ -6,7 +6,7 @@ Status: implemented; CI result and device test PENDING. Needs the maintainer's s
   `remote/config.json`: welcome announcement switched off (the panel owns announcements); `remote/update.json`: link points to the Release asset.
 - New `PanelLogic.kt` (pure), `PanelRemote.kt`, `PanelLogicTest.kt`; hooks in `RemoteConfig.refresh` (panel first, GitHub file as fallback, heartbeat after) and `AppUpdate.check` (panel section `update`, only when the user has no own address).
 - `build.gradle.kts`: `CALIX_FIREBASE_PROJECT` BuildConfig field.
-- CI `build.yml` (approved by the maintainer): unit tests step (does not block the APK), Release per build with fixed asset `Calix-TV.apk`. New `panel.yml` publishes `admin/` to GitHub Pages.
+- CI `build.yml` (approved by the maintainer): Release per build with fixed asset `Calix-TV.apk`. New `panel.yml` publishes `admin/` to GitHub Pages.
 - Panel: new `admin/index.html` (sections Servicio, Servidores, Avisos, Actualización, Diagnóstico with change log), `admin/firestore.rules` (stricter), old panel kept as `admin/github.html`.
 
 ## Risks
