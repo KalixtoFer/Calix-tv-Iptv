@@ -1,85 +1,118 @@
-<!doctype html>
-<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Calix TV · Panel de administración</title>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>CALIX Panel</title>
 <style>
-:root{--bg:#050b1c;--card:#0d1a38;--line:#1d3a7a;--txt:#e8eefc;--mut:#8fa3cf;--acc:#2aa8ff}
-*{box-sizing:border-box}body{margin:0;font:15px/1.45 system-ui,sans-serif;background:var(--bg);color:var(--txt)}
-main{max-width:860px;margin:0 auto;padding:20px}h1{margin:0 0 4px}h2{margin:0 0 10px;font-size:18px;color:var(--acc)}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:14px 0}
-label{display:block;margin:10px 0 4px;color:var(--mut);font-size:13px}
-input,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid var(--line);background:#071229;color:var(--txt);font:inherit}
-textarea{min-height:90px}button{background:var(--acc);color:#04122a;border:0;border-radius:999px;padding:10px 18px;font-weight:700;cursor:pointer;margin:10px 8px 0 0}
-button.sec{background:transparent;color:var(--acc);border:1px solid var(--acc)}button.del{background:#c0392b;color:#fff;padding:6px 12px;margin:0}
-.row{display:flex;gap:10px;align-items:center}.row>*{flex:1}.row>button{flex:0 0 auto}
-.chk{display:flex;gap:8px;align-items:center;margin:10px 0}.chk input{width:auto}
-#msg{position:sticky;top:0;padding:10px 14px;border-radius:10px;margin:10px 0;display:none}
-.ok{background:#12351f;border:1px solid #2ecc71}.err{background:#3a1616;border:1px solid #e74c3c}
-small{color:var(--mut)}.ban{border:1px dashed var(--line);border-radius:10px;padding:10px;margin:8px 0}
-</style></head><body><main>
-<h1>Calix TV · Panel</h1><small>Edita lo que la app lee desde GitHub (carpeta <code>remote/</code>). No hay servidor: se guarda directo en tu repositorio.</small>
-<div id="msg"></div>
+:root{--bg:#080d1a;--card:#101a30;--ln:#1d2a4a;--tx:#e8eefc;--mu:#8795b5;--g:linear-gradient(135deg,#22d3ee,#2563eb)}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,sans-serif}
+header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--ln);z-index:2}
+h1{font-size:20px;margin:0;background:var(--g);-webkit-background-clip:text;background-clip:text;color:transparent}
+h2{margin:4px 0}h3{margin:20px 0 8px}
+nav{display:flex;gap:8px;overflow-x:auto;padding:12px 16px;position:sticky;top:53px;background:var(--bg);z-index:2}
+nav button{white-space:nowrap;background:var(--card);color:var(--mu);border:1px solid var(--ln);border-radius:20px;padding:10px 16px}
+nav button.on{background:var(--g);color:#fff;border-color:transparent}
+main{padding:0 16px 40px;max-width:640px;margin:auto}
+small{color:var(--mu);display:block}.err{color:#ff7b7b}.hint{color:var(--mu);font-size:13px;margin:4px 0 0}
+.fld{margin:14px 0}.fld label{display:block;margin-bottom:6px;color:var(--mu);font-size:14px}
+input:not([type=checkbox]),textarea,select{width:100%;padding:12px;background:var(--card);color:var(--tx);border:1px solid var(--ln);border-radius:10px;font:inherit}
+textarea{font-family:ui-monospace,monospace;font-size:13px}
+.row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--ln)}
+input[type=checkbox]{width:24px;height:24px;accent-color:#22d3ee}
+.dev{padding:10px 0;border-bottom:1px solid var(--ln)}
+button{font:inherit;cursor:pointer}
+.btns{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}
+.btns button,.fld button,#go{padding:13px 18px;border-radius:10px;border:1px solid var(--ln);background:var(--card);color:var(--tx)}
+.fld button{margin-top:6px;padding:8px 12px}
+.pri,#go{background:var(--g)!important;border-color:transparent!important;color:#fff!important;font-weight:600}
+#login{max-width:340px;margin:20vh auto;padding:0 16px;display:grid;gap:12px}
+#setup{max-width:560px;margin:10vh auto;padding:0 16px}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1d2a4a;padding:12px 20px;border-radius:10px;opacity:0;transition:opacity .2s;pointer-events:none}
+</style></head><body>
+<div id="setup" hidden><h1>CALIX Panel</h1><h2>Falta conectar Firebase</h2><p>Abrí <b>admin/index.html</b> y reemplazá los <b>PEGAR</b> de <code>cfg</code> con la configuración web de tu proyecto (Firebase &gt; Configuración del proyecto &gt; Tus apps &gt; Web). Después volvé a publicar.</p></div>
+<div id="login" hidden><h1>CALIX Panel</h1><input id="em" type="email" placeholder="Email" autocomplete="username"><input id="pw" type="password" placeholder="Contraseña" autocomplete="current-password"><button id="go">Entrar</button></div>
+<div id="app" hidden><header><h1>CALIX Panel</h1><button id="out" style="background:none;border:0;color:var(--mu)">Salir</button></header><nav id="nav"></nav><main id="main"></main></div>
+<div id="toast"></div>
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import{getAuth,signInWithEmailAndPassword,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import{getFirestore,doc,getDoc,setDoc,addDoc,collection,getDocs,query,orderBy,limit}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
-<div class="card"><h2>1 · Conexión con GitHub</h2>
-<label>Repositorio (usuario/nombre)</label><input id="repo" placeholder="miusuario/Calix-tv-Iptv">
-<label>Rama</label><input id="branch" value="main">
-<label>Token de GitHub (permiso "Contents: Read and write" solo sobre este repositorio)</label><input id="token" type="password" placeholder="github_pat_...">
-<div class="chk"><input type="checkbox" id="remember"><span>Recordar en este navegador <small>(el token queda guardado en este dispositivo; no lo uses en una PC compartida)</small></span></div>
-<button onclick="loadAll()">Cargar configuración actual</button></div>
+// 1) PEGÁ ACÁ LA CONFIG WEB DE TU PROYECTO FIREBASE (no es secreta; la protección está en las reglas de Firestore)
+const cfg={apiKey:"PEGAR",authDomain:"PEGAR",projectId:"PEGAR",appId:"PEGAR"};
 
-<div class="card"><h2>2 · Servidor y nombre</h2>
-<label>Nombre del servicio</label><input id="serviceName">
-<label>Servidor Xtream (ej.: http://servidor:puerto). Los usuarios solo escriben usuario y contraseña.</label><input id="serverUrl">
-<div class="chk"><input type="checkbox" id="allowCustom"><span>Permitir que el usuario use otras fuentes (M3U, Stalker, otro servidor)</span></div></div>
+// 2) SECCIONES. Solo lo que la app lee de verdad. Para agregar una: sumá un objeto. Campos: [clave, etiqueta, tipo, ayuda]
+// tipos: text, url, num, bool, area, json, date, pass, sel:a,b,c
+const S=[
+{id:"brand",t:"Servicio",f:[["name","Nombre del servicio","text","Se muestra en la app (máx. 40 letras)."]]},
+{id:"servers",t:"Servidores",f:[["main","Servidor IPTV principal (URL)","url","Ej.: https://servidor:puerto. Los usuarios solo escriben usuario y contraseña."],["backup","Servidor de respaldo (URL)","url"],["useBackup","Usar el de respaldo","bool"],["allowCustomSources","Permitir que el usuario use otras fuentes (M3U, Stalker, otro servidor)","bool"]]},
+{id:"notices",t:"Avisos",f:[["active","Mostrar el aviso al abrir la app","bool"],["id","ID del aviso","text","Cambialo para que se vuelva a mostrar a todos."],["title","Título"],["text","Mensaje","area"],["expires","Vence el (opcional)","date"],["banners","Banners (lista JSON)","json","Ej.: [{\"image\":\"https://...\",\"title\":\"Oferta\",\"link\":\"\"}]. Hasta 10, solo https."]]},
+{id:"update",t:"Actualización",f:[["versionName","Versión nueva","text","Ej.: 1.3.13. La app avisa solo si es mayor a la instalada."],["apkUrl","Link del APK (https)","url","Ej.: https://github.com/KalixtoFer/Calix-tv-Iptv/releases/latest/download/Calix-TV.apk"],["notes","Novedades","area"]]},
+{id:"diag",t:"Diagnóstico",custom:1}
+];
 
-<div class="card"><h2>3 · Anuncio</h2>
-<div class="chk"><input type="checkbox" id="annEnabled"><span>Mostrar anuncio al abrir la app</span></div>
-<label>ID del anuncio (cambialo para que se vuelva a mostrar a todos)</label><input id="annId">
-<label>Título</label><input id="annTitle"><label>Texto</label><textarea id="annText"></textarea></div>
+if(Object.values(cfg).includes("PEGAR")){document.querySelector("#setup").hidden=false;throw new Error("Falta la configuración de Firebase")}
+const auth=getAuth(initializeApp(cfg)),db=getFirestore();
+const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const toast=m=>{const t=$("#toast");t.textContent=m;t.style.opacity=1;setTimeout(()=>t.style.opacity=0,2600)};
+const get=async(c,id)=>{const d=await getDoc(doc(db,c,id));return d.exists()?d.data():{}};
+const vals=d=>{try{return JSON.parse(d.json||"{}")}catch{return{}}};
+const put=(c,id,o,old)=>setDoc(doc(db,c,id),{json:JSON.stringify(o),prevJson:old.json||"",version:(old.version||0)+1,updatedAt:Date.now()});
+const logIt=(section,what)=>addDoc(collection(db,"log"),{ts:Date.now(),by:auth.currentUser?.email||"",section,what}).catch(()=>{});
+const ping=async u=>{try{const c=new AbortController();setTimeout(()=>c.abort(),5000);await fetch(u,{mode:"no-cors",signal:c.signal});return true}catch{return false}};
+let cur=S[0].id;
+const nav=()=>$("#nav").innerHTML=S.map(s=>`<button class="${s.id==cur?"on":""}" data-id="${s.id}">${s.t}</button>`).join("");
+$("#nav").onclick=e=>e.target.dataset.id&&show(e.target.dataset.id);
 
-<div class="card"><h2>4 · Banners</h2><small>Imágenes públicas (https). El primero se muestra dentro del anuncio.</small>
-<div id="banners"></div><button class="sec" onclick="addBanner()">+ Agregar banner</button></div>
+function inp(k,l,t,v,h){
+ const help=h?`<div class="hint">${esc(h)}</div>`:"";
+ if(t=="bool")return`<label class="row"><span>${l}</span><input type="checkbox" data-k="${k}" ${v?"checked":""}></label>`;
+ let c;
+ if(t=="area"||t=="json")c=`<textarea data-k="${k}" rows="${t=="json"?6:3}">${esc(v&&typeof v=="object"?JSON.stringify(v,null,1):v??"")}</textarea>`;
+ else if(t.startsWith("sel"))c=`<select data-k="${k}">${t.slice(4).split(",").map(o=>`<option ${o==v?"selected":""}>${o}</option>`).join("")}</select>`;
+ else c=`<input data-k="${k}" type="${t=="num"?"number":t=="pass"?"password":t=="date"?"date":"text"}" value="${esc(v??"")}">`;
+ return`<div class="fld"><label>${l}</label>${c}${help}</div>`}
 
-<div class="card"><h2>5 · Actualización de la app</h2>
-<small>Subí el APK nuevo como Release en GitHub y completá estos datos. La app avisa a quien tenga una versión menor. El número de versión (código) debe ser mayor al instalado.</small>
-<div class="row"><div><label>Código de versión (número entero, sube de a 1)</label><input id="vCode" type="number"></div><div><label>Nombre de versión</label><input id="vName"></div></div>
-<label>Enlace directo al APK</label><input id="vApk"><label>Novedades</label><textarea id="vNotes"></textarea></div>
+// Validación antes de guardar: la app también valida, pero acá se corta el error de tipeo.
+function check(s,o){
+ for(const[k,l,t]of s.f){
+  if(t=="url"&&o[k]&&!/^https?:\/\/\S+$/i.test(o[k]))return`${l}: tiene que empezar con http:// o https://`;
+ }
+ if(s.id=="update"){
+  if(o.apkUrl&&!/^https:\/\//i.test(o.apkUrl))return"El link del APK tiene que ser https";
+  if(o.versionName&&!/^\d+(\.\d+){0,3}$/.test(o.versionName))return"La versión tiene que ser como 1.3.13";
+ }
+ if(s.id=="notices"&&o.banners!==undefined&&o.banners!==""&&!Array.isArray(o.banners))return"Banners tiene que ser una lista [ ... ]";
+ return""}
 
-<button onclick="saveAll()">Guardar todo en GitHub</button>
-<script>
-const $=id=>document.getElementById(id);
-let shas={}; let banners=[];
-function msg(t,ok){const m=$('msg');m.textContent=t;m.className=ok?'ok':'err';m.style.display='block'}
-(function(){try{const s=JSON.parse(localStorage.getItem('calixPanel')||'{}');if(s.repo)$('repo').value=s.repo;if(s.branch)$('branch').value=s.branch;if(s.token){$('token').value=s.token;$('remember').checked=true}}catch(e){}})();
-function api(path){return 'https://api.github.com/repos/'+$('repo').value.trim()+'/contents/'+path}
-function hdr(){return {'Authorization':'Bearer '+$('token').value.trim(),'Accept':'application/vnd.github+json'}}
-function b64d(s){return decodeURIComponent(escape(atob(s.replace(/\n/g,''))))}
-function b64e(s){return btoa(unescape(encodeURIComponent(s)))}
-async function getFile(p){const r=await fetch(api(p)+'?ref='+encodeURIComponent($('branch').value.trim()),{headers:hdr(),cache:'no-store'});
- if(r.status===404)return null;if(!r.ok)throw new Error('GitHub respondió '+r.status+' (revisá repositorio, rama y token)');
- const j=await r.json();shas[p]=j.sha;return JSON.parse(b64d(j.content))}
-async function putFile(p,obj){const body={message:'Panel Calix TV: actualizar '+p,content:b64e(JSON.stringify(obj,null,2)+'\n'),branch:$('branch').value.trim()};
- if(shas[p])body.sha=shas[p];const r=await fetch(api(p),{method:'PUT',headers:Object.assign({'Content-Type':'application/json'},hdr()),body:JSON.stringify(body)});
- if(!r.ok){const t=await r.text();throw new Error('No se pudo guardar '+p+' ('+r.status+'): '+t.slice(0,200))}
- const j=await r.json();shas[p]=j.content.sha}
-function renderBanners(){const d=$('banners');d.innerHTML='';banners.forEach((b,i)=>{const e=document.createElement('div');e.className='ban';
- e.innerHTML='<label>Imagen (https://...)</label><input value="'+(b.image||'').replace(/"/g,'&quot;')+'" oninput="banners['+i+'].image=this.value"><label>Título</label><input value="'+(b.title||'').replace(/"/g,'&quot;')+'" oninput="banners['+i+'].title=this.value"><label>Enlace (opcional)</label><input value="'+(b.link||'').replace(/"/g,'&quot;')+'" oninput="banners['+i+'].link=this.value"><button class="del" onclick="banners.splice('+i+',1);renderBanners()">Quitar</button>';d.appendChild(e)})}
-function addBanner(){banners.push({image:'',title:'',link:''});renderBanners()}
-async function loadAll(){try{
- if($('remember').checked)localStorage.setItem('calixPanel',JSON.stringify({repo:$('repo').value.trim(),branch:$('branch').value.trim(),token:$('token').value.trim()}));else localStorage.removeItem('calixPanel');
- const c=await getFile('remote/config.json')||{};const u=await getFile('remote/update.json')||{};
- $('serviceName').value=c.serviceName||'Calix TV';$('serverUrl').value=c.serverUrl||'';$('allowCustom').checked=!!c.allowCustomSources;
- const a=c.announcement||{};$('annEnabled').checked=!!a.enabled;$('annId').value=a.id||'';$('annTitle').value=a.title||'';$('annText').value=a.text||'';
- banners=(c.banners||[]).map(b=>({image:b.image||'',title:b.title||'',link:b.link||''}));renderBanners();
- $('vCode').value=u.versionCode||'';$('vName').value=u.versionName||'';$('vApk').value=u.apk||'';$('vNotes').value=u.notes||'';
- msg('Configuración cargada.',true)}catch(e){msg(e.message,false)}}
-async function saveAll(){try{
- const srv=$('serverUrl').value.trim();if(srv&&!/^https?:\/\//i.test(srv))throw new Error('El servidor debe empezar con http:// o https://');
- for(const b of banners){if(b.image&&!/^https:\/\//i.test(b.image.trim()))throw new Error('Los banners deben ser enlaces https://')}
- const cfg={serviceName:$('serviceName').value.trim()||'Calix TV',serverUrl:srv,allowCustomSources:$('allowCustom').checked,
-  announcement:{enabled:$('annEnabled').checked,id:$('annId').value.trim(),title:$('annTitle').value.trim(),text:$('annText').value.trim()},
-  banners:banners.filter(b=>b.image.trim()).map(b=>({image:b.image.trim(),title:b.title.trim(),link:b.link.trim()}))};
- const code=parseInt($('vCode').value,10);const upd={versionCode:isNaN(code)?0:code,versionName:$('vName').value.trim(),apk:$('vApk').value.trim(),notes:$('vNotes').value.trim()};
- if(!shas['remote/config.json'])await getFile('remote/config.json');if(!shas['remote/update.json'])await getFile('remote/update.json');
- await putFile('remote/config.json',cfg);if(upd.versionCode>0&&upd.apk)await putFile('remote/update.json',upd);
- msg('Guardado. La app lo toma al abrirse (GitHub puede tardar unos minutos en reflejarlo).',true)}catch(e){msg(e.message,false)}}
-</script></main></body></html>
+async function save(s,old){
+ const o={};
+ for(const[k,,t="text"]of s.f){const e=$(`[data-k="${k}"]`);let v=t=="bool"?e.checked:t=="num"?(e.value===""?"":Number(e.value)):e.value.trim();
+  if(t=="json"){if(v){try{v=JSON.parse(v)}catch{return toast("El JSON no es válido")}}else v=[]}o[k]=v}
+ const bad=check(s,o);if(bad)return toast(bad);
+ await put("config",s.id,o,old);logIt(s.id,"guardado");toast("Guardado");show(s.id)}
+
+async function show(id){
+ cur=id;nav();const s=S.find(x=>x.id==id),m=$("#main");m.innerHTML="<p>Cargando…</p>";
+ try{
+ if(s.custom)return await diag(m);
+ const d=await get("config",id),v=vals(d);
+ m.innerHTML=`<h2>${s.t}</h2><small>Versión ${d.version||0}${d.updatedAt?" · "+new Date(d.updatedAt).toLocaleString():""}</small>`
+  +s.f.map(([k,l,t="text",h])=>inp(k,l,t,v[k],h)).join("")
+  +`<div class="btns"><button class="pri" id="sv">Guardar cambios</button><button id="un">Volver a la versión anterior</button></div>`;
+ $("#sv").onclick=()=>save(s,d);
+ $("#un").onclick=async()=>{if(!d.prevJson)return toast("No hay versión anterior");await put("config",id,JSON.parse(d.prevJson),d);logIt(id,"restaurado");toast("Versión restaurada");show(id)};
+ if(id=="servers")document.querySelectorAll('[data-k="main"],[data-k="backup"]').forEach(e=>{const b=document.createElement("button");b.textContent="Probar conexión (orientativo)";b.onclick=async()=>{b.textContent="Probando…";b.textContent=await ping(e.value)?"Responde":"No responde"};e.after(b)});
+ }catch(e){m.innerHTML=`<p class="err">No se pudo cargar: ${esc(e.message)}</p>`}}
+
+async function diag(m){
+ const sv=vals(await get("config","servers"));
+ const st=await Promise.all(["main","backup"].filter(k=>sv[k]).map(async k=>`<div class="row"><span>${k=="main"?"Principal":"Respaldo"}</span><b>${await ping(sv[k])?"Responde":"No responde"}</b></div>`));
+ const ds=await getDocs(query(collection(db,"devices"),orderBy("ts","desc"),limit(30)));
+ const lg=await getDocs(query(collection(db,"log"),orderBy("ts","desc"),limit(15)));
+ m.innerHTML=`<h2>Diagnóstico</h2><small>El estado de los servidores es orientativo: se prueba desde tu navegador.</small>${st.join("")||"<small>Cargá un servidor para ver su estado</small>"}<h3>Dispositivos recientes</h3>`
+  +(ds.docs.map(x=>{const d=x.data();return`<div class="dev"><b>v${esc(d.version)} · ${d.mode=="tv"?"TV":"Celular"}</b><small>${new Date(d.ts).toLocaleString()}</small>${d.lastError?`<small class="err">${esc(d.lastError)}</small>`:""}</div>`}).join("")||"<small>Todavía ningún dispositivo reportó</small>")
+  +`<h3>Últimos cambios</h3>`
+  +(lg.docs.map(x=>{const d=x.data();return`<div class="dev"><b>${esc(d.section)} · ${esc(d.what)}</b><small>${new Date(d.ts).toLocaleString()} · ${esc(d.by)}</small></div>`}).join("")||"<small>Sin cambios registrados</small>")}
+
+onAuthStateChanged(auth,u=>{$("#login").hidden=!!u;$("#app").hidden=!u;if(u)show(cur)});
+$("#go").onclick=()=>signInWithEmailAndPassword(auth,$("#em").value,$("#pw").value).catch(()=>toast("Email o contraseña incorrectos"));
+$("#out").onclick=()=>signOut(auth);
+</script></body></html>

@@ -112,6 +112,16 @@ object RemoteConfig {
 
     /** Lee remote/config.json de GitHub. Los errores quedan invisibles: se sigue con la última copia guardada. */
     suspend fun refresh(c: Context) {
+        // Web panel first (Firebase); the GitHub file below stays as fallback when the panel is off or unreachable
+        if (PanelRemote.enabled) {
+            val j = PanelRemote.config()
+            if (j != null) {
+                prefs(c).edit().putString("json", j.toString()).apply()
+                withContext(Dispatchers.Main) { applyJson(j) }
+                PanelRemote.heartbeat(c)
+                return
+            }
+        }
         val url = BuildConfig.CALIX_CONFIG_URL
         if (url.contains("TU_USUARIO")) return   // calix.properties todavía sin configurar
         withContext(Dispatchers.IO) {

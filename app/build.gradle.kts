@@ -55,6 +55,7 @@ android {
 
         buildConfigField("String", "CALIX_CONFIG_URL", "\"$calixRaw/config.json\"")
         buildConfigField("String", "CALIX_UPDATE_URL", "\"$calixRaw/update.json\"")
+        buildConfigField("String", "CALIX_FIREBASE_PROJECT", "\"${calixProp("firebase", "")}\"")
         buildConfigField("String", "CALIX_DEFAULT_SERVER", "\"${calixProp("server", "")}\"")
         buildConfigField("String", "TMDB_KEY", "\"${secret("TMDB_KEY")}\"")
         buildConfigField("String", "OMDB_KEY", "\"${secret("OMDB_KEY")}\"")

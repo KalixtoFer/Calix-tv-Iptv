@@ -1,0 +1,28 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Solo vos: cambiá el email por el tuyo (el mismo del usuario creado en Authentication)
+    function admin() {
+      return request.auth != null
+        && request.auth.token.email == 'TU_EMAIL_ADMIN@gmail.com'
+        && request.auth.token.email_verified == true;
+    }
+    // La app lee la configuración (es pública: NO guardes claves ni contraseñas ahí); solo el admin la escribe
+    match /config/{id} {
+      allow read: if true;
+      allow write: if admin();
+    }
+    // Historial de cambios del panel
+    match /log/{id} { allow read, write: if admin(); }
+    // Diagnóstico: la app solo puede crear o actualizar su propia fila, con 4 campos del tipo y largo correctos
+    match /devices/{id} {
+      allow create, update: if request.resource.data.keys().hasOnly(['version','mode','lastError','ts'])
+        && request.resource.data.version is string && request.resource.data.version.size() <= 40
+        && request.resource.data.mode in ['tv','mobile']
+        && request.resource.data.lastError is string && request.resource.data.lastError.size() <= 300
+        && request.resource.data.ts is int
+        && id.size() <= 64;
+      allow read: if admin();
+    }
+  }
+}

@@ -88,3 +88,4 @@
 - Celular: deportes sin texto cortado (escala mínima en modo celular), canales en vivo estilo guía de TV, Películas/Series con título, filtros por género e imagen destacada (T-014).
 - Celular: buscador propio con el teclado del teléfono (antes no buscaba); Deportes abre en "En directo" con partidos en tarjetas (T-015).
 - Celular: barra de abajo Inicio / TV en vivo / Deportes / Buscar / Más; Películas y Series como filtros en el Inicio; Deportes con los eventos del día y el canal que los transmite (T-016).
+- Panel web (Firebase, en `admin/`): servidor, nombre, avisos y actualizaciones se manejan desde el navegador; cada build publica una Release con `Calix-TV.apk`; `calix.properties` ya apunta al repositorio real (T-017).

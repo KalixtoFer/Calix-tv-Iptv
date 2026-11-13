@@ -5,6 +5,9 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  contents: write   # para publicar el APK como Release
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -44,6 +47,10 @@ jobs:
         with:
           path: ~/.android/debug.keystore
           key: calix-debug-keystore-v1
+      # Pruebas de lógica pura (sin Android). No bloquean el APK: si fallan, se ve en el log y en el resumen.
+      - name: Pruebas unitarias
+        continue-on-error: true
+        run: ./gradlew --no-daemon testDebugUnitTest
       - name: Compilar APK (release)
         run: ./gradlew --no-daemon assembleRelease
       - name: Renombrar APK
@@ -51,6 +58,16 @@ jobs:
           mkdir -p out
           f=$(ls app/build/outputs/apk/release/*.apk | head -n1)
           cp "$f" "out/Calix-TV-1.3.${{ github.run_number }}.apk"
+      # Release con nombre fijo (Calix-TV.apk): el link releases/latest/download/Calix-TV.apk siempre apunta a la última versión
+      - name: Publicar Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          N=${{ github.run_number }}
+          mkdir -p rel
+          cp "out/Calix-TV-1.3.$N.apk" rel/
+          cp "out/Calix-TV-1.3.$N.apk" rel/Calix-TV.apk
+          gh release create "v1.3.$N" rel/Calix-TV-1.3.$N.apk rel/Calix-TV.apk --target "$GITHUB_SHA" --title "Calix TV 1.3.$N" --notes "Compilación automática del commit ${GITHUB_SHA::7}." --latest
       - uses: actions/upload-artifact@v4
         with:
           name: Calix-TV-APK

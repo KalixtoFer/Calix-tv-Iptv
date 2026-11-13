@@ -3,7 +3,7 @@
   "serverUrl": "https://sneoplus.net:8443",
   "allowCustomSources": false,
   "announcement": {
-    "enabled": true,
+    "enabled": false,
     "id": "bienvenida-1",
     "title": "¡Bienvenido a Calix TV!",
     "text": "Gracias por usar Calix TV. Ingresá tu usuario y contraseña para empezar."

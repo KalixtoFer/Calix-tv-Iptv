@@ -4,7 +4,7 @@ Last update: 2026-11-12. Read `CLAUDE.md` first, then this file.
 
 ## Current task
 
-**T-016** (`docs/tasks/T-016-phone-nav-vod-sports.md`): new phone bottom bar, Movies/Series as start-page filters, Sports overview with channels. CI and device test PENDING. T-015 pushed, CI green. Next: Live TV guide screen, Sports header details, admin panel, TV visual.
+**T-017** (`docs/tasks/T-017-web-panel.md`, setup in `docs/PANEL.md`): web panel connection, Releases, working GitHub config. CI and device test PENDING; maintainer must do the Firebase and Pages steps (needs project id and admin email). T-016 pushed, CI green. Next: move settings to the panel (hidden-settings mechanism), Live TV guide screen, Sports header, TV visual.
 
 Earlier note:
 

@@ -58,6 +58,16 @@ object AppUpdate {
     /** Returns null if the installed version is current. */
     suspend fun check(c: Context): Result<UpdateInfo?> = withContext(Dispatchers.IO) {
         runCatching {
+            // Web panel (section "update"), unless the user set an own address under Settings > About
+            if (prefs(c).getString("url", "").isNullOrBlank() && PanelRemote.enabled) {
+                PanelRemote.fetch("update")?.let { j ->
+                    val res = fromPanel(c, j)
+                    prefs(c).edit().putLong("last", System.currentTimeMillis()).apply()
+                    available = res
+                    remember(c, res)
+                    return@runCatching res
+                }
+            }
             val u = url(c)
             if (u.isBlank()) error("Keine Update-Adresse eingetragen")
             val req = Request.Builder().url(u).header("User-Agent", "Calix TV")
@@ -88,6 +98,15 @@ object AppUpdate {
         val apk = UpdateLogic.pickApk(assets) ?: return null
         val notes = j.optString("body").lineSequence().map { it.trim() }.filter { it.isNotEmpty() && !it.startsWith("#") }.take(4).joinToString(" · ")
         return UpdateInfo(0L, tag.trimStart('v', 'V'), apk, notes.take(300))
+    }
+
+    /** Panel section "update": {versionName, apkUrl, notes}. Only https links; "newer" is judged by the version name (1.3.13 > 1.3.12). */
+    private fun fromPanel(c: Context, j: JSONObject): UpdateInfo? {
+        val name = j.optString("versionName").trim()
+        val apk = j.optString("apkUrl").trim()
+        if (name.isBlank() || !apk.startsWith("https://")) return null
+        if (!UpdateLogic.isNewerName(currentName(c), name)) return null
+        return UpdateInfo(0L, name, apk, j.optString("notes").take(300))
     }
 
     private fun fromFile(c: Context, u: String, j: JSONObject): UpdateInfo? {
