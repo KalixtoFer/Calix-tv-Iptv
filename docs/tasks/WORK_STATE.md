@@ -4,7 +4,7 @@ Last update: 2026-11-12. Read `CLAUDE.md` first, then this file.
 
 ## Current task
 
-**T-017** (`docs/tasks/T-017-web-panel.md`, setup in `docs/PANEL.md`): web panel connection, Releases, working GitHub config. CI and device test PENDING; maintainer must do the Firebase and Pages steps (needs project id and admin email). T-016 pushed, CI green. Next: move settings to the panel (hidden-settings mechanism), Live TV guide screen, Sports header, TV visual.
+**T-018** (`docs/tasks/T-018-phone-design-stage1.md`): phone design stage 1 (bottom bar, start page, live sports). CI and device test PENDING. Next stages: 2 Movies/Series catalog, 3 Live TV, 4 More. Web panel paused (T-017 pushed; setup in `docs/PANEL.md`).
 
 Earlier note:
 

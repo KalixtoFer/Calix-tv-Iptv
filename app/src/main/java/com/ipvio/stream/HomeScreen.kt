@@ -575,7 +575,7 @@ fun HomeScreen(
                                     Text("Bearbeiten: Über jeder Reihe kannst du sie verschieben oder ausblenden.", color = Muted, fontSize = 15.sp)
                                 }
                             }
-                            if (phone && tab == 0) item(key = "phoneTop") { PhoneHomeTop(ready.toList(), tiles, onOpen, onPlayNow, { onTab(4) }) { onTab(it) } }
+                            if (phone && tab == 0) item(key = "phoneTop") { PhoneHomeTop(ready.toList(), onOpen, onPlayNow) { onTab(4) } }
                             else if (ready.isNotEmpty() && HomeLayout.shown("hero")) item(key = "hero") { Hero(ready.toList(), heroH, true, onOpen, onPlayNow, header, { heroScroll(states[0]) }) { scope.launch { states[0].animateScrollToItem(0) } } }
                             else item(key = "top") { header(Modifier) }
                             val wl = wlVod
@@ -590,9 +590,14 @@ fun HomeScreen(
                                     // Continue watching directly under the tiles: whoever watches a lot wants to continue in few clicks
                                     "resume" -> { if (resumeList.isNotEmpty()) item(key = "resume") { ResumeRow(resumeList, cardW, onResume) } }
                                     "favch" -> { if (favLive.isNotEmpty()) item(key = "favch") { ItemsRow("Meine Sender", favLive, cardW, onOpen) { onTab(3) } } }
-                                    "chnow" -> { if (nowChannels.isNotEmpty()) item(key = "chnow") {
-                                        if (phone) PhoneLiveGrid("Live TV", nowChannels.take(6), onOpen) { onTab(3) } else ChannelNowRow("Live TV", nowChannels, onOpen) { onTab(3) }
-                                    } }
+                                    "chnow" -> {
+                                        if (nowChannels.isNotEmpty()) item(key = "chnow") {
+                                            if (phone) PhoneLiveGrid("Live TV", nowChannels.take(6), onOpen) { onTab(3) } else ChannelNowRow("Live TV", nowChannels, onOpen) { onTab(3) }
+                                        }
+                                        if (phone) item(key = "phoneSports") {
+                                            PhoneSportsNow(live, { onTab(MenuLogic.SPORT) }) { ch, l -> ZapContext.list = l; ZapContext.key = null; onOpen(ch) }
+                                        }
+                                    }
                                     // Top 10 always as whole covers (independent of the picture setting)
                                     "trend" -> { if (trendItems.size >= 3) item(key = "trend") {
                                         ItemsRow("Top 10 heute", trendTop, cardW, onOpen, style = CARD_TOP10) { onBrowse(BrowseReq("Im Trend", trendItems, SORT_PLAYLIST)) }

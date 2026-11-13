@@ -45,16 +45,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
 /**
- * Start page for phone mode (portrait): big picture with logo, search, title, info and two buttons, then the quick tiles
- * (3 per row). The rows below are the normal ones, which scroll sideways with the finger. The TV start page is untouched.
+ * Start page for phone mode (portrait): logo and search, big picture with title, info and the "Watch now" button. Below come the live channels,
+ * the live sports and the normal rows, which scroll sideways with the finger. The TV start page is untouched.
  */
 @Composable
-fun PhoneHomeTop(featured: List<Item>, tiles: List<QuickTile>, onOpen: (Item) -> Unit, onPlay: (Item) -> Unit, onSearch: () -> Unit, onKind: (Int) -> Unit) {
+fun PhoneHomeTop(featured: List<Item>, onOpen: (Item) -> Unit, onPlay: (Item) -> Unit, onSearch: () -> Unit) {
     Column(Modifier.fillMaxWidth()) {
         PhoneLogoBar(onSearch)
-        PhoneChips(listOf("Serien" to { onKind(2) }, "Filme" to { onKind(1) }), selected = null)
-        PhoneHero(featured, onOpen, onPlay, onSearch, topBar = false, heroH = 420)
-        PhoneTiles(tiles)
+        PhoneHero(featured, onOpen, onPlay, onSearch, topBar = false, heroH = 520)
     }
 }
 
@@ -87,45 +85,14 @@ private fun PhoneHero(featured: List<Item>, onOpen: (Item) -> Unit, onPlay: (Ite
                 val m = rememberFullMeta(c, rememberMeta(c))
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Kicker(Lang.tr(kindLabel(c.kind)) + (qualityOf(c)?.let { q -> "  ·  " + q.uppercase() } ?: ""))
-                    Text(raw = true, text = c.title, color = Tok.TextHi, fontSize = 34.sp, lineHeight = 36.sp, fontWeight = FontWeight.ExtraBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                    Text(raw = true, text = c.title, color = Tok.TextHi, fontSize = 34.sp, lineHeight = 36.sp, fontWeight = FontWeight.ExtraBold, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.clickable { onOpen(c) })
                     HeroMetaLine(c, m, dots = false)
                     m?.overview?.takeIf { it.isNotBlank() }?.let {
                         Text(raw = true, text = TitleText.short(it, 160), color = Tok.TextMid, fontSize = 14.sp, lineHeight = 19.sp, maxLines = 3)
                     }
                 }
             }
-            Row(Modifier.padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                HeroButton("Jetzt ansehen", AIcon.Play, true, Modifier, 46) { onPlay(item) }
-                HeroButton("Mehr Infos", AIcon.Info, false, Modifier, 46) { onOpen(item) }
-            }
-        }
-    }
-}
-
-@Composable
-private fun PhoneTiles(tiles: List<QuickTile>) {
-    Column(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        tiles.chunked(3).forEach { row ->
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                row.forEach { t -> PhoneTile(t, Modifier.weight(1f)) }
-                repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
-            }
-        }
-    }
-}
-
-@Composable
-private fun PhoneTile(t: QuickTile, modifier: Modifier) {
-    val shape = RoundedCornerShape(16.dp)
-    Row(
-        modifier.height(70.dp).clip(shape).background(Brush.linearGradient(listOf(t.c1, t.c2)))
-            .border(1.dp, t.iconColor.copy(alpha = .55f), shape).clickable(onClick = t.onClick).padding(horizontal = 10.dp),
-        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        MenuIcon(t.icon, t.iconColor, Modifier.size(24.dp))
-        Column(Modifier.weight(1f)) {
-            Text(t.title, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(t.sub, color = Color(0xCCFFFFFF), fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            HeroButton("Jetzt ansehen", AIcon.Play, true, Modifier.fillMaxWidth().padding(top = 6.dp), 50) { onPlay(item) }
         }
     }
 }
@@ -185,10 +152,9 @@ private fun PhoneLiveCard(item: Item, modifier: Modifier, onClick: () -> Unit) {
 /** Logo on the left, search on the right. */
 @Composable
 private fun PhoneLogoBar(onSearch: () -> Unit) {
-    Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-        BrandLogo(Modifier.width(104.dp))
-        Spacer(Modifier.weight(1f))
-        MenuIcon(MenuLogic.SEARCH, Color.White, Modifier.clip(CircleShape).clickable(onClick = onSearch).padding(10.dp).size(26.dp))
+    Box(Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 6.dp)) {
+        BrandLogo(Modifier.align(Alignment.Center).width(120.dp))
+        MenuIcon(MenuLogic.SEARCH, Color.White, Modifier.align(Alignment.CenterEnd).clip(CircleShape).clickable(onClick = onSearch).padding(10.dp).size(26.dp))
     }
 }
 

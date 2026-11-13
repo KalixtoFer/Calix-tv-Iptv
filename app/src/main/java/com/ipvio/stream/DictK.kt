@@ -43,4 +43,6 @@ Nur Spiele in meinen Sendern¦Only games on my channels¦Yalnızca kanallarımda
 Alle Spiele des Tages¦All games of the day¦Günün tüm maçları¦Sve utakmice dana¦¦¦Todos los partidos del día¦Tous les matchs du jour¦Tutte le partite del giorno¦Alle wedstrijden van de dag
 Heute läuft in deinen Sendern nichts mehr. Schalte oben auf alle Spiele um.¦Nothing more on your channels today. Switch above to all games.¦Bugün kanallarında başka maç yok. Yukarıdan tüm maçlara geç.¦Danas nema više ničega na tvojim kanalima. Gore prebaci na sve utakmice.¦¦¦Hoy no hay más partidos en tus canales. Cambiá arriba a todos los partidos.¦Plus rien sur tes chaînes aujourd'hui. Passe ci-dessus à tous les matchs.¦Oggi non c'è altro sui tuoi canali. Passa sopra a tutte le partite.¦Vandaag niets meer op je zenders. Schakel hierboven naar alle wedstrijden.
 Heute stehen keine weiteren Spiele an.¦No more games today.¦Bugün başka maç yok.¦Danas nema više utakmica.¦¦¦Hoy no hay más partidos.¦Plus de matchs aujourd'hui.¦Oggi non ci sono altre partite.¦Vandaag geen wedstrijden meer.
+Sport live¦Live sports¦Canlı spor¦Sport uživo¦¦¦Deportes en vivo¦Sport en direct¦Sport in diretta¦Sport live
+Sport heute¦Sports today¦Bugün spor¦Sport danas¦¦¦Deportes de hoy¦Sport aujourd'hui¦Sport di oggi¦Sport vandaag
 """
