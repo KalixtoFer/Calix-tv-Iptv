@@ -7,3 +7,7 @@
 - **Documentation:** CHANGELOG entry.
 - **Test results:** pure-Kotlin `CatalogLogicTest` runs in CI (result: see Actions). Visual checks PENDING on device.
 - **Status:** implemented, awaiting CI and device test.
+
+## Follow-up (2026-11-14)
+
+Maintainer prefers the simple row view for phone Movies/Series: the `PhoneCatalog` branch in `HomeScreen.kt` was removed (file kept, its helpers are used by Live TV) and phone posters are smaller (about 3.5 per screen width).

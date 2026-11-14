@@ -516,7 +516,11 @@ fun HomeScreen(
         if (bbTab) BillboardLayer(bbA, bbItemState, Modifier.padding(start = SideStart + dpx(56), top = dpx(64) + (if (SidebarPrefs.pos == SidebarPrefs.TOP) TopBarH else 0.dp)))
         BoxWithConstraints(Modifier.fillMaxSize().sidebarPad()) {
             // Card widths and height of the big picture from the available space (as in the design: everything at a glance)
-            val grid = remember(maxWidth, Design.k, General.cardSize) { cardGrid(maxWidth - RowPadX * 2) }
+            val grid = remember(maxWidth, Design.k, General.cardSize, phone) {
+                val g0 = cardGrid(maxWidth - RowPadX * 2)
+                // Phone: smaller posters, about three and a half per screen width
+                if (phone) CardGrid(g0.land, (maxWidth - RowPadX * 2 - g0.posterGap * 3) / 3.5f, g0.chan, g0.gap, g0.wide, g0.posterGap) else g0
+            }
             // Design: big picture 420 px high (start), 345 px (movies/series)
             val heroH = dpx(if (tab == 0) 540 else 450)
             when {
@@ -544,9 +548,6 @@ fun HomeScreen(
                         }
                     }
                 }
-                phone && tab in 1..2 -> PhoneCatalog(
-                    vodNoun, vodBase, if (tab == 1) data.movieG else data.seriesG, if (tab == 1) data.movieP else data.seriesP, onOpen
-                ) { onTab(4) }
                 tab == 3 -> if (MobilePrefs.isMobile(ctx)) LiveTabPhone(live, liveP, favLive, onOpen) else LiveTab(live, liveP, favLive, onOpen, onPlayNow)
                 tab == MenuLogic.SPORT -> SportHub(live) { ch, l -> ZapContext.list = l; ZapContext.key = null; onOpen(ch) }
                 // The selected row stays in the lower half (PivotSpec); rows above are hidden so that at the top

@@ -5,7 +5,8 @@
 - New start page: top bar with date and time, big featured picture, featured movies and five big tiles (Live TV, Movies, Series, Anime, Specials); old rows follow below
 
 **Phone**
-- Live TV, Movies and Series redesigned for the phone: category column with counts, search, sort chip, poster grid / channel cards (TV layout unchanged)
+- Live TV redesigned for the phone: category column with counts, search, sort chip, channel cards (TV layout unchanged)
+- Movies and Series keep the simple row view; posters are smaller so more fit on screen
 
 [PENDING: Änderung eintragen]
 
