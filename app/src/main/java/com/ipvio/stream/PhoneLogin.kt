@@ -64,6 +64,7 @@ fun PhoneLogin(
     user: String, onUser: (String) -> Unit,
     pass: String, onPass: (String) -> Unit,
     error: String?,
+    tv: Boolean = false,
     onSubmit: () -> Unit
 ) {
     val ctx = LocalContext.current
@@ -72,7 +73,8 @@ fun PhoneLogin(
     val version = remember { runCatching { ctx.packageManager.getPackageInfo(ctx.packageName, 0).versionName }.getOrNull() ?: "" }
 
     // This screen is portrait; afterwards the normal phone orientation applies again.
-    DisposableEffect(Unit) {
+    DisposableEffect(tv) {
+        if (tv) return@DisposableEffect onDispose { }
         val act = DeviceMode.activityOf(ctx)
         act?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         onDispose { act?.let { MobilePrefs.apply(it) } }
@@ -86,7 +88,7 @@ fun PhoneLogin(
         ) {
             BrandLogo(Modifier.width(230.dp))
             Text(
-                "VERSIÓN $version • MÓVIL", color = LoginCyan, fontSize = 12.sp, fontWeight = FontWeight.Bold,
+                "VERSIÓN $version • ${if (tv) "TV" else "MÓVIL"}", color = LoginCyan, fontSize = 12.sp, fontWeight = FontWeight.Bold,
                 letterSpacing = 3.sp, textAlign = TextAlign.Center, raw = true, modifier = Modifier.padding(bottom = 18.dp)
             )
 
@@ -104,8 +106,12 @@ fun PhoneLogin(
                 Text(it, color = DS.Danger, fontSize = 14.sp, lineHeight = 18.sp, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 4.dp))
             }
 
+            var btnFocus by remember { mutableStateOf(false) }
             Row(
-                Modifier.padding(top = 18.dp).clip(RoundedCornerShape(14.dp)).clickable { focus.clearFocus(); onSubmit() }
+                Modifier.padding(top = 18.dp).clip(RoundedCornerShape(14.dp)).onFocusChanged { btnFocus = it.isFocused }
+                    .background(if (btnFocus) Color(0x3329C7F5) else Color.Transparent)
+                    .border(if (btnFocus) 2.dp else 0.dp, LoginCyan, RoundedCornerShape(14.dp))
+                    .clickable { focus.clearFocus(); onSubmit() }
                     .padding(horizontal = 18.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {

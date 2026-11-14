@@ -470,7 +470,8 @@ fun HomeScreen(
     val reload: () -> Unit = { PlaylistStore.savedUrl(ctx)?.let { u -> scope.launch { PlaylistStore.load(ctx, u, false) } } }
 
     // Round 17b (Cinematic Remake): background and info follow the selected title once the big picture has scrolled away
-    val bbTab = tab in 0..2 && !phone
+    // TV start page is the new TvHome (no billboard layer behind it); the billboard stays for Movies and Series
+    val bbTab = tab in 1..2 && !phone
     val bbState = states[tab.coerceIn(0, states.lastIndex)]
     // Round 18: even when the big picture is still partly visible (e.g. first row "Popular series"), the background shows
     // the info of the selected title – and the big picture (slideshow) pauses.
@@ -579,6 +580,25 @@ fun HomeScreen(
                                 }
                             }
                             if (phone && tab == 0) item(key = "phoneTop") { PhoneHomeTop(ready.toList(), onOpen, onPlayNow) { onTab(4) } }
+                            else if (!phone && tab == 0) item(key = "tvHome") {
+                                val anime = remember(movies, series) { TvHomeLogic.match(series + movies, listOf("anime")) }
+                                val special = remember(movies, series) { TvHomeLogic.match(series + movies, listOf("especial", "special")) }
+                                val tvTiles = listOf(
+                                    TvTile("Live TV", 3, null, Color(0xFF0B3A8F), Color(0xFF5CC8FF)) { onTab(3) },
+                                    TvTile("Filme", 1, null, Color(0xFF1B3FA0), Color(0xFFB9C6FF)) { onTab(1) },
+                                    TvTile("Serien", 2, null, Color(0xFF1B3FA0), Color(0xFFB9C6FF)) { onTab(2) },
+                                    TvTile("Anime", null, AIcon.Sparkle, Color(0xFF3A1B8F), Color(0xFFFF9F5C)) {
+                                        if (anime.isNotEmpty()) onBrowse(BrowseReq("Anime", anime, SORT_NEW)) else onTab(2)
+                                    },
+                                    TvTile("Specials", null, AIcon.Star, Color(0xFF1B3FA0), Color(0xFFFFC83D)) {
+                                        if (special.isNotEmpty()) onBrowse(BrowseReq("Specials", special, SORT_NEW)) else onTab(MenuLogic.FAVS)
+                                    }
+                                )
+                                TvHome(
+                                    ready.toList(), topM, tvTiles, onOpen, { onTab(4) }, { onTab(MenuLogic.SETTINGS) },
+                                    { r -> byId[r.chId]?.let(onOpen) }, { id -> byId[id]?.let(onOpen) }
+                                )
+                            }
                             else if (ready.isNotEmpty() && HomeLayout.shown("hero")) item(key = "hero") { Hero(ready.toList(), heroH, true, onOpen, onPlayNow, header, { heroScroll(states[0]) }) { scope.launch { states[0].animateScrollToItem(0) } } }
                             else item(key = "top") { header(Modifier) }
                             val wl = wlVod

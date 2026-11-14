@@ -132,9 +132,9 @@ fun AddPlaylistScreen(onDone: () -> Unit) {
 
     if (PlaylistStore.loading) { PlaylistLoadingOverlay(); return }
 
-    // Phone mode with the fixed server: simple portrait login (user + password), same loading logic as below
-    if (fixed && MobilePrefs.isMobile(ctx)) {
-        PhoneLogin(user, { user = it }, pass, { pass = it }, PlaylistStore.error) {
+    // Fixed server (phone and TV): same simple login (the TV one stays landscape) (user + password), same loading logic as below
+    if (fixed) {
+        PhoneLogin(user, { user = it }, pass, { pass = it }, PlaylistStore.error, tv = !MobilePrefs.isMobile(ctx)) {
             val finalUrl = PlaylistStore.xtreamUrl(RemoteConfig.server(), user.trim(), pass)
             if (finalUrl == null) PlaylistStore.error = "Ingresá tu usuario y contraseña."
             else scope.launch { if (PlaylistStore.load(ctx, finalUrl, true)) onDone() }

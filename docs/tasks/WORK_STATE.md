@@ -47,3 +47,7 @@ None run. This task changes documents only. Mermaid diagrams in `docs/DIAGRAMS.m
 ## T-019 (phone Live TV / Movies / Series)
 
 Implemented: `PhoneCatalog.kt`, new `LiveTabPhone.kt`, HomeScreen branch. Awaiting CI and device test. Next stages: Más screen, guide screen, sports header polish.
+
+## T-020 (TV start page)
+
+Implemented `TvHome.kt`; awaiting CI and TV test. Open: TV login image (needs screenshot), Anime/Specials mapping, phone redesign planned for next session.

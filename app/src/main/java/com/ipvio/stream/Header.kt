@@ -239,7 +239,7 @@ private fun ChoiceChip(label: String, selected: Boolean, modifier: Modifier, onC
 }
 
 @Composable
-private fun BellButton(onReminder: (Reminder) -> Unit, onNewEpisode: (String) -> Unit) {
+internal fun BellButton(onReminder: (Reminder) -> Unit, onNewEpisode: (String) -> Unit) {
     val ctx = androidx.compose.ui.platform.LocalContext.current
     val scope = androidx.compose.runtime.rememberCoroutineScope()
     var open by remember { mutableStateOf(false) }

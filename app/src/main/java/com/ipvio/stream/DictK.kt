@@ -52,4 +52,6 @@ Anbieter-Kategorien¦Provider categories¦Sağlayıcı kategorileri¦Kategorije 
 Nach Nummer¦By number¦Numaraya göre¦Po broju¦¦¦Por número¦Par numéro¦Per numero¦Op nummer
 Mosaik¦Mosaic¦Mozaik¦Mozaik¦¦¦Mosaico¦Mosaïque¦Mosaico¦Mozaïek
 Suchergebnisse¦Search results¦Arama sonuçları¦Rezultati pretrage¦¦¦Resultados de búsqueda¦Résultats de recherche¦Risultati di ricerca¦Zoekresultaten
+Empfohlene Filme¦Featured movies¦Öne çıkan filmler¦Izdvojeni filmovi¦¦¦Películas destacadas¦Films à l'affiche¦Film in evidenza¦Uitgelichte films
+Specials¦Specials¦Özel¦Specijali¦¦¦Especiales¦Spéciaux¦Speciali¦Specials
 """
