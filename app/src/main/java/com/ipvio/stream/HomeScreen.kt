@@ -595,14 +595,15 @@ fun HomeScreen(
                                     }
                                 )
                                 TvHome(
-                                    ready.toList(), topM, tvTiles, onOpen, { onTab(4) }, { onTab(MenuLogic.SETTINGS) },
+                                    ready.toList().ifEmpty { candidates.take(6) }, topM.ifEmpty { movies.takeLast(4).reversed() }, tvTiles, onOpen, { onTab(4) }, { onTab(MenuLogic.SETTINGS) },
                                     { r -> byId[r.chId]?.let(onOpen) }, { id -> byId[id]?.let(onOpen) }
                                 )
                             }
                             else if (ready.isNotEmpty() && HomeLayout.shown("hero")) item(key = "hero") { Hero(ready.toList(), heroH, true, onOpen, onPlayNow, header, { heroScroll(states[0]) }) { scope.launch { states[0].animateScrollToItem(0) } } }
                             else item(key = "top") { header(Modifier) }
                             val wl = wlVod
-                            for (blockId in HomeLayout.order) {
+                            // TV: the start page is only the new TvHome (rows are reachable through the tiles and the menu)
+                            for (blockId in (if (phone) HomeLayout.order else emptyList())) {
                                 if (blockId == "hero") continue
                                 val editing = HomeEdit.active
                                 if (editing) item(key = "eb$blockId") { HomeEditBar(ctx, blockId) }

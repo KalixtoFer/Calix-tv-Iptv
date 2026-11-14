@@ -61,13 +61,13 @@ fun TvHome(
     onOpen: (Item) -> Unit, onSearch: () -> Unit, onSettings: () -> Unit,
     onReminder: (Reminder) -> Unit, onNewEpisode: (String) -> Unit
 ) {
-    Column(Modifier.fillMaxWidth().padding(start = dpx(38), end = dpx(36), top = dpx(14)), verticalArrangement = Arrangement.spacedBy(dpx(16))) {
+    Column(Modifier.fillMaxWidth().padding(start = dpx(38), end = dpx(36), top = dpx(26)), verticalArrangement = Arrangement.spacedBy(dpx(16))) {
         TvTopBar(onSearch, onSettings, onReminder, onNewEpisode)
-        Row(Modifier.fillMaxWidth().height(dpx(380)), horizontalArrangement = Arrangement.spacedBy(dpx(18))) {
+        Row(Modifier.fillMaxWidth().height(dpx(470)), horizontalArrangement = Arrangement.spacedBy(dpx(18))) {
             TvBanner(featured, onOpen, Modifier.weight(1.9f).fillMaxHeight())
             TvFeaturedMovies(movies.take(4), onOpen, Modifier.weight(1f).fillMaxHeight())
         }
-        Row(Modifier.fillMaxWidth().height(dpx(118)), horizontalArrangement = Arrangement.spacedBy(dpx(16))) {
+        Row(Modifier.fillMaxWidth().height(dpx(130)), horizontalArrangement = Arrangement.spacedBy(dpx(16))) {
             tiles.forEachIndexed { i, t -> TvTileCard(t, if (i == 0) ContentFocus.req else null, Modifier.weight(1f).fillMaxHeight()) }
         }
     }
@@ -80,8 +80,8 @@ private fun TvTopBar(onSearch: () -> Unit, onSettings: () -> Unit, onReminder: (
     }
     val date = remember(now / 60_000) { SimpleDateFormat("EEE, dd MMM yyyy", Locale.getDefault()).format(Date(now)).replaceFirstChar { it.uppercase() } }
     val time = remember(now / 60_000) { SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(now)) }
-    Row(Modifier.fillMaxWidth().height(dpx(64)), verticalAlignment = Alignment.CenterVertically) {
-        BrandLogo(Modifier.width(dpx(210)))
+    Row(Modifier.fillMaxWidth().height(dpx(84)), verticalAlignment = Alignment.CenterVertically) {
+        BrandLogo(Modifier.height(dpx(84)))
         Spacer(Modifier.weight(1f))
         if (General.showClock) {
             Text(date, color = Color.White, fontSize = spx(20), fontWeight = FontWeight.SemiBold, maxLines = 1, raw = true)
@@ -129,7 +129,7 @@ private fun TvBanner(featured: List<Item>, onOpen: (Item) -> Unit, modifier: Mod
         if (item != null) {
             Crossfade(item, animationSpec = tween(900), label = "tvBanner") { c ->
                 val m = rememberMeta(c)
-                m?.backdrop?.let { AsyncImage(it, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop) }
+                (m?.backdrop ?: m?.poster?.let { cardPoster(it) } ?: c.logo)?.let { AsyncImage(it, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop) }
             }
             Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(0f to Color(0xE6050B1E), 0.55f to Color(0x66050B1E), 1f to Color.Transparent)))
             Column(Modifier.align(Alignment.BottomStart).padding(dpx(28)).fillMaxWidth(0.7f), verticalArrangement = Arrangement.spacedBy(dpx(8))) {
@@ -164,7 +164,7 @@ private fun TvFeaturedMovies(list: List<Item>, onOpen: (Item) -> Unit, modifier:
 @Composable
 private fun TvPoster(item: Item, onOpen: (Item) -> Unit, modifier: Modifier) {
     val m = rememberMeta(item)
-    val img = m?.backdrop ?: m?.poster?.let { cardPoster(it) } ?: item.logo
+    val img = m?.poster?.let { cardPoster(it) } ?: m?.backdrop ?: item.logo
     var f by remember { mutableStateOf(false) }
     val s by animateFloatAsState(if (f) focusScale(1.05f) else 1f, label = "tvPoster")
     val shape = RoundedCornerShape(dpx(12))
@@ -175,7 +175,7 @@ private fun TvPoster(item: Item, onOpen: (Item) -> Unit, modifier: Modifier) {
         contentAlignment = Alignment.Center
     ) {
         if (img != null) AsyncImage(img, item.title, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-        else Text(item.title.take(2).uppercase(), color = Color.White, fontWeight = FontWeight.Bold, raw = true)
+        else Text(item.title, color = Color.White, fontSize = spx(14), fontWeight = FontWeight.Bold, maxLines = 3, overflow = TextOverflow.Ellipsis, raw = true, modifier = Modifier.padding(dpx(8)))
     }
 }
 

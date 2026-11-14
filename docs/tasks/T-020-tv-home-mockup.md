@@ -6,3 +6,8 @@
 - **Risks:** "Anime" and "Specials" tiles open the titles whose category name contains `anime` / `especial|special`; if none, they fall back to Series / Favorites (assumption, to confirm). Profile button is not in the new top bar (profiles stay in Settings). Banner uses the existing featured titles, not custom art. Layout checked by CI compile only.
 - **Login:** TV already uses `PhoneLogin` (same composable as the phone) when the server is fixed; nothing changed. Needs a TV screenshot to see what differs.
 - **Status:** implemented, awaiting CI and TV test.
+
+## Follow-up (TV photos, 2026-11-14)
+
+- Old rows/tiles removed from the TV start page (only `TvHome`); fixed clipped logo; banner and featured movies fall back to newest titles/posters when trend data is empty.
+- Reported, not changed: slow navigation on the TV (cause not identified) and live channels dropping (player core, protected; needs logs).
