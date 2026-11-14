@@ -137,7 +137,7 @@ internal fun CatSideList(entries: List<CatEntry>, selected: String, onSelect: (S
                     .clickable { onSelect(e.key) }.padding(horizontal = 10.dp, vertical = 11.dp),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Text(e.label, color = if (on) Color.White else Color(0xFFCBD5E1), fontSize = 14.sp, fontWeight = if (on) FontWeight.Bold else FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis, raw = e.raw, modifier = Modifier.weight(1f))
+                Text(e.label, color = if (on) Color.White else Color(0xFFCBD5E1), fontSize = 13.sp, fontWeight = if (on) FontWeight.Bold else FontWeight.Medium, maxLines = 2, overflow = TextOverflow.Ellipsis, raw = e.raw, modifier = Modifier.weight(1f))
                 Text(e.count.toString(), color = if (on) Color.White else Muted, fontSize = 11.sp, maxLines = 1, raw = true)
             }
         }

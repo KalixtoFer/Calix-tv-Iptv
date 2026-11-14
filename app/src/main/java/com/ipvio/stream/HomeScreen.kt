@@ -580,7 +580,12 @@ fun HomeScreen(
                                     Text("Bearbeiten: Über jeder Reihe kannst du sie verschieben oder ausblenden.", color = Muted, fontSize = 15.sp)
                                 }
                             }
-                            if (phone && tab == 0) item(key = "phoneTop") { PhoneHomeTop(ready.toList(), onOpen, onPlayNow) { onTab(4) } }
+                            if (phone && tab == 0) item(key = "phoneTop") {
+                                Column {
+                                    PhoneLogoBar { onTab(4) }
+                                    PhoneAgenda(live, { ch, l -> ZapContext.list = l; ZapContext.key = null; onOpen(ch) }) { g -> LiveMemory.setSel(ctx, g); onTab(3) }
+                                }
+                            }
                             else if (!phone && tab == 0) item(key = "tvHome") {
                                 val anime = remember(movies, series) { TvHomeLogic.match(series + movies, listOf("anime")) }
                                 val special = remember(movies, series) { TvHomeLogic.match(series + movies, listOf("especial", "special")) }
@@ -604,11 +609,11 @@ fun HomeScreen(
                             else item(key = "top") { header(Modifier) }
                             val wl = wlVod
                             // TV: the start page is only the new TvHome (rows are reachable through the tiles and the menu)
-                            for (blockId in (if (phone) HomeLayout.order else emptyList())) {
+                            for (blockId in (if (phone) listOf("newm", "news") else emptyList())) {
                                 if (blockId == "hero") continue
                                 val editing = HomeEdit.active
                                 if (editing) item(key = "eb$blockId") { HomeEditBar(ctx, blockId) }
-                                if (!HomeLayout.shown(blockId)) continue
+                                if (!phone && !HomeLayout.shown(blockId)) continue
                                 when (blockId) {
                                     "tiles" -> { if (!phone) item(key = "tiles") { QuickTiles(tiles) } }
                                     "clock" -> { item(key = "clock") { ClockWidget() } }

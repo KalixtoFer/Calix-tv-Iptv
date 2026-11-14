@@ -71,7 +71,7 @@ fun LiveTabPhone(live: List<Item>, groups: Map<String, List<Item>>, favs: List<I
     val cur = if (entries.any { it.key == sel }) sel else "ALL"
     var query by rememberSaveable { mutableStateOf("") }
     var byName by rememberSaveable { mutableStateOf(false) }
-    var mosaic by rememberSaveable { mutableStateOf(true) }
+    var mosaic by rememberSaveable { mutableStateOf(false) }
     var menuFor by remember { mutableStateOf<Item?>(null) }
 
     val base: List<Item> = when (cur) { FAV_CAT -> favs; "ALL" -> live; else -> groups[cur].orEmpty() }
@@ -105,7 +105,7 @@ fun LiveTabPhone(live: List<Item>, groups: Map<String, List<Item>>, favs: List<I
             }
             CatSearchField(query, "Sender nach Nummer oder Name suchen") { query = it }
             Row(Modifier.fillMaxSize()) {
-                CatSideList(entries, cur, { sel = it; query = "" }, Modifier.width(112.dp).fillMaxHeight())
+                CatSideList(entries, cur, { sel = it; query = "" }, Modifier.width(140.dp).fillMaxHeight())
                 Column(Modifier.weight(1f).fillMaxHeight()) {
                     Row(Modifier.fillMaxWidth().padding(start = 6.dp, end = 12.dp, top = 8.dp, bottom = 6.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                         Text(title.uppercase(), color = Accent2, fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis, raw = cur != "ALL" && cur != FAV_CAT && query.isBlank(), modifier = Modifier.weight(1f))

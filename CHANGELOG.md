@@ -5,6 +5,8 @@
 - New start page: top bar with date and time, big featured picture, featured movies and five big tiles (Live TV, Movies, Series, Anime, Specials); old rows follow below
 
 **Phone**
+- Start page reduced to: sports agenda (channels of the "EVENTOS" folders), recently added movies, recently added series
+- Settings: one tile per row, names readable; Live TV: wider folder column with two-line names
 - Live TV redesigned for the phone: category column with counts, search, sort chip, channel cards (TV layout unchanged)
 - Movies and Series keep the simple row view; posters are smaller so more fit on screen
 

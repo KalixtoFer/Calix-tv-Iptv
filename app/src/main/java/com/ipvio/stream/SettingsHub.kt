@@ -97,13 +97,15 @@ fun SettingsHub(onAdd: () -> Unit, reload: () -> Unit) {
                 Text("Einstellungen", color = Color.White, fontSize = spx(38), fontWeight = FontWeight.ExtraBold)
                 Text("Alles rund um Aussehen, Wiedergabe und Konto", color = Tok.TextLow, fontSize = spx(16))
             }
-            CATS.chunked(3).forEachIndexed { r, row ->
+            // Phone: one tile per row so the names are readable
+            val cols = if (DeviceMode.phoneNow) 1 else 3
+            CATS.chunked(cols).forEachIndexed { r, row ->
                 Row(horizontalArrangement = Arrangement.spacedBy(dpx(16))) {
                     row.forEachIndexed { c, cat ->
-                        val idx = r * 3 + c
+                        val idx = r * cols + c
                         SettingsCard(cat, idx, Modifier.weight(1f).focusRequester(cardFocus[idx])) { last = idx; page = idx }
                     }
-                    repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
+                    repeat(cols - row.size) { Spacer(Modifier.weight(1f)) }
                 }
             }
         } else {
